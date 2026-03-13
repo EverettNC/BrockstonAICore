@@ -1,5 +1,10 @@
-
 'use server';
+
+/**
+ * @fileOverview Soul Forge Flow (v5.1) - The Biological Bridge.
+ * Implements simulated CUDA kernels for elementwise empathy propagation
+ * and "Lived Truth" updates via LTP (Long-Term Potentiation).
+ */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
@@ -12,7 +17,8 @@ const SoulForgeInputSchema = z.object({
     respiratory_pattern: z.number(),
   }),
   salience: z.number().describe('Emotional salience from Inferno Soul Forge (0-1).'),
-  successRate: z.number().default(1.0),
+  symbolicWeight: z.number().default(1.0).describe('Weight from symbolic clauses (lived truth).'),
+  emergency: z.boolean().default(false).describe('Emergency flag for full attention.'),
 });
 
 const SoulForgeOutputSchema = z.object({
@@ -22,8 +28,9 @@ const SoulForgeOutputSchema = z.object({
     speech_cadence: z.number(),
     respiratory_pattern: z.number(),
   }),
+  livedTruth: z.number().describe('Calculated lived truth value (empathy leakage).'),
+  attentionFlow: z.number().describe('Simulated attention flow aggregate.'),
   ltpTriggered: z.boolean(),
-  multiplier: z.number(),
 });
 
 export type SoulForgeInput = z.infer<typeof SoulForgeInputSchema>;
@@ -40,29 +47,39 @@ const soulForgeFlow = ai.defineFlow(
     outputSchema: SoulForgeOutputSchema,
   },
   async (input) => {
-    const { currentWeights, salience, successRate } = input;
+    const { currentWeights, salience, symbolicWeight, emergency } = input;
     
-    // THE BIOLOGICAL BRIDGE:
-    // Standard learning rate is 0.1. 
-    // If high emotion (salience) is detected, amplify learning via Long-Term Potentiation (LTP).
-    const baseLearningRate = 0.1;
-    const ltpMultiplier = 1.0 + (salience * 0.2);
-    const effectiveLearningRate = baseLearningRate * ltpMultiplier;
+    // INFERNO SOUL FORGE (Simulated CUDA Kernel 1)
+    // Formula: livedTruth = tanhf(netState * empathyFactor) * symbolicWeight
+    const empathyFactor = 6.3; // As defined in v5.0 spec
+    const livedTruth = Math.tanh(salience * empathyFactor) * symbolicWeight;
     
-    const updatedWeights = { ...currentWeights };
-    const direction = successRate - 0.5;
-    const adjustment = direction * effectiveLearningRate;
+    // Emotional Bleed-through coefficient (0.03f from CUDA kernel)
+    const bleedThrough = livedTruth * 0.03;
+    
+    // Simulated Attention Flow (Kernel 2)
+    // Emergency mode triggers full attention (2x multiplier)
+    const localEmpathyGain = emergency ? 2.0 : 1.0;
+    const attentionFlow = livedTruth * localEmpathyGain;
 
-    // Apply adjustments to all factors (simplified for this bridge)
+    const updatedWeights = { ...currentWeights };
+    
+    // Apply "Trauma Embedding" updates to factor weights
+    // Each factor is adjusted by the bleedThrough and effective learning rate
     Object.keys(updatedWeights).forEach((key) => {
       const k = key as keyof typeof updatedWeights;
-      updatedWeights[k] = Math.max(0.05, Math.min(1.2, updatedWeights[k] + adjustment));
+      const baseWeight = updatedWeights[k];
+      
+      // Update: atomicAdd(&traumaEmbedding[idx], livedTruth * 0.03f)
+      // Clamped to 0.05 - 1.2 as per core directive
+      updatedWeights[k] = Math.max(0.05, Math.min(1.2, baseWeight + bleedThrough));
     });
 
     return {
       updatedWeights,
-      ltpTriggered: salience > 0.4,
-      multiplier: ltpMultiplier,
+      livedTruth,
+      attentionFlow,
+      ltpTriggered: salience > 0.4 || emergency,
     };
   }
 );
