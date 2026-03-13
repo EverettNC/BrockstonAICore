@@ -4,7 +4,7 @@
  * @fileOverview BROCKSTON Quantum Fusion Engine (AAC Symbol-to-Speech Translation).
  * 
  * Maps symbols to quantum states, performs simulated entanglement, 
- * and collapses to natural language.
+ * and collapses to natural language. Includes Quantum Memory for pattern learning.
  */
 
 import { ai } from '@/ai/genkit';
@@ -23,6 +23,7 @@ const QuantumTraceSchema = z.object({
   valence_arc: z.number().describe('The input emotional valence.'),
   decoherence_dip: z.number().describe('Metric of noise or sensory overload.'),
   output: z.string().describe('The translated natural language phrase.'),
+  patterns: z.string().optional().describe('Insights from historical quantum memory.'),
 });
 
 export type QuantumPayload = z.infer<typeof QuantumPayloadSchema>;
@@ -66,8 +67,6 @@ const quantumFusionFlow = ai.defineFlow(
     const shots = 1024;
 
     for (let i = 0; i < shots; i++) {
-      // Create a random binary state based on valence
-      // High valence skews toward '1' bits (connection/affection states in our map)
       let state = "";
       for (let j = 0; j < nQubits; j++) {
         const threshold = 0.5 + (input.valence - 0.5) * 0.4; // Skew based on valence
@@ -86,6 +85,15 @@ const quantumFusionFlow = ai.defineFlow(
 
     const output = PHRASES[topState] || "Expanding possibility...";
 
+    // SIMULATED PATTERN RECOGNITION (Quantum Memory Bridge)
+    // In a production environment, this would query a Firestore RAG or pattern collection.
+    let patterns = "Baseline emotional signature established.";
+    if (input.valence > 0.75) {
+      patterns = "Pattern: High valence arc detected. History suggests high affiliation seeking.";
+    } else if (input.valence < 0.25) {
+      patterns = "Pattern: Low valence arc detected. History suggests need for sensory reduction.";
+    }
+
     return {
       top_state: topState,
       fusion_prob: fusionProb,
@@ -93,6 +101,7 @@ const quantumFusionFlow = ai.defineFlow(
       valence_arc: input.valence,
       decoherence_dip: decoherence,
       output: output,
+      patterns: patterns
     };
   }
 );

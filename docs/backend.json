@@ -55,6 +55,17 @@
         "last_ltp_event": { "type": "string", "format": "date-time" }
       }
     },
+    "QuantumMemoryTrace": {
+      "title": "Quantum Memory Trace",
+      "description": "A record of a quantum fusion event for pattern learning.",
+      "type": "object",
+      "properties": {
+        "top_state": { "type": "string" },
+        "fusion_prob": { "type": "number" },
+        "valence_arc": { "type": "number" },
+        "timestamp": { "type": "number" }
+      }
+    },
     "SystemLog": {
       "title": "System Log",
       "description": "A security or operational event log.",
@@ -82,6 +93,10 @@
     "/cognitive_core/{coreId}": {
       "schema": "#/entities/SoulForgeState",
       "description": "Global cognitive weights and biological bridge state."
+    },
+    "/quantum_memory/{userId}/traces/{traceId}": {
+      "schema": "#/entities/QuantumMemoryTrace",
+      "description": "Pseudonymized quantum signatures for pattern recognition."
     },
     "/system_logs/{logId}": {
       "schema": "#/entities/SystemLog",

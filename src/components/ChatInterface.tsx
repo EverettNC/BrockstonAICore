@@ -9,7 +9,7 @@ import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Zap, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, HelpCircle, AlertTriangle } from 'lucide-react';
+import { Send, Zap, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, HelpCircle, AlertTriangle, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
@@ -34,6 +34,7 @@ const SYMBOLS = [
 export const ChatInterface: React.FC = () => {
   const db = useFirestore();
   const chatId = "main-session-alpha";
+  const userId = "operator-alpha"; // In production, this comes from useUser()
   
   const coreRef = useMemo(() => doc(db, 'cognitive_core', 'main-bridge'), [db]);
   const { data: forgeState } = useDoc<any>(coreRef);
@@ -98,11 +99,19 @@ export const ChatInterface: React.FC = () => {
         const result = await quantumFuse({
           symbols: selectedSymbols,
           valence: currentValence,
-          userId: 'operator-alpha'
+          userId
         });
         response = result.output;
         trace = result;
         type = 'quantum';
+
+        // PERSIST QUANTUM TRACE TO MEMORY
+        addDoc(collection(db, 'quantum_memory', userId, 'traces'), {
+          top_state: result.top_state,
+          fusion_prob: result.fusion_prob,
+          valence_arc: result.valence_arc,
+          timestamp: Date.now()
+        });
       } else if (forceKnowledge || userMessage.toLowerCase().includes('fact')) {
         const history = (storedMessages || []).map(m => m.content);
         const result = await aiCoreKnowledgePoweredResponses({
@@ -131,7 +140,6 @@ export const ChatInterface: React.FC = () => {
       });
 
       // TRIGGER THE SOUL FORGE BRIDGE
-      // If salience is high, Long-Term Potentiation (LTP) occurs.
       const salience = quantumMode ? currentValence : (Math.random() * 0.5);
       if (salience > 0.4) {
         const currentWeights = forgeState || {
@@ -172,14 +180,14 @@ export const ChatInterface: React.FC = () => {
       <div className="flex-none flex items-center justify-between px-4 py-2 bg-primary/10 rounded-xl border border-white/5">
         <CoreAvatar status={status} className="h-24 w-24" />
         <div className="flex flex-col items-end gap-2">
-           <Badge variant={quantumMode ? "default" : "outline"} className={cn(quantumMode && "bg-accent text-accent-foreground")}>
+           <Badge variant={quantumMode ? "default" : "outline"} className={cn(quantumMode && "bg-accent text-accent-foreground shadow-[0_0_10px_rgba(0,255,127,0.3)]")}>
              {quantumMode ? "Quantum Fusion Active" : "Neural Link Active"}
            </Badge>
            <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => setQuantumMode(!quantumMode)}
-            className="text-[10px] uppercase font-code tracking-widest text-secondary hover:text-accent"
+            className="text-[10px] uppercase font-code tracking-widest text-secondary hover:text-accent transition-colors"
            >
              Toggle {quantumMode ? "Conversation" : "AAC Quantum Mode"}
            </Button>
@@ -214,8 +222,16 @@ export const ChatInterface: React.FC = () => {
                 )}>
                   {msg.content}
                   {msg.trace && (
-                    <div className="mt-2 pt-2 border-t border-white/5 text-[9px] font-code text-secondary">
-                      TRACE: {msg.trace.top_state} | PROB: {(msg.trace.fusion_prob * 100).toFixed(1)}%
+                    <div className="mt-2 pt-2 border-t border-white/5 space-y-1">
+                      <div className="text-[9px] font-code text-secondary flex items-center justify-between">
+                        <span>TRACE: {msg.trace.top_state} | PROB: {(msg.trace.fusion_prob * 100).toFixed(1)}%</span>
+                        {msg.trace.patterns && <Database className="h-2 w-2 text-accent" />}
+                      </div>
+                      {msg.trace.patterns && (
+                        <div className="text-[8px] font-code text-accent/70 italic uppercase tracking-tighter">
+                          MEMORY RECALL: {msg.trace.patterns}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -238,13 +254,13 @@ export const ChatInterface: React.FC = () => {
                     type="button"
                     onClick={() => handleQuantumSymbolSelect(sym.id)}
                     className={cn(
-                      "p-4 rounded-xl border transition-all flex flex-col items-center gap-2",
+                      "p-4 rounded-xl border transition-all flex flex-col items-center gap-2 group",
                       active 
                         ? "bg-accent/20 border-accent text-accent shadow-[0_0_15px_rgba(0,255,127,0.2)]" 
                         : "bg-black/20 border-white/5 text-secondary hover:border-white/20"
                     )}
                   >
-                    <Icon className="h-6 w-6" />
+                    <Icon className={cn("h-6 w-6 transition-transform group-active:scale-90", active && "animate-pulse")} />
                     <span className="text-[9px] uppercase font-code">{sym.label}</span>
                   </button>
                 );
@@ -264,7 +280,7 @@ export const ChatInterface: React.FC = () => {
               <Button 
                 onClick={handleSend}
                 disabled={selectedSymbols.length === 0 || status !== 'idle'}
-                className="bg-accent text-accent-foreground hover:bg-accent/80"
+                className="bg-accent text-accent-foreground hover:bg-accent/80 glow-accent px-6"
               >
                 FUSE
               </Button>
@@ -300,12 +316,15 @@ export const ChatInterface: React.FC = () => {
             </Button>
           </div>
         )}
-        <div className="flex justify-center gap-4 mt-3">
+        <div className="flex justify-center gap-4 mt-3 border-t border-white/5 pt-3">
             <span className="flex items-center gap-1.5 text-[10px] text-secondary/60 uppercase font-code">
               <Zap className="h-3 w-3 text-accent" /> NLU.Engaged
             </span>
             <span className="flex items-center gap-1.5 text-[10px] text-secondary/60 uppercase font-code">
               <Atom className="h-3 w-3 text-accent" /> Q-Fusion.Enabled
+            </span>
+            <span className="flex items-center gap-1.5 text-[10px] text-secondary/60 uppercase font-code">
+              <Database className="h-3 w-3 text-accent" /> Q-Memory.Syncing
             </span>
         </div>
       </form>
