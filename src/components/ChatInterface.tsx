@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -18,7 +19,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { hapticSystem, HapticPattern } from '@/lib/haptic-system';
 import { toast } from '@/hooks/use-toast';
-import { speechService } from '@/lib/speech-recognition-service';
+import { speechService as localSpeech } from '@/lib/speech-recognition-service';
+import { brockstonSpeech } from '@/lib/speech-service';
 import { vortexEngine } from '@/lib/vortex-engine';
 import { topologyEngine } from '@/lib/topology-engine';
 import { visionContext } from '@/lib/vision-context';
@@ -58,10 +60,11 @@ export const ChatInterface: React.FC = () => {
 
   const toggleListening = () => {
     if (isListening) {
-      speechService.stopListening();
+      localSpeech.stopListening();
       setIsListening(false);
     } else {
-      speechService.startListening(
+      // Use local speech for real-time interim results, but we could upgrade to neural for final
+      localSpeech.startListening(
         (text, isFinal) => {
           if (isFinal) {
             setInput(text);
@@ -170,14 +173,11 @@ export const ChatInterface: React.FC = () => {
       if (autoSpeak) {
         setStatus('speaking');
         try {
-          const tts = await speakStephen({ 
-            text: result.response,
-            specialist: 'brockston',
-            fusion_prob: result.lucas_signal.stability,
-            valence: result.tone_engine_v2.raw_scores[result.tone_engine_v2.dominant_state] || 0.5
-          });
+          // Use unified brockstonSpeech for synthesis
+          const audioMedia = await brockstonSpeech.synthesizeSpeech(result.response, "brockston");
+          
           if (audioRef.current) {
-            audioRef.current.src = tts.media;
+            audioRef.current.src = audioMedia;
             audioRef.current.play().catch(e => {
               console.error("Audio playback blocked:", e);
               setStatus('idle');
