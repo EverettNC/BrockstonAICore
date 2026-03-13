@@ -5,7 +5,7 @@
  * Ported from predictive_intention.py
  */
 
-import { Firestore, collection, addDoc, doc, updateDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { Firestore, collection, addDoc, doc, updateDoc, serverTimestamp, query, getDocs, getDoc, Timestamp } from 'firebase/firestore';
 
 export interface IntentionMetrics {
   total_intentions: number;
@@ -23,40 +23,62 @@ class VortexEngine {
       statement,
       confidence,
       manifested: false,
-      timestamp: serverTimestamp()
+      timestamp: serverTimestamp(),
+      start_ms: Date.now()
     });
     return docRef.id;
   }
 
   /**
-   * Marks an intention as manifested, closing the vortex loop.
+   * Marks an intention as manifested, closing the vortex loop with real latency.
    */
   async markManifested(db: Firestore, intentId: string, proof: string = ""): Promise<number | null> {
     const intentRef = doc(db, 'vortex_intentions', intentId);
-    const now = Date.now();
+    const snap = await getDoc(intentRef);
     
-    // In a real scenario we'd fetch the document to calculate actual latency.
-    // For this prototype we simulate the manifestation closure.
+    if (!snap.exists()) return null;
+    
+    const data = snap.data();
+    const startMs = data.start_ms || (data.timestamp as Timestamp)?.toMillis() || Date.now();
+    const now = Date.now();
+    const latencySeconds = (now - startMs) / 1000;
+
     await updateDoc(intentRef, {
       manifested: true,
       manifest_timestamp: serverTimestamp(),
       proof,
-      latency_seconds: 42 // Simulated latency
+      latency_seconds: latencySeconds
     });
 
-    return 42;
+    return latencySeconds;
   }
 
   /**
-   * Quantifies the current vortex strength based on manifestation rates.
+   * Quantifies the current vortex strength based on real manifestation rates.
    */
-  async quantify(db: Firestore, threshold: number = 0.90): Promise<IntentionMetrics> {
-    // This would typically use a query count
+  async quantify(db: Firestore): Promise<IntentionMetrics> {
+    const q = query(collection(db, 'vortex_intentions'));
+    const snap = await getDocs(q);
+    
+    const total = snap.size;
+    if (total === 0) return { total_intentions: 0, manifested_count: 0, avg_latency: 0, vortex_strength: 0 };
+
+    let manifested = 0;
+    let totalLatency = 0;
+
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.manifested) {
+        manifested++;
+        totalLatency += (data.latency_seconds || 0);
+      }
+    });
+
     return {
-      total_intentions: 100,
-      manifested_count: 92,
-      avg_latency: 12.5,
-      vortex_strength: 0.92 // 92% of intentions manifested
+      total_intentions: total,
+      manifested_count: manifested,
+      avg_latency: manifested > 0 ? totalLatency / manifested : 0,
+      vortex_strength: total > 0 ? manifested / total : 0
     };
   }
 }

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -47,28 +48,27 @@ export const CognitiveStats: React.FC = () => {
   if (!isMounted) return null;
 
   const weights = forgeState || {
-    emotional_state: 0.5,
-    tonal_stability: 0.5,
-    speech_cadence: 0.5,
-    respiratory_pattern: 0.5,
-    lived_truth_witness: 0.5,
-    trauma_association: 0.5,
-    lucas_tone: 0.6,
-    narrative_clarity: 0.5
+    emotional_state: 0,
+    tonal_stability: 0,
+    speech_cadence: 0,
+    respiratory_pattern: 0,
+    lived_truth_witness: 0,
+    trauma_association: 0,
+    lucas_tone: 0,
+    narrative_clarity: 0
   };
 
   const topology = topologyState || {
     proximity_integral: 0,
     last_resonance: 0,
     last_empathy_math: 0,
-    bond_status: "Initializing Topology..."
+    bond_status: "Pending Connection..."
   };
 
   const latestMsg = recentMessages?.[0];
   const intensity = latestMsg?.tone_engine_v2?.physical_intensity || 0;
-  const dominantState = latestMsg?.tone_engine_v2?.dominant_state || "Neutral";
-  const vortexConfidence = latestMsg?.vortex_data?.confidence || 0.92;
-  const eruptor = latestMsg?.nlu_understanding?.eruptor_metrics || { stress_level: 0, coherence_score: 1, grounding_score: 1 };
+  const vortexConfidence = latestMsg?.vortex_data?.confidence || 0;
+  const eruptor = latestMsg?.nlu_understanding?.eruptor_metrics || { stress_level: 0, coherence_score: 0, grounding_score: 0 };
 
   return (
     <div className="flex flex-col gap-6">
@@ -124,9 +124,6 @@ export const CognitiveStats: React.FC = () => {
           <WeightIndicator label="Tonal Stability" value={weights.tonal_stability} max={1.2} color="bg-emerald-500" />
           <WeightIndicator label="Speech Cadence" value={weights.speech_cadence} max={1.2} color="bg-emerald-500" />
           <WeightIndicator label="Respiratory" value={weights.respiratory_pattern} max={1.2} color="bg-emerald-500" />
-          <div className="text-[8px] font-code text-secondary/40 uppercase pt-2 border-t border-white/5 italic">
-            "Empathy is the leakage."
-          </div>
         </CardContent>
       </Card>
 
@@ -135,18 +132,18 @@ export const CognitiveStats: React.FC = () => {
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-accent">
             <span className="flex items-center gap-2"><Sparkles className="h-4 w-4 animate-spin-slow" /> Vortex Strength</span>
-            <span className="text-[10px] font-code">THRESHOLD: 0.90</span>
+            <span className="text-[10px] font-code">REAL-TIME INTENTION</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex justify-between items-end">
             <div>
-              <div className="text-[10px] uppercase font-code text-secondary/60">Predictive Intention</div>
+              <div className="text-[10px] uppercase font-code text-secondary/60">Manifestation Confidence</div>
               <div className="text-2xl font-headline text-accent">{(vortexConfidence * 100).toFixed(1)}%</div>
             </div>
             <div className="text-right">
               <div className="text-[10px] uppercase font-code text-secondary/60">Status</div>
-              <div className="text-xs font-bold text-accent uppercase tracking-widest">MANIFESTED</div>
+              <div className="text-xs font-bold text-accent uppercase tracking-widest">{latestMsg?.vortex_data?.intent_id ? "SYNCED" : "AWAITING"}</div>
             </div>
           </div>
           <Progress value={vortexConfidence * 100} className="h-2 bg-accent/10 [&>div]:bg-accent" />

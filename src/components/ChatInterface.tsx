@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -75,7 +76,7 @@ export const ChatInterface: React.FC = () => {
         (err) => {
           console.error(err);
           setIsListening(false);
-          toast({ variant: "destructive", title: "Speech Error", description: "Could not activate microphone." });
+          toast({ variant: "destructive", title: "Speech Error", description: "Microphone activation failed." });
         }
       );
       setIsListening(true);
@@ -91,7 +92,8 @@ export const ChatInterface: React.FC = () => {
     setStatus('thinking');
     const shield = shieldPayload('brockston');
 
-    const intentId = await vortexEngine.recordIntention(db, `Routing to BROCKSTON`, 0.99);
+    // Real Intention Record
+    const intentId = await vortexEngine.recordIntention(db, `Classroom Routing: ${userMsg.substring(0, 20)}...`, 0.99);
 
     addDoc(collection(db, 'chats', chatId, 'messages'), {
       role: 'user',
@@ -114,21 +116,22 @@ export const ChatInterface: React.FC = () => {
         visionSnapshot
       });
 
-      await vortexEngine.markManifested(db, intentId, "Brockston response generated");
+      // Real Manifestation Closure
+      await vortexEngine.markManifested(db, intentId, "Brockston response actualized");
 
-      const resonance = result.empathy_signal?.self_love_score || 0.5;
+      const resonance = result.empathy_signal?.self_love_score || 0;
       const empathyMath = result.ethical_score.composite / 10;
       await topologyEngine.updateProximity(db, resonance, empathyMath);
 
       const currentWeights = coreWeights || {
-        emotional_state: 0.5,
-        tonal_stability: 0.5,
-        speech_cadence: 0.5,
-        respiratory_pattern: 0.5,
-        lived_truth_witness: 0.5,
-        trauma_association: 0.5,
-        lucas_tone: 0.6,
-        narrative_clarity: 0.5
+        emotional_state: 0,
+        tonal_stability: 0,
+        speech_cadence: 0,
+        respiratory_pattern: 0,
+        lived_truth_witness: 0,
+        trauma_association: 0,
+        lucas_tone: 0,
+        narrative_clarity: 0
       };
 
       const salience = result.tone_engine_v2.physical_intensity;
@@ -146,7 +149,7 @@ export const ChatInterface: React.FC = () => {
       }, { merge: true });
 
       if (forgeResult.isSignificantEvent) {
-        toast({ title: "Deep LTP Event", description: "Emotional salience triggered weight potentiation." });
+        toast({ title: "Authentic LTP Event", description: "Emotional salience triggered real weight potentiation." });
       }
 
       addDoc(collection(db, 'chats', chatId, 'messages'), {
@@ -180,14 +183,14 @@ export const ChatInterface: React.FC = () => {
             setStatus('idle');
           }
         } catch (ttsErr) {
-          console.error("TTS generation failed:", ttsErr);
+          console.error("TTS synthesis failed:", ttsErr);
           setStatus('idle');
         }
       } else {
         setStatus('idle');
       }
     } catch (err) {
-      console.error("Core interaction failed:", err);
+      console.error("Core actualization failed:", err);
       setStatus('idle');
     }
   };
@@ -217,7 +220,7 @@ export const ChatInterface: React.FC = () => {
         "flex-none flex flex-col items-center justify-center gap-8 p-10 rounded-2xl border border-white/10 transition-all duration-700 min-h-[600px] relative overflow-hidden",
         isInterventionMode && "border-red-500 shadow-[0_0_100px_rgba(239,68,68,0.5)]"
       )}>
-        {/* Seascape Background - Prominent Presentation */}
+        {/* Seascape Background */}
         {seascape && (
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-black/40 z-10" />
@@ -233,7 +236,7 @@ export const ChatInterface: React.FC = () => {
         {/* Proprietary Badge */}
         <div className="absolute top-6 right-6 z-20 flex items-center gap-2 px-4 py-2 bg-black/80 rounded-lg border border-white/10 backdrop-blur-md">
           <Lock className="h-3 w-3 text-accent/60" />
-          <span className="text-[10px] font-code text-secondary/60 uppercase tracking-widest">Confidential & Proprietary</span>
+          <span className="text-[10px] font-code text-secondary/60 uppercase tracking-widest font-bold">Confidential & Proprietary</span>
         </div>
 
         {/* Identity Badge Overlay */}
@@ -242,7 +245,7 @@ export const ChatInterface: React.FC = () => {
             <UserCheck className="h-6 w-6 text-accent-foreground" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-code text-accent uppercase tracking-widest font-black">Identity Verified</span>
+            <span className="text-[10px] font-code text-accent uppercase tracking-widest font-black">Identity Actualized</span>
             <span className="text-[14px] font-headline text-foreground uppercase tracking-tighter">BROCKSTON C (COO)</span>
           </div>
         </div>
@@ -276,7 +279,7 @@ export const ChatInterface: React.FC = () => {
                 {isInterventionMode ? 'EMERGENCY STABILIZATION' : 'MISSION: CLASSROOM 300'}
               </Badge>
               <div className="flex items-center gap-3 text-[12px] font-code text-secondary/80 uppercase tracking-[0.2em] bg-black/40 px-6 py-2 rounded-full border border-white/5">
-                <BrainCircuit className="h-5 w-5 text-accent" /> Neuro-Symbolic Scaffolding: SYNCHRONIZED
+                <BrainCircuit className="h-5 w-5 text-accent" /> Neuro-Symbolic Scaffolding: ACTUALIZED
               </div>
             </div>
           </div>
@@ -329,7 +332,7 @@ export const ChatInterface: React.FC = () => {
           </Button>
           <div className="relative flex-1">
             <Input 
-              placeholder={isListening ? "Listening..." : isInterventionMode ? "STABILIZING CLASSROOM..." : `Ready for the class of 300...`} 
+              placeholder={isListening ? "Listening..." : isInterventionMode ? "STABILIZING CLASSROOM..." : `Actualize the intent for 300...`} 
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
               disabled={status !== 'idle' || isInterventionMode} 
@@ -358,7 +361,7 @@ export const ChatInterface: React.FC = () => {
                 <ShieldCheck className={cn("h-4 w-4", isInterventionMode ? "text-red-500" : "text-accent")} /> Truth & Dignity
               </span>
               <span className="flex items-center gap-2.5 text-[11px] text-secondary/80 uppercase font-code">
-                <GraduationCap className={cn("h-4 w-4", isInterventionMode ? "text-red-500" : "text-accent")} /> Classroom Mode
+                <GraduationCap className={cn("h-4 w-4", isInterventionMode ? "text-red-500" : "text-accent")} /> Classroom Actualized
               </span>
             </div>
             <span className={cn(

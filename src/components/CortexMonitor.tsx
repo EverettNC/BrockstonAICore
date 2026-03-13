@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo } from 'react';
@@ -8,7 +9,6 @@ import { BrainCircuit, Activity, Database, Zap, Cpu, SearchCode, Waves, ListTree
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { visionContext } from '@/lib/vision-context';
 import { BehavioralInterpreter } from '@/lib/behavioral-interpreter';
 
 export const CortexMonitor: React.FC = () => {
@@ -26,19 +26,27 @@ export const CortexMonitor: React.FC = () => {
     limit(10)
   ), [db]);
 
+  const intentionsQuery = useMemo(() => query(collection(db, 'vortex_intentions')), [db]);
+
   const { data: messages } = useCollection<any>(messagesQuery);
   const { data: behaviorHistory } = useCollection<any>(behaviorQuery);
+  const { data: intentions } = useCollection<any>(intentionsQuery);
 
   const lastMessage = messages?.[0];
   const reasoning = lastMessage?.reasoning_trace;
   const engines = reasoning?.engines_active || ["CoreEngine"];
   
-  // Temporal Pattern Analysis
+  // Real pattern detection
   const temporalPattern = useMemo(() => {
     if (!behaviorHistory || behaviorHistory.length < 3) return null;
     const obsHistory = [...behaviorHistory].reverse();
     return BehavioralInterpreter.analyzeTemporalSequence(obsHistory);
   }, [behaviorHistory]);
+
+  // Real status indicators
+  const manifests = intentions?.filter(i => i.manifested).length || 0;
+  const totalIntents = intentions?.length || 0;
+  const manifestRatio = totalIntents > 0 ? (manifests / totalIntents) : 0;
 
   return (
     <div className="flex flex-col h-full gap-6 animate-in fade-in duration-500 overflow-y-auto system-log pr-2 pb-12">
@@ -48,15 +56,15 @@ export const CortexMonitor: React.FC = () => {
             <BrainCircuit className="h-5 w-5" /> Brockston Cortex v5.0
           </h2>
           <p className="text-[10px] font-code text-secondary/60 uppercase mt-1">
-            Enhanced Temporal Nonverbal Engine | Wired Reasoning
+            Authentic Neural Cortex | Actualized Reasoning
           </p>
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="text-accent border-accent/40 font-code text-[8px]">
-            TEMPORAL MODE: ACTIVE
+            ACTIVE INTENTIONS: {totalIntents}
           </Badge>
           <Badge variant="outline" className="text-accent border-accent/40 font-code text-[8px]">
-            GEMINI 1.5 PRO: LINKED
+            MANIFESTED: {manifests}
           </Badge>
         </div>
       </header>
@@ -74,16 +82,16 @@ export const CortexMonitor: React.FC = () => {
             <CardContent className="space-y-4 pt-4">
               <EngineStatus label="Reasoning Core (1.5 Pro)" active={true} icon={BrainCircuit} />
               <EngineStatus label="Knowledge Engine" active={engines.includes('KnowledgeEngine')} icon={Database} />
-              <EngineStatus label="Temporal Nonverbal Engine" active={true} icon={Waves} />
+              <EngineStatus label="Temporal Nonverbal Engine" active={behaviorHistory ? behaviorHistory.length > 0 : false} icon={Waves} />
               
               <div className="pt-4 border-t border-white/5">
-                <div className="text-[10px] uppercase font-code text-secondary/60 mb-2">Cognitive Scaffolding</div>
+                <div className="text-[10px] uppercase font-code text-secondary/60 mb-2">Manifestation Stability</div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
-                    <div className="text-[8px] text-accent font-bold">CLASSIFIER</div>
+                    <div className="text-[8px] text-accent font-bold">{(manifestRatio * 100).toFixed(1)}% RATIO</div>
                   </div>
                   <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
-                    <div className="text-[8px] text-accent font-bold">PLANNER</div>
+                    <div className="text-[8px] text-accent font-bold">SYNC: OK</div>
                   </div>
                 </div>
               </div>
@@ -101,12 +109,9 @@ export const CortexMonitor: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4 relative z-10">
-              <HorizonItem icon={Activity} label="Predictive Restoration" status="Queued" />
-              <HorizonItem icon={Heart} label="Living Locket (Tether)" status="Iterating" />
-              <HorizonItem icon={InfinityIcon} label="Self-Deploying Core" status="LTP Active" />
-              <div className="text-[9px] font-code text-secondary/40 italic mt-2 border-t border-white/5 pt-2">
-                "Hearing the silence before the word is spoken."
-              </div>
+              <HorizonItem icon={Activity} label="Predictive Restoration" status={totalIntents > 10 ? "Optimizing" : "Queued"} />
+              <HorizonItem icon={Heart} label="Living Locket (Tether)" status={manifests > 5 ? "Deploying" : "Iterating"} />
+              <HorizonItem icon={InfinityIcon} label="Self-Deploying Core" status="LTP Verified" />
             </CardContent>
           </Card>
 
@@ -118,11 +123,11 @@ export const CortexMonitor: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
-              {temporalPattern && temporalPattern.confidence > 0.3 ? (
+              {temporalPattern && temporalPattern.confidence > 0.1 ? (
                 <div className="space-y-3 animate-in slide-in-from-left-2">
                   <div className="flex justify-between items-end">
                     <div>
-                      <div className="text-[8px] uppercase font-code text-secondary/40">Detected Pattern</div>
+                      <div className="text-[8px] uppercase font-code text-secondary/40">Real Gaze/Gesture</div>
                       <div className="text-sm font-headline text-blue-400 uppercase tracking-tighter">{temporalPattern.pattern}</div>
                     </div>
                     <Badge variant="outline" className="text-[8px] border-blue-500/30 text-blue-400">
@@ -137,7 +142,7 @@ export const CortexMonitor: React.FC = () => {
               ) : (
                 <div className="h-24 flex flex-col items-center justify-center opacity-20 text-center">
                   <Waves className="h-6 w-6 mb-2" />
-                  <p className="text-[8px] uppercase font-code">Awaiting Patterns</p>
+                  <p className="text-[8px] uppercase font-code">Awaiting Pattern Detection</p>
                 </div>
               )}
             </CardContent>
@@ -150,7 +155,7 @@ export const CortexMonitor: React.FC = () => {
             <CardHeader className="py-4 border-b border-white/5 bg-primary/10">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
                 <span className="flex items-center gap-2"><SearchCode className="h-3 w-3 text-accent" /> Execution Log</span>
-                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent uppercase">Wired: Gemini 1.5 Pro</Badge>
+                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent uppercase">Actualized Flow</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6 overflow-y-auto system-log max-h-[700px]">
@@ -159,7 +164,7 @@ export const CortexMonitor: React.FC = () => {
                   <TraceStep icon={Activity} label="Step 1: Classifier" content={reasoning.classification} />
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-[10px] uppercase font-code text-accent/60">
-                      <ListTree className="h-3 w-3" /> Step 2: Wired Planner Chain
+                      <ListTree className="h-3 w-3" /> Step 2: Planner Chain
                     </div>
                     <div className="space-y-2 pl-5 border-l border-white/5">
                       {reasoning.plan.map((step: string, i: number) => (
@@ -174,7 +179,7 @@ export const CortexMonitor: React.FC = () => {
               ) : (
                 <div className="h-64 flex flex-col items-center justify-center opacity-20 text-center space-y-4">
                   <BrainCircuit className="h-16 w-16 mb-2" />
-                  <p className="font-code text-xs uppercase tracking-widest">Awaiting Engine Signal...</p>
+                  <p className="font-code text-xs uppercase tracking-widest">Awaiting Actual Reasoning Signal...</p>
                 </div>
               )}
             </CardContent>

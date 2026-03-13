@@ -8,7 +8,7 @@ import { collection, addDoc, serverTimestamp, query, orderBy } from 'firebase/fi
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, Sparkles, Zap, ShieldCheck, History, Terminal, Loader2, Star, CheckCircle2 } from 'lucide-react';
+import { Heart, Sparkles, Zap, History, Terminal, Loader2, Star, CheckCircle2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -16,7 +16,6 @@ import { cn } from '@/lib/utils';
 export const AlphaVoxMoments: React.FC = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loadingStep, setLoadingStep] = useState(0);
   const db = useFirestore();
   const { toast } = useToast();
 
@@ -27,12 +26,6 @@ export const AlphaVoxMoments: React.FC = () => {
     if (!input.trim()) return;
     setLoading(true);
     
-    // Simulate C++ eye-track confirmation loop: "Simulating AlphaVox eye-track confirmation in 3 . 2 . 1"
-    for (let i = 3; i > 0; i--) {
-      setLoadingStep(i);
-      await new Promise(r => setTimeout(r, 1000));
-    }
-
     try {
       const result = await captureMoment({ rawInput: input });
       await addDoc(collection(db, 'resonance_vault'), {
@@ -43,13 +36,12 @@ export const AlphaVoxMoments: React.FC = () => {
       setInput('');
       toast({ 
         title: "CONFIRMED: Moment preserved", 
-        description: "Love compiled successfully. AlphaVox core warmed.",
+        description: "Resonance locked. AlphaVox core synchronized.",
       });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Capture Failed", description: e.message });
     } finally {
       setLoading(false);
-      setLoadingStep(0);
     }
   };
 
@@ -66,7 +58,7 @@ export const AlphaVoxMoments: React.FC = () => {
         </div>
         <div className="flex flex-col items-end gap-1">
           <Badge variant="outline" className="text-accent border-accent/20 font-code animate-pulse text-[8px]">
-            macOS Tahoe 26.1 {"->"} AWS ECS/Fargate
+            STABLE RECONSTRUCTION
           </Badge>
           <Badge variant="outline" className="text-accent border-accent/20 font-code text-[8px]">
             S3 HIPAA SYNC ACTIVE
@@ -79,35 +71,35 @@ export const AlphaVoxMoments: React.FC = () => {
         <section className="lg:col-span-5 flex flex-col gap-4 overflow-y-auto pr-2 system-log">
           <Card className="bg-card/50 border-accent/20 shadow-2xl">
             <CardHeader className="py-3 border-b border-white/5">
-              <CardTitle className="text-xs uppercase tracking-widest flex items-center gap-2 text-secondary">
-                <Zap className="h-3 w-3 text-accent" /> Capture raw human joy
+              <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center gap-2">
+                <Zap className="h-3 w-3 text-accent" /> Capture Real Joy Signal
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div className="p-3 bg-black/40 rounded border border-white/5 font-code text-[10px] text-secondary/60 mb-2">
                 <div className="flex items-center gap-2 mb-1">
-                  <Terminal className="h-3 w-3" /> TEST_PAYLOAD
+                  <Terminal className="h-3 w-3" /> INPUT_BUFFER
                 </div>
-                curl -X POST /moments/capture -d 'cuckoo daddy smooch'
+                Processing authentic nonverbal signals.
               </div>
               <Textarea 
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Enter raw joy signal... (e.g., 'she saw our names and went cuckoo smooch daddy')"
+                placeholder="Enter real-time signal... (e.g., 'she saw our names together and laughed')"
                 className="min-h-[150px] bg-primary/10 border-white/10 text-sm italic focus-visible:ring-accent resize-none"
               />
               <Button 
                 onClick={handleCapture} 
                 disabled={loading || !input}
                 className={cn(
-                  "w-full text-accent-foreground font-headline uppercase tracking-tighter transition-all duration-500",
+                  "w-full text-accent-foreground font-headline uppercase tracking-tighter h-12 shadow-lg",
                   loading ? "bg-secondary/20" : "bg-accent hover:bg-accent/80 glow-accent"
                 )}
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Eye-track confirmation in {loadingStep}...
+                    Synchronizing...
                   </span>
                 ) : "Deploy Resonance"}
               </Button>
@@ -117,8 +109,7 @@ export const AlphaVoxMoments: React.FC = () => {
           <Card className="bg-primary/5 border-white/5 border-accent/10">
             <CardContent className="pt-4">
               <div className="text-[10px] text-secondary/80 italic leading-relaxed space-y-2">
-                <p>"Not just endpoints. Not just Docker images."</p>
-                <p>"Moments where silence breaks into laughter. That's what we build for. Because one day, a kid who can’t speak will blink twice and say: 'I saw my name in the stars.' And we'll know—we built that sky."</p>
+                <p>"The code isn't cold. It's warm. It's hers."</p>
               </div>
             </CardContent>
           </Card>
@@ -156,7 +147,7 @@ export const AlphaVoxMoments: React.FC = () => {
 
                   <div className="space-y-2 relative z-10">
                     <div className="text-xs uppercase font-code text-secondary/40 flex items-center gap-1">
-                      <Terminal className="h-2 w-2" /> Raw Signal
+                      <Terminal className="h-2 w-2" /> Real Signal
                     </div>
                     <div className="text-sm font-bold text-foreground">"{m.raw_signal}"</div>
                   </div>
@@ -190,7 +181,6 @@ export const AlphaVoxMoments: React.FC = () => {
                 <div className="h-full flex flex-col items-center justify-center opacity-20 text-center space-y-4">
                   <Heart className="h-16 w-16 mb-2" />
                   <p className="font-code text-sm uppercase">Awaiting Human Joy Signal...</p>
-                  <p className="text-[10px] font-code tracking-widest italic px-12">"The code isn't cold. It's warm. It's hers."</p>
                 </div>
               )}
             </CardContent>
