@@ -1,34 +1,49 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
 import { aiCoreKnowledgePoweredResponses } from '@/ai/flows/ai-core-knowledge-powered-responses';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Zap, BrainCircuit, Sparkles } from 'lucide-react';
+import { Send, Zap, BrainCircuit, Sparkles, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
+import { useFirestore, useCollection } from '@/firebase';
+import { collection, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
 
 type Message = {
   role: 'user' | 'model';
   content: string;
   type?: 'standard' | 'knowledge';
+  timestamp?: any;
 };
 
 export const ChatInterface: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'model', content: "Brockston AI Core initialized. Operational protocols at 100%. How may I assist your inquiry today?" }
-  ]);
+  const db = useFirestore();
+  const chatId = "main-session-alpha"; // Using a constant ID for MVP
+  
+  const messagesQuery = useMemo(() => {
+    return query(
+      collection(db, 'chats', chatId, 'messages'),
+      orderBy('timestamp', 'asc'),
+      limit(50)
+    );
+  }, [db]);
+
+  const { data: storedMessages, loading } = useCollection<Message>(messagesQuery);
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<'idle' | 'thinking' | 'speaking'>('idle');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
     }
-  }, [messages]);
+  }, [storedMessages]);
 
   const handleSend = async (e?: React.FormEvent, forceKnowledge = false) => {
     e?.preventDefault();
@@ -36,49 +51,73 @@ export const ChatInterface: React.FC = () => {
 
     const userMessage = input;
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setStatus('thinking');
+
+    // Optimistically add to Firestore
+    addDoc(collection(db, 'chats', chatId, 'messages'), {
+      role: 'user',
+      content: userMessage,
+      timestamp: serverTimestamp()
+    });
 
     try {
       let response = '';
+      const history = (storedMessages || []).map(m => ({ role: m.role, content: m.content }));
+
       if (forceKnowledge || userMessage.toLowerCase().includes('fact') || userMessage.toLowerCase().includes('knowledge')) {
         const result = await aiCoreKnowledgePoweredResponses({
           query: userMessage,
-          chatHistory: messages.map(m => m.content)
+          chatHistory: history.map(m => m.content)
         });
         response = result.response;
       } else {
         const result = await aiCoreConversationalInteraction({
           message: userMessage,
-          chatHistory: messages.map(m => ({ role: m.role, content: m.content }))
+          chatHistory: history as any
         });
         response = result.response;
       }
 
       setStatus('speaking');
-      setMessages(prev => [...prev, { role: 'model', content: response, type: forceKnowledge ? 'knowledge' : 'standard' }]);
       
-      // Simulate speaking finish
+      // Save model response to Firestore
+      addDoc(collection(db, 'chats', chatId, 'messages'), {
+        role: 'model',
+        content: response,
+        type: forceKnowledge ? 'knowledge' : 'standard',
+        timestamp: serverTimestamp()
+      });
+      
       setTimeout(() => setStatus('idle'), 2000);
     } catch (error) {
       console.error(error);
-      setMessages(prev => [...prev, { role: 'model', content: "SYSTEM ERROR: Cognitive link interrupted. Please retry sequence." }]);
+      addDoc(collection(db, 'chats', chatId, 'messages'), {
+        role: 'model',
+        content: "SYSTEM ERROR: Cognitive link interrupted. Please retry sequence.",
+        timestamp: serverTimestamp()
+      });
       setStatus('idle');
     }
   };
 
+  const displayMessages = storedMessages || [];
+
   return (
     <div className="flex flex-col h-full gap-4">
-      {/* Visual Agent Section */}
       <div className="flex-none flex justify-center py-4 bg-primary/10 rounded-xl border border-white/5">
         <CoreAvatar status={status} />
       </div>
 
-      {/* Chat Messages */}
       <div className="flex-1 min-h-0 bg-black/20 rounded-xl border border-white/5 p-4 relative">
         <ScrollArea className="h-full pr-4" ref={scrollRef}>
           <div className="space-y-4 pb-4">
-            {messages.map((msg, i) => (
+            {loading && displayMessages.length === 0 && (
+              <div className="flex items-center justify-center h-full opacity-40">
+                <Loader2 className="h-6 w-6 animate-spin text-accent" />
+              </div>
+            )}
+            
+            {displayMessages.map((msg, i) => (
               <div key={i} className={cn(
                 "flex flex-col max-w-[85%] animate-in fade-in slide-in-from-bottom-2 duration-300",
                 msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
@@ -93,7 +132,7 @@ export const ChatInterface: React.FC = () => {
                   "p-3 rounded-2xl text-sm",
                   msg.role === 'user' 
                     ? "bg-accent text-accent-foreground font-medium rounded-tr-none" 
-                    : "bg-primary/40 border border-white/10 text-foreground rounded-tl-none backdrop-blur-md"
+                    : "bg-primary/40 border border-white/10 text-foreground rounded-tl-none backdrop-blur-md shadow-lg"
                 )}>
                   {msg.content}
                 </div>
@@ -103,7 +142,6 @@ export const ChatInterface: React.FC = () => {
         </ScrollArea>
       </div>
 
-      {/* Input Section */}
       <form onSubmit={handleSend} className="flex-none p-4 bg-card rounded-xl border border-white/5 shadow-2xl">
         <div className="flex gap-3">
           <div className="relative flex-1">

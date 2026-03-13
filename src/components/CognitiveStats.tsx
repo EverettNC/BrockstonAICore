@@ -1,10 +1,9 @@
-
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Area, AreaChart, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { Activity } from 'lucide-react';
 
 const data = [
@@ -18,6 +17,20 @@ const data = [
 ];
 
 export const CognitiveStats: React.FC = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Card className="bg-card/50 backdrop-blur-sm border-white/5 h-[320px] flex items-center justify-center">
+        <span className="text-xs font-code text-secondary animate-pulse">Initializing Adaptive Engine...</span>
+      </Card>
+    );
+  }
+
   return (
     <Card className="bg-card/50 backdrop-blur-sm border-white/5">
       <CardHeader className="pb-2">
