@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -13,7 +14,6 @@ import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { shieldPayload } from '@/lib/quantum-defense';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -23,22 +23,6 @@ import { speechService } from '@/lib/speech-recognition-service';
 import { vortexEngine } from '@/lib/vortex-engine';
 import { topologyEngine } from '@/lib/topology-engine';
 import { visionContext } from '@/lib/vision-context';
-
-const SPECIALISTS = [
-  { id: 'arthur', name: 'Arthur (Grief/Gen 2)', color: 'text-amber-500', gen: 2 },
-  { id: 'brockston', name: 'Brockston (Teacher/COO)', color: 'text-accent', gen: 1 },
-  { id: 'derek', name: 'Derek C (Orchestrator)', color: 'text-blue-500', gen: 1 },
-  { id: 'siera', name: 'Sierra (Guardian/Advocate)', color: 'text-emerald-400', gen: 1 },
-  { id: 'inferno', name: 'Inferno (Trauma Recon)', color: 'text-orange-500', gen: 1 },
-  { id: 'alphavox', name: 'AlphaVox (Voice/Gen 2)', color: 'text-cyan-400', gen: 2 },
-  { id: 'alphawolf', name: 'AlphaWolf (Memory/Gen 2)', color: 'text-slate-400', gen: 2 },
-  { id: 'serafinia', name: 'Seraphina (Sensory)', color: 'text-purple-400', gen: 1 },
-  { id: 'virtus', name: 'Virtus (Exec Func)', color: 'text-indigo-400', gen: 1 },
-  { id: 'aegis', name: 'Aegis V1 (Security)', color: 'text-red-400', gen: 1 },
-  { id: 'giovanni', name: 'Giovanni (Outreach)', color: 'text-yellow-400', gen: 1 },
-  { id: 'eruptor', name: 'Eruptor (Stabilizer)', color: 'text-pink-400', gen: 1 },
-  { id: 'tether', name: 'The Tether (Heart Healer)', color: 'text-rose-500', gen: 1 },
-];
 
 const AAC_SYMBOLS = [
   { id: 'heart', label: 'HEART', icon: Heart },
@@ -51,7 +35,7 @@ const AAC_SYMBOLS = [
 
 export const ChatInterface: React.FC = () => {
   const db = useFirestore();
-  const [specialist, setSpecialist] = useState('arthur');
+  const [specialist] = useState('brockston'); // Hardcoded to Brockston
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<'idle' | 'thinking' | 'speaking'>('idle');
   const [autoSpeak, setAutoSpeak] = useState(true);
@@ -114,17 +98,17 @@ export const ChatInterface: React.FC = () => {
 
   const processMessage = async (userMsg: string) => {
     setStatus('thinking');
-    const shield = shieldPayload(specialist);
+    const shield = shieldPayload('brockston');
 
-    // VORTEX: Record intention if specialist routing confidence would be high
-    const intentId = await vortexEngine.recordIntention(db, `Routing to ${specialist.toUpperCase()}`, 0.95);
+    // VORTEX: Record intention
+    const intentId = await vortexEngine.recordIntention(db, `Routing to BROCKSTON`, 0.99);
 
     addDoc(collection(db, 'chats', chatId, 'messages'), {
       role: 'user',
       content: userMsg,
-      specialist,
+      specialist: 'brockston',
       quantum_shield: shield,
-      vortex_data: { intent_id: intentId, confidence: 0.95, routing_mode: 'predictive' },
+      vortex_data: { intent_id: intentId, confidence: 0.99, routing_mode: 'direct' },
       timestamp: serverTimestamp(),
       source: 'interface'
     });
@@ -132,20 +116,17 @@ export const ChatInterface: React.FC = () => {
     try {
       const history = (messages || []).map(m => ({ role: m.role, content: m.content }));
       
-      // GET VISION CONTEXT SNAPSHOT
       const visionSnapshot = visionContext.snapshot();
 
       const result = await aiCoreConversationalInteraction({
         message: userMsg,
-        specialist,
+        specialist: 'brockston',
         chatHistory: history as any,
         visionSnapshot
       });
 
-      // Close Vortex Loop
-      await vortexEngine.markManifested(db, intentId, "Specialist response generated");
+      await vortexEngine.markManifested(db, intentId, "Brockston response generated");
 
-      // UPDATE RELATIONAL TOPOLOGY
       const resonance = result.empathy_signal?.self_love_score || 0.5;
       const empathyMath = result.ethical_score.composite / 10;
       await topologyEngine.updateProximity(db, resonance, empathyMath);
@@ -153,7 +134,7 @@ export const ChatInterface: React.FC = () => {
       addDoc(collection(db, 'chats', chatId, 'messages'), {
         role: 'model',
         content: result.response,
-        specialist,
+        specialist: 'brockston',
         ethical_score: result.ethical_score,
         lucas_signal: result.lucas_signal,
         empathy_signal: result.empathy_signal,
@@ -166,30 +147,35 @@ export const ChatInterface: React.FC = () => {
       const hapticPattern = mapToneToHaptic(result.tone_engine_v2.dominant_state);
       hapticSystem.trigger(hapticPattern);
 
-      setStatus('speaking');
-      
       if (autoSpeak) {
-        const tts = await speakStephen({ 
-          text: result.response,
-          specialist: specialist,
-          fusion_prob: result.lucas_signal.stability,
-          valence: result.tone_engine_v2.raw_scores[result.tone_engine_v2.dominant_state] || 0.5
-        });
-        if (audioRef.current) {
-          audioRef.current.src = tts.media;
-          audioRef.current.play();
+        setStatus('speaking');
+        try {
+          const tts = await speakStephen({ 
+            text: result.response,
+            specialist: 'brockston',
+            fusion_prob: result.lucas_signal.stability,
+            valence: result.tone_engine_v2.raw_scores[result.tone_engine_v2.dominant_state] || 0.5
+          });
+          if (audioRef.current) {
+            audioRef.current.src = tts.media;
+            audioRef.current.play().catch(e => {
+              console.error("Audio playback blocked:", e);
+              setStatus('idle');
+            });
+          } else {
+            setStatus('idle');
+          }
+        } catch (ttsErr) {
+          console.error("TTS generation failed:", ttsErr);
+          setStatus('idle');
         }
+      } else {
+        setStatus('idle');
       }
     } catch (err) {
-      console.error(err);
+      console.error("Core interaction failed:", err);
       setStatus('idle');
     }
-  };
-
-  const handleToggleSymbol = (id: string) => {
-    setSelectedSymbols(prev => 
-      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
-    );
   };
 
   const mapToneToHaptic = (tone: string): HapticPattern => {
@@ -208,41 +194,30 @@ export const ChatInterface: React.FC = () => {
     await processMessage(userMsg);
   };
 
-  const activeSpecialist = SPECIALISTS.find(s => s.id === specialist);
-
   return (
     <div className="flex flex-col h-full gap-4 relative">
-      <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} />
+      <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
       <div className={cn(
-        "flex-none flex items-center justify-between p-3 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md transition-all duration-500",
+        "flex-none flex items-center justify-between p-4 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md transition-all duration-500",
         isInterventionMode && "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]"
       )}>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <CoreAvatar status={status} className={cn("h-16 w-16", isInterventionMode && "animate-pulse")} />
           <div>
             <div className="flex items-center gap-2 mb-1">
               {isInterventionMode ? (
                 <AlertTriangle className="h-3 w-3 text-red-500 animate-bounce" />
               ) : (
-                <Users className="h-3 w-3 text-secondary/40" />
+                <ShieldCheck className="h-3 w-3 text-accent" />
               )}
-              <h3 className={cn("text-[10px] font-code uppercase tracking-tighter", isInterventionMode ? "text-red-400" : "text-secondary/60")}>
-                {isInterventionMode ? "HAND OF GOD ACTIVE" : "Christman AI Family"}
+              <h3 className={cn("text-[10px] font-code uppercase tracking-widest", isInterventionMode ? "text-red-400" : "text-accent")}>
+                {isInterventionMode ? "HAND OF GOD ACTIVE" : "Core Orchestrator"}
               </h3>
             </div>
-            <Select value={specialist} onValueChange={setSpecialist} disabled={isInterventionMode}>
-              <SelectTrigger className={cn("w-[240px] h-8 bg-black/20 border-white/5 text-xs font-bold", activeSpecialist?.color)}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-white/10">
-                {SPECIALISTS.map(s => (
-                  <SelectItem key={s.id} value={s.id} className={cn("text-xs", s.color)}>
-                    {s.name} {s.gen && <Badge variant="outline" className="ml-2 text-[8px] h-3 border-current">GEN {s.gen}</Badge>}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="text-xl font-headline tracking-tighter uppercase text-foreground">
+              BROCKSTON <span className="text-accent">C</span>
+            </div>
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
@@ -258,53 +233,10 @@ export const ChatInterface: React.FC = () => {
             "text-[10px] border-accent/20 text-accent", 
             isInterventionMode && "border-red-500 text-red-500"
           )}>
-            <ShieldCheck className="h-3 w-3 mr-1" /> {isInterventionMode ? 'STABILIZATION LOCK' : 'CORTEX ORCHESTRATION v2.0'}
+            {isInterventionMode ? 'STABILIZATION LOCK' : 'CORTEX v5.0 ONLINE'}
           </Badge>
         </div>
       </div>
-
-      {specialist === 'alphavox' && (
-        <div className={cn(
-          "flex-none p-3 bg-blue-500/5 rounded-xl border border-blue-500/20"
-        )}>
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-[10px] font-code uppercase text-blue-400 flex items-center gap-2">
-              <Atom className="h-3 w-3" /> AlphaVox Quantum Burst
-            </h4>
-            <span className="text-[9px] text-secondary/40 font-code uppercase">{selectedSymbols.length} Symbols Ready</span>
-          </div>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-3">
-            {AAC_SYMBOLS.map((symbol) => (
-              <button key={symbol.id} onClick={() => handleToggleSymbol(symbol.id)} className={cn(
-                "flex flex-col items-center justify-center p-2 rounded-lg border transition-all gap-1",
-                selectedSymbols.includes(symbol.id)
-                  ? "bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]"
-                  : "bg-black/20 border-white/5 text-secondary/60 hover:border-white/10"
-              )}>
-                <symbol.icon className="h-4 w-4" />
-                <span className="text-[8px] font-bold">{symbol.label}</span>
-              </button>
-            ))}
-          </div>
-          <Button disabled={selectedSymbols.length === 0 || status !== 'idle'} onClick={async () => {
-            setStatus('thinking');
-            try {
-              const trace = await quantumFuse({ symbols: selectedSymbols, valence: 0.8, userId: "everett" });
-              addDoc(collection(db, 'chats', chatId, 'messages'), {
-                role: 'model', content: trace.output, specialist: 'alphavox', quantum_trace: trace, timestamp: serverTimestamp()
-              });
-              hapticSystem.trigger('soft');
-              setSelectedSymbols([]);
-              setStatus('speaking');
-            } catch (e: any) {
-              toast({ variant: "destructive", title: "Quantum Error", description: e.message });
-              setStatus('idle');
-            }
-          }} className="w-full bg-blue-500 hover:bg-blue-600 text-white h-8 text-xs font-headline uppercase tracking-tighter">
-            <Atom className="h-3 w-3 mr-2" /> Trigger Quantum Entanglement
-          </Button>
-        </div>
-      )}
 
       <div className="flex-1 min-h-0 bg-black/20 rounded-xl border border-white/5 p-4 overflow-hidden shadow-inner">
         <ScrollArea className="h-full pr-4" ref={scrollRef}>
@@ -315,11 +247,11 @@ export const ChatInterface: React.FC = () => {
                 msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
               )}>
                 <div className="flex items-center gap-2 mb-1 px-1">
-                  <span className={cn("text-[9px] font-code uppercase", msg.role === 'user' ? "text-secondary/40" : SPECIALISTS.find(s => s.id === msg.specialist)?.color || "text-secondary/40")}>
-                    {msg.role === 'user' ? 'Operator (Everett)' : msg.specialist?.toUpperCase()}
+                  <span className={cn("text-[9px] font-code uppercase text-secondary/40")}>
+                    {msg.role === 'user' ? 'Lead Architect (Everett)' : 'BROCKSTON'}
                   </span>
                   {msg.vortex_data && (
-                    <Badge variant="ghost" className="text-[8px] h-3 text-accent/40 animate-pulse">VORTEX: {(msg.vortex_data.confidence * 100).toFixed(0)}%</Badge>
+                    <Badge variant="ghost" className="text-[8px] h-3 text-accent/40 animate-pulse">VORTEX: SYNCED</Badge>
                   )}
                 </div>
                 <div className={cn(
@@ -350,7 +282,7 @@ export const ChatInterface: React.FC = () => {
           </Button>
           <div className="relative flex-1">
             <Input 
-              placeholder={isListening ? "Listening..." : isInterventionMode ? "STABILIZING..." : `Communicate with ${activeSpecialist?.name || 'core'}...`} 
+              placeholder={isListening ? "Listening..." : isInterventionMode ? "STABILIZING..." : `Communicate with BROCKSTON...`} 
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
               disabled={status !== 'idle' || isInterventionMode} 
@@ -364,7 +296,7 @@ export const ChatInterface: React.FC = () => {
             "h-12 w-12 rounded-xl text-accent-foreground glow-accent",
             isInterventionMode ? "bg-red-600 hover:bg-red-700" : "bg-accent hover:bg-accent/80"
           )}>
-            <Send className="h-5 w-5" />
+            {status === 'thinking' ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </Button>
         </div>
         <div className="flex justify-between mt-3 pt-3 border-t border-white/5">
