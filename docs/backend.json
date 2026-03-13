@@ -49,8 +49,10 @@
         "raw_signal": { "type": "string" },
         "translation": { "type": "string" },
         "resonance_score": { "type": "number" },
+        "infrastructure_insight": { "type": "string" },
+        "deployment_log": { "type": "array", "items": { "type": "string" } },
         "timestamp": { "type": "string", "format": "date-time" },
-        "deployed": { "type": "boolean" }
+        "mission_status": { "type": "string" }
       }
     },
     "ResonanceOverflow": {

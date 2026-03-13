@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -7,13 +8,15 @@ import { collection, addDoc, serverTimestamp, query, orderBy } from 'firebase/fi
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, Sparkles, Zap, ShieldCheck, History, Terminal, Send } from 'lucide-react';
+import { Heart, Sparkles, Zap, ShieldCheck, History, Terminal, Loader2, Star, CheckCircle2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 export const AlphaVoxMoments: React.FC = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const db = useFirestore();
   const { toast } = useToast();
 
@@ -23,6 +26,13 @@ export const AlphaVoxMoments: React.FC = () => {
   const handleCapture = async () => {
     if (!input.trim()) return;
     setLoading(true);
+    
+    // Simulate C++ eye-track confirmation loop: "Simulating AlphaVox eye-track confirmation in 3 . 2 . 1"
+    for (let i = 3; i > 0; i--) {
+      setLoadingStep(i);
+      await new Promise(r => setTimeout(r, 1000));
+    }
+
     try {
       const result = await captureMoment({ rawInput: input });
       await addDoc(collection(db, 'resonance_vault'), {
@@ -32,13 +42,14 @@ export const AlphaVoxMoments: React.FC = () => {
       });
       setInput('');
       toast({ 
-        title: "Moment Preserved", 
-        description: "AlphaVox core warmed +0.7°. Love compiled successfully.",
+        title: "CONFIRMED: Moment preserved", 
+        description: "Love compiled successfully. AlphaVox core warmed.",
       });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Capture Failed", description: e.message });
     } finally {
       setLoading(false);
+      setLoadingStep(0);
     }
   };
 
@@ -53,15 +64,20 @@ export const AlphaVoxMoments: React.FC = () => {
             Infrastructure for the Heart | Preserving Fleeting Joy | v26.1 Core
           </p>
         </div>
-        <Badge variant="outline" className="text-accent border-accent/20 font-code animate-pulse">
-          S3 HIPAA SYNC ACTIVE
-        </Badge>
+        <div className="flex flex-col items-end gap-1">
+          <Badge variant="outline" className="text-accent border-accent/20 font-code animate-pulse text-[8px]">
+            macOS Tahoe 26.1 {"->"} AWS ECS/Fargate
+          </Badge>
+          <Badge variant="outline" className="text-accent border-accent/20 font-code text-[8px]">
+            S3 HIPAA SYNC ACTIVE
+          </Badge>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0 flex-1 overflow-hidden">
         {/* Signal Input */}
         <section className="lg:col-span-5 flex flex-col gap-4 overflow-y-auto pr-2 system-log">
-          <Card className="bg-card/50 border-accent/20">
+          <Card className="bg-card/50 border-accent/20 shadow-2xl">
             <CardHeader className="py-3 border-b border-white/5">
               <CardTitle className="text-xs uppercase tracking-widest flex items-center gap-2 text-secondary">
                 <Zap className="h-3 w-3 text-accent" /> Capture raw human joy
@@ -78,30 +94,39 @@ export const AlphaVoxMoments: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Enter raw joy signal... (e.g., 'she saw our names and went cuckoo smooch daddy')"
-                className="min-h-[150px] bg-primary/10 border-white/10 text-sm italic focus-visible:ring-accent"
+                className="min-h-[150px] bg-primary/10 border-white/10 text-sm italic focus-visible:ring-accent resize-none"
               />
               <Button 
                 onClick={handleCapture} 
                 disabled={loading || !input}
-                className="w-full bg-accent text-accent-foreground hover:bg-accent/80 glow-accent font-headline uppercase tracking-tighter"
+                className={cn(
+                  "w-full text-accent-foreground font-headline uppercase tracking-tighter transition-all duration-500",
+                  loading ? "bg-secondary/20" : "bg-accent hover:bg-accent/80 glow-accent"
+                )}
               >
-                {loading ? "Simulating AlphaVox eye-track..." : "Deploy Resonance"}
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Eye-track confirmation in {loadingStep}...
+                  </span>
+                ) : "Deploy Resonance"}
               </Button>
             </CardContent>
           </Card>
 
           <Card className="bg-primary/5 border-white/5 border-accent/10">
             <CardContent className="pt-4">
-              <p className="text-[10px] text-secondary/80 italic leading-relaxed">
-                "Not just endpoints. Not just Docker images. Moments where silence breaks into laughter. That's what we build for. Because one day, a kid who can’t speak will blink twice and say: 'I saw my name in the stars.'"
-              </p>
+              <div className="text-[10px] text-secondary/80 italic leading-relaxed space-y-2">
+                <p>"Not just endpoints. Not just Docker images."</p>
+                <p>"Moments where silence breaks into laughter. That's what we build for. Because one day, a kid who can’t speak will blink twice and say: 'I saw my name in the stars.' And we'll know—we built that sky."</p>
+              </div>
             </CardContent>
           </Card>
         </section>
 
         {/* Resonance Stream */}
         <section className="lg:col-span-7 flex flex-col min-h-0">
-          <Card className="bg-black/40 border-white/5 h-full flex flex-col">
+          <Card className="bg-black/40 border-white/5 h-full flex flex-col shadow-inner">
             <CardHeader className="border-b border-white/5 py-3 bg-accent/5">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
                 <span className="flex items-center gap-2"><History className="h-3 w-3 text-accent" /> Resonance Reconstruction</span>
@@ -119,32 +144,43 @@ export const AlphaVoxMoments: React.FC = () => {
                     <div className="text-[9px] font-code text-accent/60">
                       [{m.timestamp?.toDate ? new Date(m.timestamp.toDate()).toLocaleString() : '...'}]
                     </div>
-                    <Badge className="bg-accent/20 text-accent text-[8px] border-accent/30 font-bold">RESONANCE: {(m.resonance_score * 100).toFixed(0)}%</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-accent/20 text-accent text-[8px] border-accent/30 font-bold uppercase">
+                        {m.mission_status}
+                      </Badge>
+                      <Badge className="bg-blue-500/20 text-blue-400 text-[8px] border-blue-500/30 font-bold">
+                        RESONANCE: {(m.resonance_score * 100).toFixed(0)}%
+                      </Badge>
+                    </div>
                   </div>
 
                   <div className="space-y-2 relative z-10">
-                    <div className="text-xs uppercase font-code text-secondary/40">Raw Signal</div>
+                    <div className="text-xs uppercase font-code text-secondary/40 flex items-center gap-1">
+                      <Terminal className="h-2 w-2" /> Raw Signal
+                    </div>
                     <div className="text-sm font-bold text-foreground">"{m.raw_signal}"</div>
                   </div>
 
                   <div className="space-y-2 relative z-10">
-                    <div className="text-xs uppercase font-code text-accent/40">Resonance Translation</div>
-                    <div className="text-xs text-foreground/90 italic leading-relaxed border-l-2 border-accent/20 pl-4 py-1">
+                    <div className="text-xs uppercase font-code text-accent/40 flex items-center gap-1">
+                      <Star className="h-2 w-2" /> Resonance Translation
+                    </div>
+                    <div className="text-xs text-foreground/90 italic leading-relaxed border-l-2 border-accent/20 pl-4 py-1 bg-accent/5 rounded-r">
                       {m.translation}
                     </div>
                   </div>
 
                   <div className="space-y-2 relative z-10">
                     <div className="text-xs uppercase font-code text-secondary/40">Infrastructure Insight</div>
-                    <div className="text-[10px] text-secondary leading-relaxed">
+                    <div className="text-[10px] text-secondary leading-relaxed bg-black/20 p-2 rounded">
                       {m.infrastructure_insight}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 relative z-10">
+                  <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/5 relative z-10">
                     {m.deployment_log?.map((log: string, j: number) => (
                       <div key={j} className="text-[8px] font-code text-accent/40 flex items-center gap-1">
-                        <ShieldCheck className="h-2 w-2" /> {log}
+                        <CheckCircle2 className="h-2 w-2" /> {log}
                       </div>
                     ))}
                   </div>

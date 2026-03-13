@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview AlphaVox Resonance Module - Human Connection Capture.
@@ -19,6 +20,7 @@ const MomentOutputSchema = z.object({
   resonance_score: z.number(),
   infrastructure_insight: z.string(),
   deployment_log: z.array(z.string()),
+  mission_status: z.string(),
 });
 
 export async function captureMoment(input: z.infer<typeof MomentInputSchema>) {
@@ -47,14 +49,15 @@ const momentCaptureFlow = ai.defineFlow(
       "She saw her name in the code. She saw *our* names—together. Heart rate: elevated. Cheeks: flushed. Laughter: uncontainable."
       
       TASK:
-      1. Provide a dignity-preserving translation that explains the heart-connection behind the signal.
+      1. Provide a dignity-preserving translation that explains the heart-connection behind the signal. 
+         Emphasize that the user sees themselves in the system and feels seen.
       2. Calculate a resonance score (0-1).
       3. Explain how this is "Infrastructure for the Heart." Explain that the code isn't cold; it's warm and hers.
       4. Generate a deployment log including:
          - 'Moment encrypted (AES-256)'
          - 'Stored in resonance vault'
          - 'AlphaVox core warmed +0.7° (human joy detected)'
-         - 'Mission status: HEARTFULLY ACHIEVED'`,
+      5. Set mission_status to 'HEARTFULLY ACHIEVED'.`,
       output: { schema: MomentOutputSchema }
     });
 
