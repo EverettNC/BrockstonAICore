@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, use } from 'react';
 import { ChatInterface } from '@/components/ChatInterface';
 import { SecurityPanel } from '@/components/SecurityPanel';
 import { CognitiveStats } from '@/components/CognitiveStats';
@@ -49,7 +49,16 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function Home() {
+type PageProps = {
+  params: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default function Home(props: PageProps) {
+  // Unwrap Next.js 15 dynamic APIs to avoid enumeration errors
+  const _params = use(props.params);
+  const _searchParams = use(props.searchParams);
+
   const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab' | 'evolution' | 'speed'>('terminal');
 
   return (
