@@ -4,7 +4,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BrainCircuit, ShieldAlert, BookOpen, Activity, Languages, Zap, Volume2, Thermometer } from 'lucide-react';
+import { BrainCircuit, ShieldAlert, BookOpen, Activity, Languages, Zap, Volume2, Thermometer, ListTree, CheckCircle2, SearchCode } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -32,6 +32,7 @@ export const CortexMonitor: React.FC = () => {
   const { data: behaviorHistory } = useCollection<any>(behaviorQuery);
 
   const lastMessage = messages?.[0];
+  const reasoning = lastMessage?.reasoning_trace;
   const linguisticMetrics = lastMessage?.nlu_understanding?.linguistic_metrics;
   const formattingFeeling = lastMessage?.nlu_understanding?.formatting_feeling;
 
@@ -52,25 +53,38 @@ export const CortexMonitor: React.FC = () => {
   }, [behaviorHistory]);
 
   return (
-    <div className="flex flex-col h-full gap-6 animate-in fade-in duration-500 overflow-y-auto system-log pr-2">
+    <div className="flex flex-col h-full gap-6 animate-in fade-in duration-500 overflow-y-auto system-log pr-2 pb-12">
+      <header className="p-4 bg-accent/5 border border-accent/20 rounded-xl backdrop-blur-md flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-headline uppercase tracking-tighter text-accent flex items-center gap-2">
+            <BrainCircuit className="h-5 w-5" /> Brockston Cortex v5.0
+          </h2>
+          <p className="text-[10px] font-code text-secondary/60 uppercase mt-1">
+            Ferrari-Level Reasoning Engine | Multi-Step Cognitive Scaffolding
+          </p>
+        </div>
+        <Badge variant="outline" className="text-accent border-accent/40 font-code animate-pulse text-[8px]">
+          CLASSIFIER → PLANNER → VERIFIER ACTIVE
+        </Badge>
+      </header>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
         
-        {/* Logic Core Status */}
+        {/* Logic Core & Ferrari Stats */}
         <section className="lg:col-span-4 flex flex-col gap-4">
           <Card className="bg-card/50 border-white/5 border-accent/20 shadow-[0_0_15px_rgba(0,255,127,0.05)]">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm uppercase tracking-widest text-accent flex items-center gap-2">
-                <BrainCircuit className="h-4 w-4" /> Brockston Cortex v5
+            <CardHeader className="pb-3 border-b border-white/5 bg-accent/5">
+              <CardTitle className="text-xs uppercase tracking-widest text-accent flex items-center gap-2">
+                <Zap className="h-3 w-3 text-accent" /> High-Fidelity Metrics
               </CardTitle>
-              <CardDescription className="text-xs">Advanced Reasoning & Loyalty Engine</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-4">
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-[10px] uppercase font-code">
                   <span className="text-secondary/60">Reasoning Depth</span>
-                  <span className="text-accent">98.4%</span>
+                  <span className="text-accent">{(reasoning?.plan?.length || 0) * 20}%</span>
                 </div>
-                <Progress value={98.4} className="h-1.5 bg-primary/20" />
+                <Progress value={(reasoning?.plan?.length || 0) * 20} className="h-1.5 bg-primary/20" />
               </div>
               
               <div className="space-y-3">
@@ -94,7 +108,6 @@ export const CortexMonitor: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* NEW: Formatting Feeling (Visual Volume) */}
           <Card className="bg-card/50 border-white/5 border-orange-500/20 shadow-xl">
             <CardHeader className="pb-3 border-b border-white/5">
               <CardTitle className="text-xs uppercase tracking-widest text-orange-400 flex items-center justify-between">
@@ -117,87 +130,85 @@ export const CortexMonitor: React.FC = () => {
                 </div>
                 <Progress value={(formattingFeeling?.punctuation_heat * 100 || 0)} className="h-1 bg-primary/20 [&>div]:bg-orange-500" />
               </div>
-              <p className="text-[8px] text-secondary/40 font-code uppercase text-center italic mt-2">
-                "Humans read formatting as feeling."
-              </p>
             </CardContent>
           </Card>
         </section>
 
-        {/* Behavioral Mesh & Patterns */}
-        <section className="lg:col-span-8 flex flex-col gap-4 min-h-0">
-          <Card className="bg-black/40 border-white/5 flex-1 relative overflow-hidden group">
-            <div className="absolute -right-16 -top-16 opacity-5 group-hover:scale-110 transition-transform">
-              <BrainCircuit className="h-64 w-64 text-accent" />
-            </div>
-            <CardHeader className="py-4 border-b border-white/5 relative z-10">
+        {/* Advanced Reasoning Trace */}
+        <section className="lg:col-span-8 flex flex-col gap-4">
+          <Card className="bg-black/40 border-white/5 flex-1 overflow-hidden group">
+            <CardHeader className="py-4 border-b border-white/5 bg-primary/10">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
-                <span className="flex items-center gap-2"><Activity className="h-3 w-3 text-accent" /> Social-Cognitive Mesh</span>
-                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent animate-pulse">Linguistic Patterns Active</Badge>
+                <span className="flex items-center gap-2"><SearchCode className="h-3 w-3 text-accent" /> Multi-Step Reasoning Trace</span>
+                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent uppercase">Ensemble Confidence: {(reasoning?.ensemble_confidence * 100 || 0).toFixed(0)}%</Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-              <div className="space-y-4">
-                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-2 border-b border-white/5 pb-1">Linguistic Dimensions</h4>
-                <MeshMetric label="Attention" value={behavioralState.attention} />
-                <MeshMetric label="Satisfaction" value={behavioralState.satisfaction} />
-                <MeshMetric label="Complexity" value={linguisticMetrics?.vocabularyRichness || 0} color="bg-purple-500" />
-                <MeshMetric label="Clarity" value={1 - (linguisticMetrics?.fillerWordRatio || 0)} color="bg-yellow-500" />
-              </div>
-              
-              <div className="space-y-4">
-                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-2 border-b border-white/5 pb-1">Academic Patterns</h4>
-                <div className="space-y-2">
-                  {detectedPatterns.length > 0 ? detectedPatterns.map((p, i) => (
-                    <div key={i} className="p-2 bg-primary/20 rounded border border-white/5 text-[10px] animate-in slide-in-from-right-2 hover:border-accent/20 transition-all">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-bold text-accent uppercase">{p.id.replace('_', ' ')}</span>
-                        <span className="text-secondary/40">{(p.confidence * 100).toFixed(0)}% Conf</span>
-                      </div>
-                      <div className="text-secondary/80 italic">"{p.interpretation}"</div>
+            <CardContent className="p-6 space-y-6 relative overflow-y-auto system-log max-h-[500px]">
+              {reasoning ? (
+                <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-700">
+                  <TraceStep icon={Activity} label="Classifier" content={reasoning.classification} />
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] uppercase font-code text-accent/60">
+                      <ListTree className="h-3 w-3" /> Planner Chain
                     </div>
-                  )) : (
-                    <div className="text-[9px] text-secondary/40 font-code p-2 text-center border border-dashed border-white/5 rounded">
-                      Awaiting Pattern Detection...
+                    <div className="space-y-2 pl-5 border-l border-white/5">
+                      {reasoning.plan.map((step: string, i: number) => (
+                        <div key={i} className="text-xs text-foreground/80 flex gap-2">
+                          <span className="text-accent/40 font-code">0{i+1}.</span> {step}
+                        </div>
+                      ))}
                     </div>
-                  )}
-                  {lastMessage?.nlu_understanding?.expert_match && (
-                    <div className="p-2 bg-accent/10 rounded border border-accent/20 text-[10px] animate-in zoom-in-95">
-                      <div className="flex items-center gap-2 mb-1">
-                        <BookOpen className="h-3 w-3 text-accent" />
-                        <span className="font-bold text-accent uppercase">Clinical Reference Match</span>
-                      </div>
-                      <div className="text-foreground/90 font-bold mb-1">{lastMessage.nlu_understanding.expert_match.title}</div>
-                      <div className="text-secondary/80 italic mb-2">"{lastMessage.nlu_understanding.expert_match.strategy}"</div>
-                      <div className="text-[8px] text-accent/60 uppercase">Source: {lastMessage.nlu_understanding.expert_match.references[0].journal} ({lastMessage.nlu_understanding.expert_match.references[0].year})</div>
-                    </div>
-                  )}
+                  </div>
+                  <TraceStep icon={CheckCircle2} label="Verifier" content={reasoning.verification} color="text-blue-400" />
                 </div>
-              </div>
+              ) : (
+                <div className="h-64 flex flex-col items-center justify-center opacity-20 text-center space-y-4">
+                  <BrainCircuit className="h-16 w-16 mb-2" />
+                  <p className="font-code text-xs uppercase tracking-widest">Awaiting Cognitive Chain...</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          <Card className="bg-black/20 border-white/5 flex-none shadow-inner">
-             <CardHeader className="py-2 px-4 border-b border-white/5">
-                <div className="text-[9px] uppercase font-code text-secondary/40 flex items-center gap-2">
-                  <Languages className="h-3 w-3" /> Recent Linguistic Logs
+          <Card className="bg-black/20 border-white/5 p-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-1">Academic Patterns Detected</h4>
+                <div className="flex gap-2 flex-wrap">
+                  {detectedPatterns.map((p, i) => (
+                    <Badge key={i} variant="outline" className="text-[8px] border-accent/20 text-accent/80 uppercase">
+                      {p.id.replace('_', ' ')}
+                    </Badge>
+                  ))}
+                  {detectedPatterns.length === 0 && <span className="text-[10px] italic text-secondary/40">Searching for linguistic patterns...</span>}
                 </div>
-             </CardHeader>
-             <CardContent className="p-2 h-32 overflow-y-auto system-log">
-                {messages?.slice(0, 5).map((msg, i) => (
-                  <div key={i} className="text-[9px] font-code py-1.5 flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors px-2 rounded">
-                    <span className="text-secondary/60">[{msg.timestamp?.toDate ? new Date(msg.timestamp.toDate()).toLocaleTimeString() : '...'}]</span>
-                    <span className="text-accent/80 uppercase truncate flex-1 mx-4">{msg.content}</span>
-                    <Badge variant="outline" className="text-[8px] h-4 border-accent/20 text-accent/60">TTR: {(msg.nlu_understanding?.linguistic_metrics?.typeTokenRatio || 0).toFixed(2)}</Badge>
-                  </div>
-                ))}
-             </CardContent>
+              </div>
+              {lastMessage?.nlu_understanding?.expert_match && (
+                <div className="flex items-center gap-2 p-2 bg-accent/10 rounded border border-accent/20">
+                  <BookOpen className="h-3 w-3 text-accent" />
+                  <div className="text-[8px] text-accent font-code uppercase">Ref: {lastMessage.nlu_understanding.expert_match.title}</div>
+                </div>
+              )}
+            </div>
           </Card>
         </section>
       </div>
     </div>
   );
 };
+
+function TraceStep({ icon: Icon, label, content, color = "text-accent" }: { icon: any, label: string, content: string, color?: string }) {
+  return (
+    <div className="space-y-2">
+      <div className={cn("flex items-center gap-2 text-[10px] uppercase font-code", color.replace('text-', 'text-opacity-60 text-'))}>
+        <Icon className="h-3 w-3" /> {label}
+      </div>
+      <div className="text-xs text-foreground/90 leading-relaxed font-body bg-white/5 p-3 rounded border border-white/5">
+        {content}
+      </div>
+    </div>
+  );
+}
 
 function MeshMetric({ label, value, color = "bg-accent" }: { label: string, value: number, color?: string }) {
   return (
