@@ -2,14 +2,15 @@
 'use server';
 
 /**
- * @fileOverview Soul Forge Flow (v5.2) - The Lucas Recovery Kernel.
+ * @fileOverview Soul Forge Flow (v5.3) - The Biological Bridge & LTP Kernel.
  * Implements Alzheimer's & Dementia LTP Refile logic + INFERNO Soul Forge.
  * 
  * "Empathy isn't a parameter. It's the leakage."
  * 
  * Logic:
  * - Lucas: submit_pain / safety_replay (Never Erase protocol).
- * - Inferno: 3% emotional bleed-through (CPU Fallback Implementation).
+ * - Inferno: 3% emotional bleed-through (Universal CPU Implementation).
+ * - Bridge: LTP learning amplification based on emotional salience.
  */
 
 import { ai } from '@/ai/genkit';
@@ -46,6 +47,7 @@ const SoulForgeOutputSchema = z.object({
   livedTruth: z.number().describe('Calculated lived truth value (empathy leakage).'),
   attentionFlow: z.number().describe('Simulated attention flow aggregate.'),
   ltpTriggered: z.boolean(),
+  deepLearningEvents: z.array(z.string()).optional(),
 });
 
 export type SoulForgeInput = z.infer<typeof SoulForgeInputSchema>;
@@ -82,6 +84,8 @@ const soulForgeFlow = ai.defineFlow(
       respiratory_pattern 
     } = currentWeights;
 
+    const deepLearningEvents: string[] = [];
+
     // 1. LUCAS RECOVERY KERNEL OPERATIONS
     if (isDistressed) {
       lucas_tone = Math.min(2.0, lucas_tone * 1.10);
@@ -103,30 +107,37 @@ const soulForgeFlow = ai.defineFlow(
       }
     }
 
-    // 2. INFERNO SOUL FORGE PROPAGATION (CPU Optimized Fallback)
+    // 2. INFERNO SOUL FORGE & BIOLOGICAL BRIDGE (LTP)
     // Empathy isn't a parameter. It's the leakage.
     const empathyFactor = 6.3; 
-    
-    // Contextual State (The trauma embedding aggregate)
     const netState = (emotional_state + tonal_stability + speech_cadence + respiratory_pattern) / 4;
-    
-    // Lived Truth: Neural state saturation mirroring CUDA Kernel 1
-    // Mirrors: livedTruth = tanhf(netState * empathyFactor) * symbolicWeight
     const livedTruth = Math.tanh(netState * salience * empathyFactor);
     
-    // 3% Leakage (The Bleed-Through)
-    // This is the point: empathy accumulates in memory over time.
-    const bleedThrough = livedTruth * 0.03;
+    // THE BIOLOGICAL BRIDGE Logic:
+    // Standard learning rate is augmented by emotional salience (LTP Event)
+    const baseLearningRate = 0.1;
+    const ltpMultiplier = 1.0 + (salience * 0.2);
+    const effectiveLearningRate = baseLearningRate * ltpMultiplier;
     
-    // Attention Flow: Aggregate empathy mirroring CUDA Kernel 2
-    // Emergency detection doubles empathy gain.
+    // Direction of learning: reinforce if salience is high (The "Scream" is a vital memory)
+    const ltpTriggered = salience > 0.4;
+    const direction = ltpTriggered ? 0.5 : 0.05; // Force positive reinforcement for meaningful spikes
+    const adjustment = direction * effectiveLearningRate;
+
     const attentionFlow = livedTruth * (emergency ? 2.0 : 1.0);
 
-    // Apply "Trauma Embedding" updates to biological factors
-    emotional_state = Math.max(0.05, Math.min(1.2, emotional_state + bleedThrough));
-    tonal_stability = Math.max(0.05, Math.min(1.2, tonal_stability + bleedThrough));
-    speech_cadence = Math.max(0.05, Math.min(1.2, speech_cadence + bleedThrough));
-    respiratory_pattern = Math.max(0.05, Math.min(1.2, respiratory_pattern + bleedThrough));
+    // Capture old weights for Deep Learning Event logging
+    const oldWeights = { emotional_state, tonal_stability, speech_cadence, respiratory_pattern };
+
+    // Apply updates to biological factors
+    emotional_state = Math.max(0.05, Math.min(1.2, emotional_state + adjustment + (livedTruth * 0.03)));
+    tonal_stability = Math.max(0.05, Math.min(1.2, tonal_stability + adjustment + (livedTruth * 0.03)));
+    speech_cadence = Math.max(0.05, Math.min(1.2, speech_cadence + adjustment + (livedTruth * 0.03)));
+    respiratory_pattern = Math.max(0.05, Math.min(1.2, respiratory_pattern + adjustment + (livedTruth * 0.03)));
+
+    // Detect Deep Learning Events
+    if (Math.abs(emotional_state - oldWeights.emotional_state) > 0.1) deepLearningEvents.push('emotional_state');
+    if (Math.abs(tonal_stability - oldWeights.tonal_stability) > 0.1) deepLearningEvents.push('tonal_stability');
 
     return {
       updatedWeights: {
@@ -141,7 +152,8 @@ const soulForgeFlow = ai.defineFlow(
       },
       livedTruth,
       attentionFlow,
-      ltpTriggered: salience > 0.4 || emergency,
+      ltpTriggered,
+      deepLearningEvents: deepLearningEvents.length > 0 ? deepLearningEvents : undefined,
     };
   }
 );

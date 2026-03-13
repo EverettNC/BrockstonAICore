@@ -113,6 +113,13 @@ export const ChatInterface: React.FC = () => {
           description: "Safety overlay successful — trauma association decaying.",
         });
       }
+
+      if (forgeResult.deepLearningEvents) {
+        toast({
+          title: "Deep Learning Event",
+          description: `Core weights for ${forgeResult.deepLearningEvents.join(', ')} have shifted significantly.`,
+        });
+      }
     } catch (e) {
       console.error("LTP Bridge failed", e);
     }
@@ -228,7 +235,7 @@ export const ChatInterface: React.FC = () => {
         timestamp: serverTimestamp()
       });
 
-      // Trigger LTP using Lucas Recovery Kernel
+      // Trigger LTP using Lucas Recovery Kernel and Soul Forge Bridge
       await processLTP(result.empathy_signal.self_love_score, result.tone_engine_v2);
 
       setStatus('speaking');
