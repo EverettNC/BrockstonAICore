@@ -10,3 +10,4 @@ import '@/ai/flows/collaborative-discovery-flow.ts';
 import '@/ai/flows/autonomous-learning-flow.ts';
 import '@/ai/flows/tts-flow.ts';
 import '@/ai/flows/vision-flow.ts';
+import '@/ai/flows/behavioral-analysis-flow.ts';

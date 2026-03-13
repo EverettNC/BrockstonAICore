@@ -9,8 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { BehaviorType } from '@/lib/behavioral-interpreter';
 
 export const VisionFeed: React.FC = () => {
+  const db = useFirestore();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -51,6 +55,20 @@ export const VisionFeed: React.FC = () => {
 
       const result = await analyzeVision({ photoDataUri: dataUri });
       setAnalysis(result);
+
+      // Map vision results to behavioral observations
+      let behaviorType: BehaviorType = "unknown";
+      if (result.posture_analysis.toLowerCase().includes('stress')) behaviorType = "gesture:stimming";
+      if (result.emotion_detected.toLowerCase().includes('happy')) behaviorType = "symbol:happy";
+      if (result.emotion_detected.toLowerCase().includes('sad')) behaviorType = "symbol:sad";
+
+      addDoc(collection(db, 'behavioral_history'), {
+        type: behaviorType,
+        intensity: 0.7,
+        context: { source: 'vision', scene: result.description },
+        timestamp: new Date().toISOString()
+      }).catch(err => console.error("Behavior logging failed", err));
+
     } catch (err) {
       console.error(err);
     } finally {

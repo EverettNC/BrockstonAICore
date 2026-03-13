@@ -96,6 +96,18 @@
         "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
         "timestamp": { "type": "string", "format": "date-time" }
       }
+    },
+    "BehavioralObservation": {
+      "title": "Behavioral Observation",
+      "description": "A single behavioral pattern recorded by vision or interaction.",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "intensity": { "type": "number" },
+        "emotional_indicators": { "type": "object" },
+        "context": { "type": "object" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
@@ -121,6 +133,10 @@
     "/proactive_insights/{insightId}": {
       "schema": "#/entities/ProactiveInsight",
       "description": "System observations and pattern detection logs."
+    },
+    "/behavioral_history/{obsId}": {
+      "schema": "#/entities/BehavioralObservation",
+      "description": "Historical behavioral log for trend analysis."
     }
   }
 }

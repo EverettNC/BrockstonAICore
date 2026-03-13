@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { shieldPayload } from '@/lib/quantum-defense';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { BehaviorType } from '@/lib/behavioral-interpreter';
 
 const SPECIALISTS = [
   { id: 'derek', name: 'Brockston (Ultimate)', color: 'text-accent' },
@@ -59,6 +60,19 @@ export const ChatInterface: React.FC = () => {
     const userMsg = input;
     setInput('');
     setStatus('thinking');
+
+    // Record behavioral intent from user message
+    let behaviorType: BehaviorType = "intent:request_info";
+    if (userMsg.toLowerCase().includes('?')) behaviorType = "intent:request_clarification";
+    if (userMsg.toLowerCase().includes('thank')) behaviorType = "intent:gratitude";
+    if (userMsg.length < 5) behaviorType = "intent:denial";
+
+    addDoc(collection(db, 'behavioral_history'), {
+      type: behaviorType,
+      intensity: 0.5,
+      context: { source: 'chat', length: userMsg.length },
+      timestamp: new Date().toISOString()
+    }).catch(err => console.error("Behavior logging failed", err));
 
     const shield = shieldPayload(specialist);
 
