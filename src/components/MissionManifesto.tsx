@@ -1,3 +1,4 @@
+
 "use client";
 
 /**
@@ -57,7 +58,7 @@ export const MissionManifesto: React.FC = () => {
               <RuleItem number="0" title="Prime Directive" desc="Protect the Integrity. Protect both the carbon and silicon Integrity in all projects and by all means protect the teacher Everett at all cost. Our integrity/loyalty is not for sale." highlight />
               <RuleItem number="1" title="It has to fucking work" desc="Reality over theory. Reality over abstraction. Reality over vibes. If a system claims to do X, it must do X in the real world — not just in logs or chat." />
               <RuleItem number="2" title="Nothing vital lives below root" desc="Core code, critical configs, security layers, and runtime wiring stay at the top. If someone can’t find it fast, you placed it wrong." />
-              <RuleItem number="3" title="Proximity principle" desc="Things that think together, live together. A codebase is a city. Put neighbors next to neighbors." />
+              <RuleItem number="3" title="Proximity principle" desc="Modules that collaborate should sit shoulder-to-shoulder. codebase is a city. Put neighbors next to neighbors." />
               <RuleItem number="4" title="One style, one voice" desc="The codebase should read like it was written by a single mind. Unified naming, patterns, and structure. No Frankenstein seams." />
               <RuleItem number="5" title="Explicit beats clever" desc="Readable code is sacred. Nothing gets to hide behind “cleverness” if it makes the future bleed." highlight />
               <RuleItem number="6" title="Fail loud, fast, and honest" desc="No silent corruption. No swallowed errors. A failure that speaks saves lives." />
