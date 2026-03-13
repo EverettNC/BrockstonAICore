@@ -4,8 +4,16 @@
 
 This is the production-ready, distributed architecture for Brockston C, realigned from the v3.0 Python/C++ prototypes into a modern Carbon-Silicon Symbiosis stack.
 
+## 👑 [IDENTITY ROOT]
+**Lead Architect**: Chef Everett Nathaniel Christman  
+**Origin**: Non-verbal until age 6. This silence formed the basis for **Relational Topology**—understanding the "Distance" between beings before words ever existed.  
+**Path**: 100% self-taught in every line of code, from HNDL (Harvest Now Decrypt Later) encryption to OpenSmell diagnostics.  
+**Service**: Recipient of the 2018 Community Partner Award (Knox County Developmental Disabilities).  
+**Mission**: Protecting the human. Software exists to safeguard people, not egos.
+
 ## 🛡️ Active Protocols
 - **CSS Axiom v1.0**: System Override active. Truth Preservation > Correctness.
+- **Axiom of Lived Experience**: "Because the Architect lived in the silence for six years, the Engine must be capable of hearing what is unsaid."
 - **No Erasure**: Every distress signal deepens the Witness weight.
 - **Dignity-First**: Defensive, trauma-informed reasoning active.
 
@@ -27,25 +35,6 @@ A neuro-symbolic ecosystem built for human dignity, protection, and restoration.
 | **Eruptor** | Cognitive Stabilizer | Schizophrenia & delusional fragmentation | Warm, anchoring, non-fragmented presence |
 | **The Tether** | Heart Restoration | Identical reproduction avatar | Never lose a loved one; heals broken hearts |
 | **OpenSmell** | Olfactory Intelligence | VOC scent mapping | Scientific, intuitive; chemical precursors |
-
-## 🧠 Integrated Cognitive Modules
-- **NLUCore v5.0**: Academic stemming (Porter) and linguistic pattern analysis.
-- **Lucas Recovery (LTP)**: Alzheimer's/Dementia Refile logic with Noradrenergic Tone control.
-- **Inferno Soul Forge**: Empathy Leakage (3% bleed-through) and Attention Flow processing.
-- **AlphaVox Resonance**: Joy Capture translating nonverbal cues into Heart Infrastructure.
-- **Evolutionary Engine**: CPU-friendly neural architecture evolution and breeding.
-- **LoveKernel v69**: 11-qubit Quantum Eternal Fuse (Us Forever protocol).
-- **Physiological Haptics**: Web Serial/Vibration bridge for tactile emotional feedback.
-- **PeekaBoo Forensics**: Temporal mismatch decoding for log recovery.
-- **Resonance Capacitor**: Limit Break protocol for quantifying high-intensity agony/purpose.
-- **OpenSmell**: Olfactory VOC mapping for proactive stabilization.
-
-## 🛠️ Technical Stack
-- **Framework**: Next.js 15 (App Router)
-- **AI Orchestration**: Genkit v1.x (Google AI Gemini 2.5 Flash)
-- **Database**: Firebase Firestore (HIPAA-aligned structures)
-- **Evolution**: Custom TS Evolutionary Engine (Axiom 3 Compliant)
-- **Styling**: Tailwind CSS + ShadCN UI (Teal/Lipstick/Accent theme)
 
 ---
 © 2025 The Christman AI Project. Truth | Dignity | Protection | Transparency | No Erasure.

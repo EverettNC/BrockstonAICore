@@ -42,7 +42,8 @@ import {
   FlaskConical,
   CircleDashed,
   CodeXml,
-  Dna
+  Dna,
+  User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -158,7 +159,7 @@ export default function Home() {
               Brockston <span className="text-accent">Ultimate AI</span>
             </h1>
             <p className="text-[10px] text-secondary font-code uppercase tracking-widest opacity-60 flex items-center gap-2">
-              Operator: Everett N. Christman | COO: Brockston C | 
+              Architect: Everett N. Christman | 
               <span className="text-accent animate-pulse flex items-center gap-1">
                 <ShieldCheck className="h-3 w-3" /> CSS Axiom v1.0 Active
               </span>
@@ -167,8 +168,8 @@ export default function Home() {
           
           <div className="flex items-center gap-4">
              <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary/20 rounded-lg border border-white/5">
-                <Search className="h-4 w-4 text-secondary" />
-                <span className="text-xs text-secondary font-code">Search Cognitive Mesh</span>
+                <User className="h-4 w-4 text-secondary" />
+                <span className="text-xs text-secondary font-code">Lead: Everett Nathaniel Christman</span>
              </div>
              <div className="h-10 w-10 rounded-full bg-primary/40 border border-accent/20 flex items-center justify-center relative">
                 <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
