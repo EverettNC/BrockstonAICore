@@ -17,7 +17,7 @@
         },
         "type": {
           "type": "string",
-          "enum": ["standard", "knowledge"],
+          "enum": ["standard", "knowledge", "quantum"],
           "description": "The type of response generated."
         },
         "timestamp": {
@@ -28,24 +28,26 @@
       },
       "required": ["role", "content", "timestamp"]
     },
+    "QuantumTrace": {
+      "title": "Quantum Trace",
+      "description": "Metrics from a symbol-to-speech quantum fusion event.",
+      "type": "object",
+      "properties": {
+        "top_state": { "type": "string" },
+        "fusion_prob": { "type": "number" },
+        "qubit_count": { "type": "integer" },
+        "valence_arc": { "type": "number" },
+        "decoherence_dip": { "type": "number" }
+      }
+    },
     "SystemLog": {
       "title": "System Log",
       "description": "A security or operational event log.",
       "type": "object",
       "properties": {
-        "event": {
-          "type": "string",
-          "description": "The description of the event."
-        },
-        "timestamp": {
-          "type": "string",
-          "format": "date-time",
-          "description": "When the event occurred."
-        },
-        "severity": {
-          "type": "string",
-          "enum": ["info", "warning", "critical"]
-        }
+        "event": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "severity": { "type": "string", "enum": ["info", "warning", "critical"] }
       },
       "required": ["event", "timestamp"]
     }
