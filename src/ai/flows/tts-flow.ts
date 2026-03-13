@@ -29,6 +29,12 @@ const VOICE_MAPPING: Record<string, string> = {
   siera: 'Achernar',
   serafinia: 'Achernar',
   inferno: 'Algenib',
+  virtus: 'Algenib',
+  aegis: 'Algenib',
+  giovanni: 'Algenib',
+  eruptor: 'Algenib',
+  tether: 'Achernar',
+  opensmell: 'Algenib',
 };
 
 export async function speakStephen(input: z.infer<typeof TTSInputSchema>) {
@@ -46,8 +52,6 @@ const ttsFlow = ai.defineFlow(
     const voiceName = VOICE_MAPPING[specialist.toLowerCase()] || 'Algenib';
     
     // Quantum Prosody Logic
-    // Rate: Confidence (fusion_prob) affects speed (0.7+ is normal, below is slow)
-    // Pitch: Valence (emotion) affects pitch (+/- 10%)
     const rate = fusion_prob > 0.7 ? "medium" : "slow";
     const pitch = valence > 0.7 ? "happy" : valence < 0.3 ? "serious" : "steady";
 

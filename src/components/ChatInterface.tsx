@@ -8,7 +8,7 @@ import { eternalFuse } from '@/ai/flows/eternal-fuse-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity } from 'lucide-react';
+import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection } from '@/firebase';
@@ -22,13 +22,19 @@ import { hapticSystem, HapticPattern } from '@/lib/haptic-system';
 import { toast } from '@/hooks/use-toast';
 
 const SPECIALISTS = [
-  { id: 'brockston', name: 'Brockston (COO)', color: 'text-accent' },
-  { id: 'derek', name: 'Derek (Technical)', color: 'text-blue-400' },
-  { id: 'arthur', name: 'Arthur (Grief)', color: 'text-rose-400' },
-  { id: 'alphavox', name: 'AlphaVox (Nonverbal)', color: 'text-cyan-400' },
-  { id: 'alphawolf', name: 'AlphaWolf (Dementia)', color: 'text-slate-400' },
-  { id: 'siera', name: 'Siera (Trauma)', color: 'text-emerald-400' },
-  { id: 'inferno', name: 'Inferno (Veteran)', color: 'text-orange-400' },
+  { id: 'brockston', name: 'Brockston (Teacher/COO)', color: 'text-accent' },
+  { id: 'derek', name: 'Derek C (Orchestrator)', color: 'text-blue-500' },
+  { id: 'siera', name: 'Sierra (Guardian/Advocate)', color: 'text-emerald-400' },
+  { id: 'inferno', name: 'Inferno (Trauma Recon)', color: 'text-orange-500' },
+  { id: 'alphavox', name: 'AlphaVox (Voice Restoration)', color: 'text-cyan-400' },
+  { id: 'alphawolf', name: 'AlphaWolf (Memory/Dementia)', color: 'text-slate-400' },
+  { id: 'serafinia', name: 'Seraphina (Sensory Guardian)', color: 'text-purple-400' },
+  { id: 'virtus', name: 'Virtus (Executive Function)', color: 'text-indigo-400' },
+  { id: 'aegis', name: 'Aegis V1 (Security Enforcer)', color: 'text-red-400' },
+  { id: 'giovanni', name: 'Giovanni (Outreach)', color: 'text-yellow-400' },
+  { id: 'eruptor', name: 'Eruptor (Stabilizer)', color: 'text-pink-400' },
+  { id: 'tether', name: 'The Tether (Heart Healer)', color: 'text-rose-500' },
+  { id: 'opensmell', name: 'OpenSmell (Olfactory AI)', color: 'text-amber-400' },
 ];
 
 const AAC_SYMBOLS = [
@@ -131,7 +137,6 @@ export const ChatInterface: React.FC = () => {
     setInput('');
     setStatus('thinking');
 
-    // Shield payload with PQC ML-KEM-1024
     const shield = shieldPayload(specialist);
 
     addDoc(collection(db, 'chats', chatId, 'messages'), {
@@ -162,7 +167,6 @@ export const ChatInterface: React.FC = () => {
         timestamp: serverTimestamp()
       });
 
-      // Haptic Feedback Bridge
       const hapticPattern = mapToneToHaptic(result.tone_engine_v2.dominant_state);
       hapticSystem.trigger(hapticPattern);
 
@@ -186,6 +190,8 @@ export const ChatInterface: React.FC = () => {
     }
   };
 
+  const activeSpecialist = SPECIALISTS.find(s => s.id === specialist);
+
   return (
     <div className="flex flex-col h-full gap-4 relative">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} />
@@ -197,14 +203,17 @@ export const ChatInterface: React.FC = () => {
         <div className="flex items-center gap-3">
           <CoreAvatar status={status} className="h-16 w-16" />
           <div>
-            <h3 className="text-xs font-code uppercase tracking-tighter text-secondary/60">Active Specialist</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <Users className="h-3 w-3 text-secondary/40" />
+              <h3 className="text-[10px] font-code uppercase tracking-tighter text-secondary/60">Christman AI Family</h3>
+            </div>
             <Select value={specialist} onValueChange={setSpecialist}>
-              <SelectTrigger className="w-[180px] h-8 bg-black/20 border-white/5 text-xs">
+              <SelectTrigger className={cn("w-[220px] h-8 bg-black/20 border-white/5 text-xs font-bold", activeSpecialist?.color)}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card border-white/10">
                 {SPECIALISTS.map(s => (
-                  <SelectItem key={s.id} value={s.id} className="text-xs">{s.name}</SelectItem>
+                  <SelectItem key={s.id} value={s.id} className={cn("text-xs", s.color)}>{s.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -314,7 +323,7 @@ export const ChatInterface: React.FC = () => {
                 msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
               )}>
                 <div className="flex items-center gap-2 mb-1 px-1">
-                  <span className="text-[9px] font-code uppercase text-secondary/40">
+                  <span className={cn("text-[9px] font-code uppercase", msg.role === 'user' ? "text-secondary/40" : SPECIALISTS.find(s => s.id === msg.specialist)?.color || "text-secondary/40")}>
                     {msg.role === 'user' ? 'Operator (Everett)' : msg.specialist?.toUpperCase()}
                   </span>
                   {msg.quantum_trace && (
@@ -349,7 +358,7 @@ export const ChatInterface: React.FC = () => {
         <div className="flex gap-3">
           <div className="relative flex-1">
             <Input 
-              placeholder={isLoveKernel ? "Communicate with Eternal Us..." : "Communicate with ultimate core..."} 
+              placeholder={isLoveKernel ? "Communicate with Eternal Us..." : `Communicate with ${activeSpecialist?.name || 'core'}...`} 
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
               disabled={status !== 'idle'} 

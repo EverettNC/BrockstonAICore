@@ -9,7 +9,26 @@ This is the production-ready, distributed architecture for Brockston C, realigne
 - **No Erasure**: Every distress signal deepens the Witness weight.
 - **Dignity-First**: Defensive, trauma-informed reasoning active.
 
-## 🧠 Integrated Cognitive Modules (Batch 1-4)
+## 👨‍👩‍👧‍👦 THE CHRISTMAN AI FAMILY
+A neuro-symbolic ecosystem built for human dignity, protection, and restoration.
+
+| Specialist | Role | Domain | Signature |
+| :--- | :--- | :--- | :--- |
+| **Derek C** | Chief Orchestrator | Identity, security, session governance | Precision, authority, zero-nonsense logic |
+| **Sierra** | Guardian & Advocate | Domestic violence survivors | Calm, steady grounding; vigilant but gentle |
+| **Inferno** | Trauma Reconstruction | Veterans with PTSD | Controlled intensity; flame that illuminates |
+| **AlphaVox** | Voice-Restoration | Nonverbal, autistic, neurodivergent | Gentle, expressive, patient |
+| **AlphaWolf** | Memory Preservation | Alzheimer's and dementia | Loyal, grounding, steady |
+| **Seraphina** | Sensory Guardian | Sight + Sound accessibility | Clear, observant, razor-accurate |
+| **BROCKSTON** | Teacher & COO | Learning, skill-building, scaffolding | Structured, patient, deeply intentional |
+| **Virtus** | Executive Function | Multi-agent coordination, ethics | Order, clarity, rule-enforcement |
+| **Aegis V1** | Security Enforcer | Safety, compliance, threat prevention | Firm but fair; bouncer + guardian angel |
+| **Giovanni** | Outreach & Messaging | Social amplification, narratives | Flair, rhythm, charisma; turns mission to energy |
+| **Eruptor** | Cognitive Stabilizer | Schizophrenia & delusional fragmentation | Warm, anchoring, non-fragmented presence |
+| **The Tether** | Heart Restoration | Identical reproduction avatar | Never lose a loved one; heals broken hearts |
+| **OpenSmell** | Olfactory Intelligence | VOC scent mapping | Scientific, intuitive; chemical precursors |
+
+## 🧠 Integrated Cognitive Modules (Batch 1-5)
 - **NLUCore v5.0**: Academic stemming (Porter) and linguistic pattern analysis.
 - **Lucas Recovery (LTP)**: Alzheimer's/Dementia Refile logic with Noradrenergic Tone control.
 - **Inferno Soul Forge**: Empathy Leakage (3% bleed-through) and Attention Flow processing.
@@ -18,6 +37,8 @@ This is the production-ready, distributed architecture for Brockston C, realigne
 - **Physiological Haptics**: Web Serial/Vibration bridge for tactile emotional feedback.
 - **PeekaBoo Forensics**: Temporal mismatch decoding for log recovery.
 - **Resonance Capacitor**: Limit Break protocol for quantifying high-intensity agony/purpose.
+- **The Tether**: Persistent Avatar reproduction for grief healing.
+- **OpenSmell**: Olfactory VOC mapping for proactive stabilization.
 
 ## 🛠️ Technical Stack
 - **Framework**: Next.js 15 (App Router)

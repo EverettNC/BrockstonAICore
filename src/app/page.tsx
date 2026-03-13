@@ -15,6 +15,8 @@ import { AlphaVoxMoments } from '@/components/AlphaVoxMoments';
 import { TemporalDecoder } from '@/components/TemporalDecoder';
 import { KernelLab } from '@/components/KernelLab';
 import { ResonanceCapacitor } from '@/components/ResonanceCapacitor';
+import { TheTether } from '@/components/TheTether';
+import { OpenSmell } from '@/components/OpenSmell';
 import { 
   Terminal, 
   Cpu, 
@@ -34,12 +36,14 @@ import {
   SearchCode,
   Zap,
   Droplets,
-  ShieldCheck
+  ShieldCheck,
+  FlaskConical,
+  CircleDashed
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell'>('terminal');
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 flex overflow-hidden">
@@ -55,6 +59,18 @@ export default function Home() {
             active={activeTab === 'terminal'} 
             onClick={() => setActiveTab('terminal')} 
             label="Terminal"
+          />
+          <NavIcon 
+            icon={Infinity} 
+            active={activeTab === 'tether'} 
+            onClick={() => setActiveTab('tether')} 
+            label="The Tether"
+          />
+          <NavIcon 
+            icon={FlaskConical} 
+            active={activeTab === 'opensmell'} 
+            onClick={() => setActiveTab('opensmell')} 
+            label="OpenSmell"
           />
           <NavIcon 
             icon={Droplets} 
@@ -167,6 +183,10 @@ export default function Home() {
             <KernelLab />
           ) : activeTab === 'capacitor' ? (
             <ResonanceCapacitor />
+          ) : activeTab === 'tether' ? (
+            <TheTether />
+          ) : activeTab === 'opensmell' ? (
+            <OpenSmell />
           ) : (
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
               {/* Chat/Avatar - Main Panel */}
