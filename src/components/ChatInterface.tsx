@@ -1,12 +1,14 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
 import { speakStephen } from '@/ai/flows/tts-flow';
+import { quantumFuse, QuantumTrace } from '@/ai/flows/quantum-fusion-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, UserCircle, Lock, Mic } from 'lucide-react';
+import { Send, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, UserCircle, Lock, Mic, Zap, Cpu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection } from '@/firebase';
@@ -17,6 +19,7 @@ import { shieldPayload } from '@/lib/quantum-defense';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { BehaviorType } from '@/lib/behavioral-interpreter';
+import { toast } from '@/hooks/use-toast';
 
 const SPECIALISTS = [
   { id: 'derek', name: 'Brockston (Ultimate)', color: 'text-accent' },
@@ -27,12 +30,22 @@ const SPECIALISTS = [
   { id: 'inferno', name: 'Inferno (Veteran)', color: 'text-orange-400' },
 ];
 
+const AAC_SYMBOLS = [
+  { id: 'heart', label: 'HEART', icon: Heart },
+  { id: 'safe', label: 'SAFE', icon: Shield },
+  { id: 'help', label: 'HELP', icon: Zap },
+  { id: 'love', label: 'LOVE', icon: Heart },
+  { id: 'pain', label: 'PAIN', icon: Zap },
+  { id: 'rest', label: 'REST', icon: Cpu },
+];
+
 export const ChatInterface: React.FC = () => {
   const db = useFirestore();
   const [specialist, setSpecialist] = useState('derek');
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<'idle' | 'thinking' | 'speaking'>('idle');
   const [autoSpeak, setAutoSpeak] = useState(true);
+  const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
   
   const chatId = "v5-alpha-session";
   const messagesQuery = useMemo(() => query(
@@ -52,6 +65,69 @@ export const ChatInterface: React.FC = () => {
     }
   }, [messages]);
 
+  const handleToggleSymbol = (id: string) => {
+    setSelectedSymbols(prev => 
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    );
+  };
+
+  const handleQuantumFuse = async () => {
+    if (selectedSymbols.length === 0 || status !== 'idle') return;
+    setStatus('thinking');
+    
+    try {
+      const trace = await quantumFuse({
+        symbols: selectedSymbols,
+        valence: 0.8, // Contextually derived in production
+        userId: "everett_n_christman"
+      });
+
+      const shield = shieldPayload('alphavox');
+      
+      // Log Fusion to Memory
+      await addDoc(collection(db, 'chats', chatId, 'messages'), {
+        role: 'user',
+        content: `[QUANTUM BURST]: ${selectedSymbols.join(' + ')}`,
+        specialist: 'alphavox',
+        timestamp: serverTimestamp(),
+        is_quantum: true,
+        symbols: selectedSymbols
+      });
+
+      await addDoc(collection(db, 'chats', chatId, 'messages'), {
+        role: 'model',
+        content: trace.output,
+        specialist: 'alphavox',
+        quantum_shield: shield,
+        quantum_trace: trace,
+        timestamp: serverTimestamp()
+      });
+
+      setSelectedSymbols([]);
+      setStatus('speaking');
+
+      if (autoSpeak) {
+        const tts = await speakStephen({ 
+          text: trace.output,
+          specialist: 'alphavox',
+          fusion_prob: trace.fusion_prob,
+          valence: trace.valence_arc
+        });
+        if (audioRef.current) {
+          audioRef.current.src = tts.media;
+          audioRef.current.play();
+        }
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Sensory Threshold",
+        description: err.message
+      });
+      setStatus('idle');
+    }
+  };
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || status !== 'idle') return;
@@ -60,18 +136,17 @@ export const ChatInterface: React.FC = () => {
     setInput('');
     setStatus('thinking');
 
-    // Record behavioral intent from user message
+    // Record behavioral intent
     let behaviorType: BehaviorType = "intent:request_info";
     if (userMsg.toLowerCase().includes('?')) behaviorType = "intent:request_clarification";
     if (userMsg.toLowerCase().includes('thank')) behaviorType = "intent:gratitude";
-    if (userMsg.length < 5) behaviorType = "intent:denial";
 
     addDoc(collection(db, 'behavioral_history'), {
       type: behaviorType,
       intensity: 0.5,
       context: { source: 'chat', length: userMsg.length },
       timestamp: new Date().toISOString()
-    }).catch(err => console.error("Behavior logging failed", err));
+    });
 
     const shield = shieldPayload(specialist);
 
@@ -118,8 +193,6 @@ export const ChatInterface: React.FC = () => {
           audioRef.current.play();
         }
       }
-
-      setTimeout(() => setStatus('idle'), 2000);
     } catch (err) {
       console.error(err);
       setStatus('idle');
@@ -166,6 +239,43 @@ export const ChatInterface: React.FC = () => {
         </div>
       </div>
 
+      {/* AlphaVox Quantum Burst Panel (Conditional) */}
+      {specialist === 'alphavox' && (
+        <div className="flex-none p-3 bg-blue-500/5 rounded-xl border border-blue-500/20 animate-in slide-in-from-top-2">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-[10px] font-code uppercase text-blue-400 flex items-center gap-2">
+              <Atom className="h-3 w-3" /> AlphaVox Quantum Burst
+            </h4>
+            <span className="text-[9px] text-secondary/40 font-code uppercase">{selectedSymbols.length} Symbols Ready</span>
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-3">
+            {AAC_SYMBOLS.map((symbol) => (
+              <button
+                key={symbol.id}
+                onClick={() => handleToggleSymbol(symbol.id)}
+                className={cn(
+                  "flex flex-col items-center justify-center p-2 rounded-lg border transition-all gap-1",
+                  selectedSymbols.includes(symbol.id)
+                    ? "bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]"
+                    : "bg-black/20 border-white/5 text-secondary/60 hover:border-white/10"
+                )}
+              >
+                <symbol.icon className="h-4 w-4" />
+                <span className="text-[8px] font-bold">{symbol.label}</span>
+              </button>
+            ))}
+          </div>
+          <Button 
+            disabled={selectedSymbols.length === 0 || status !== 'idle'}
+            onClick={handleQuantumFuse}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white h-8 text-xs font-headline uppercase tracking-tighter"
+          >
+            {status === 'thinking' ? <Loader2 className="animate-spin h-3 w-3 mr-2" /> : <Atom className="h-3 w-3 mr-2" />}
+            Trigger Quantum Entanglement
+          </Button>
+        </div>
+      )}
+
       {/* Episodic Memory (Chat View) */}
       <div className="flex-1 min-h-0 bg-black/20 rounded-xl border border-white/5 p-4 overflow-hidden">
         <ScrollArea className="h-full pr-4" ref={scrollRef}>
@@ -179,12 +289,10 @@ export const ChatInterface: React.FC = () => {
                   <span className="text-[9px] font-code uppercase text-secondary/40">
                     {msg.role === 'user' ? 'Operator (Everett)' : msg.specialist?.toUpperCase()}
                   </span>
-                  {msg.quantum_shield && (
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Badge variant="outline" className="text-[8px] py-0 h-3 border-accent/30 text-accent/60 font-code uppercase">
-                        {msg.quantum_shield.data_class}
-                      </Badge>
-                    </div>
+                  {msg.quantum_trace && (
+                    <Badge variant="outline" className="text-[8px] h-3 border-blue-500/30 text-blue-400 font-code uppercase">
+                      Trace: {msg.quantum_trace.top_state} | {Math.round(msg.quantum_trace.fusion_prob * 100)}%
+                    </Badge>
                   )}
                 </div>
                 <div className={cn(

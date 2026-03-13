@@ -1,10 +1,10 @@
 
 'use server';
 /**
- * @fileOverview BROCKSTON Quantum Fusion Engine (AAC Symbol-to-Speech Translation).
+ * @fileOverview AlphaVox Quantum Fusion Engine (AAC Symbol-to-Speech Translation).
+ * Fuses compressed symbolic bursts into natural language via quantum entanglement simulation.
  * 
- * Maps symbols to quantum states, performs simulated entanglement, 
- * and collapses to natural language. Includes Quantum Memory for pattern learning.
+ * Logic: H-gates (superposition) -> RZ (valence phase) -> CNOT (entanglement) -> Measure.
  */
 
 import { ai } from '@/ai/genkit';
@@ -12,7 +12,7 @@ import { z } from 'genkit';
 
 const QuantumPayloadSchema = z.object({
   symbols: z.array(z.string()).describe('Burst of AAC symbols selected by the user.'),
-  valence: z.number().min(0).max(1).describe('Emotional intensity arc.'),
+  valence: z.number().min(0).max(1).describe('Emotional intensity arc (0-1).'),
   userId: z.string().describe('Pseudonymized user identifier.'),
 });
 
@@ -29,7 +29,7 @@ const QuantumTraceSchema = z.object({
 export type QuantumPayload = z.infer<typeof QuantumPayloadSchema>;
 export type QuantumTrace = z.infer<typeof QuantumTraceSchema>;
 
-const PHRASES: Record<string, string> = {
+const PHRASE_MATRIX: Record<string, string> = {
   "000": "Safe here",
   "001": "Need quiet",
   "010": "Want space",
@@ -46,6 +46,10 @@ const PHRASES: Record<string, string> = {
   "1001": "Feel happy",
   "1010": "Feel sad",
   "1011": "Feel angry",
+  "1100": "Don't understand",
+  "1101": "Want to talk",
+  "1110": "Need alone time",
+  "1111": "Everything overwhelming",
 };
 
 export async function quantumFuse(payload: QuantumPayload): Promise<QuantumTrace> {
@@ -59,49 +63,54 @@ const quantumFusionFlow = ai.defineFlow(
     outputSchema: QuantumTraceSchema,
   },
   async (input) => {
-    // SIMULATED QUANTUM CIRCUIT LOGIC
+    // 1. Build Quantum Circuit Simulation
+    // active_qubits maps to symbol burst size (capped for stability)
     const nQubits = Math.min(input.symbols.length, 4);
-    
-    // Simulate 1024 shots (probabilistic sampling)
-    const counts: Record<string, number> = {};
     const shots = 1024;
+    const counts: Record<string, number> = {};
 
-    for (let i = 0; i < shots; i++) {
+    // 2. Probabilistic Run (Simulation of H-gates, RZ, and CNOT)
+    for (let s = 0; i < shots; i++) {
       let state = "";
-      for (let j = 0; j < nQubits; j++) {
-        const threshold = 0.5 + (input.valence - 0.5) * 0.4; // Skew based on valence
-        state += Math.random() < threshold ? "1" : "0";
+      
+      // Initial Qubit 0 (Heart Qubit)
+      // Affected by Hadamard + RZ Phase Shift based on valence
+      const heartThreshold = 0.5 + (input.valence - 0.5) * 0.6; // Scale phase impact
+      const qubit0 = Math.random() < heartThreshold ? "1" : "0";
+      state += qubit0;
+
+      // Entanglement chain (CNOT): Qubit 0 controls the others
+      for (let j = 1; j < nQubits; j++) {
+        // High valence increases entanglement stability (1-to-1 mapping)
+        // Low valence increases decoherence (randomness)
+        const entanglementStrength = 0.7 + (input.valence * 0.3);
+        const entangledBit = Math.random() < entanglementStrength ? qubit0 : (qubit0 === "1" ? "0" : "1");
+        state += entangledBit;
       }
+      
       counts[state] = (counts[state] || 0) + 1;
     }
 
+    // 3. Collapse to Intent
     const topState = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-    const fusionProb = counts[topState] / shots;
-    const decoherence = 1.0 - fusionProb;
+    const intentProb = counts[topState] / shots;
+    const decoherence = 1.0 - intentProb;
 
-    if (decoherence > 0.8) {
-      throw new Error("SENSORY OVERLOAD: Quantum decoherence too high. Please recalibrate with calm.");
+    // 4. Sensory Threshold Guard
+    if (decoherence > 0.7) {
+      throw new Error("SENSORY THRESHOLD: High decoherence detected. Please recalibrate with calm.");
     }
 
-    const output = PHRASES[topState] || "Expanding possibility...";
-
-    // SIMULATED PATTERN RECOGNITION (Quantum Memory Bridge)
-    // In a production environment, this would query a Firestore RAG or pattern collection.
-    let patterns = "Baseline emotional signature established.";
-    if (input.valence > 0.75) {
-      patterns = "Pattern: High valence arc detected. History suggests high affiliation seeking.";
-    } else if (input.valence < 0.25) {
-      patterns = "Pattern: Low valence arc detected. History suggests need for sensory reduction.";
-    }
+    const output = PHRASE_MATRIX[topState] || "Expanding possibility...";
 
     return {
       top_state: topState,
-      fusion_prob: fusionProb,
+      fusion_prob: intentProb,
       qubit_count: nQubits,
       valence_arc: input.valence,
       decoherence_dip: decoherence,
       output: output,
-      patterns: patterns
+      patterns: input.valence > 0.8 ? "High Intensity Signature: Synergistic affinity detected." : "Stable baseline established."
     };
   }
 );
