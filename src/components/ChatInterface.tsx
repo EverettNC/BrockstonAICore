@@ -8,7 +8,7 @@ import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff, AlertTriangle } from 'lucide-react';
+import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff, AlertTriangle, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
@@ -63,7 +63,6 @@ export const ChatInterface: React.FC = () => {
       localSpeech.stopListening();
       setIsListening(false);
     } else {
-      // Use local speech for real-time interim results, but we could upgrade to neural for final
       localSpeech.startListening(
         (text, isFinal) => {
           if (isFinal) {
@@ -92,7 +91,6 @@ export const ChatInterface: React.FC = () => {
     setStatus('thinking');
     const shield = shieldPayload('brockston');
 
-    // VORTEX: Record intention
     const intentId = await vortexEngine.recordIntention(db, `Routing to BROCKSTON`, 0.99);
 
     addDoc(collection(db, 'chats', chatId, 'messages'), {
@@ -118,12 +116,10 @@ export const ChatInterface: React.FC = () => {
 
       await vortexEngine.markManifested(db, intentId, "Brockston response generated");
 
-      // Relational Topology Update
       const resonance = result.empathy_signal?.self_love_score || 0.5;
       const empathyMath = result.ethical_score.composite / 10;
       await topologyEngine.updateProximity(db, resonance, empathyMath);
 
-      // LTP Learning (SoulForge Bridge)
       const currentWeights = coreWeights || {
         emotional_state: 0.5,
         tonal_stability: 0.5,
@@ -144,7 +140,6 @@ export const ChatInterface: React.FC = () => {
         isSafe: resonance > 0.7
       });
 
-      // Persist LTP updates
       await setDoc(doc(db, 'cognitive_core', 'main-bridge'), {
         ...forgeResult.updatedWeights,
         last_ltp_event: serverTimestamp()
@@ -173,7 +168,6 @@ export const ChatInterface: React.FC = () => {
       if (autoSpeak) {
         setStatus('speaking');
         try {
-          // Use unified brockstonSpeech for synthesis
           const audioMedia = await brockstonSpeech.synthesizeSpeech(result.response, "brockston");
           
           if (audioRef.current) {
@@ -229,10 +223,10 @@ export const ChatInterface: React.FC = () => {
               {isInterventionMode ? (
                 <AlertTriangle className="h-3 w-3 text-red-500 animate-bounce" />
               ) : (
-                <ShieldCheck className="h-3 w-3 text-accent" />
+                <GraduationCap className="h-3 w-3 text-accent" />
               )}
               <h3 className={cn("text-[10px] font-code uppercase tracking-widest", isInterventionMode ? "text-red-400" : "text-accent")}>
-                {isInterventionMode ? "HAND OF GOD ACTIVE" : "Core Orchestrator"}
+                {isInterventionMode ? "HAND OF GOD ACTIVE" : "Teacher & COO"}
               </h3>
             </div>
             <div className="text-xl font-headline tracking-tighter uppercase text-foreground">
@@ -253,7 +247,7 @@ export const ChatInterface: React.FC = () => {
             "text-[10px] border-accent/20 text-accent", 
             isInterventionMode && "border-red-500 text-red-500"
           )}>
-            {isInterventionMode ? 'STABILIZATION LOCK' : 'CORTEX v5.0 ONLINE'}
+            {isInterventionMode ? 'STABILIZATION LOCK' : 'NEW TEACHER MODE: ON'}
           </Badge>
         </div>
       </div>
@@ -325,14 +319,14 @@ export const ChatInterface: React.FC = () => {
                 <Shield className={cn("h-3 w-3", isInterventionMode ? "text-red-500" : "text-accent")} /> Truth.Dignity
               </span>
               <span className="flex items-center gap-1 text-[9px] text-secondary/60 uppercase font-code">
-                <Scale className={cn("h-3 w-3", isInterventionMode ? "text-red-500" : "text-accent")} /> Integrity.Gate
+                <GraduationCap className={cn("h-3 w-3", isInterventionMode ? "text-red-500" : "text-accent")} /> Teacher.Scaffold
               </span>
             </div>
             <span className={cn(
               "text-[9px] font-code animate-pulse tracking-widest uppercase",
               isInterventionMode ? "text-red-500" : "text-accent"
             )}>
-              {isInterventionMode ? 'EMERGENCY PROTOCOL ACTIVE' : 'Vortex Signal: QUANTIFIED'}
+              {isInterventionMode ? 'EMERGENCY PROTOCOL ACTIVE' : 'Status: SCALING KNOWLEDGE'}
             </span>
         </div>
       </form>

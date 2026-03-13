@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "ai-core-bg",
+      "description": "Abstract neural network background",
+      "imageUrl": "https://picsum.photos/seed/core1/1200/800",
+      "imageHint": "neural network"
+    },
+    {
+      "id": "brockston-avatar",
+      "description": "The New Teacher: Brockston in Tuxedo",
+      "imageUrl": "https://picsum.photos/seed/777/400/400",
+      "imageHint": "blonde man tuxedo blue eyes private jet"
+    }
+  ]
 }

@@ -36,7 +36,7 @@ export const CoreAvatar: React.FC<CoreAvatarProps> = ({ status, className }) => 
         {brockstonImage ? (
           <Image 
             src={brockstonImage.imageUrl} 
-            alt="Brockston" 
+            alt="Brockston - The Teacher" 
             fill 
             className={cn(
               "object-cover transition-opacity duration-500",
@@ -56,8 +56,8 @@ export const CoreAvatar: React.FC<CoreAvatarProps> = ({ status, className }) => 
       </div>
 
       {/* Status Label */}
-      <div className="absolute -bottom-8 flex flex-col items-center">
-        <span className="text-[9px] uppercase tracking-[0.2em] text-secondary/60 font-code">Identity.Core</span>
+      <div className="absolute -bottom-10 flex flex-col items-center">
+        <span className="text-[8px] uppercase tracking-[0.2em] text-secondary/60 font-code">Teacher Presence: ACTIVE</span>
         <span className={cn(
           "text-[10px] font-headline tracking-widest transition-colors duration-300",
           status === 'speaking' ? "text-accent animate-pulse" : "text-secondary"
