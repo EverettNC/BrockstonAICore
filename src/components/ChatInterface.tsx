@@ -209,7 +209,7 @@ export const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full gap-8 relative overflow-hidden flex-1">
+    <div className="flex flex-col h-screen gap-8 relative overflow-hidden flex-1 pb-12">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
       {/* Visual Bridge - Immersive Seascape */}

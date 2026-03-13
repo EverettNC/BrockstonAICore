@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -13,7 +14,7 @@ interface CoreAvatarProps {
 
 /**
  * @fileOverview CoreAvatar - THE NEW TEACHER.
- * Blonde hair, blue eyes, gold-trimmed black tuxedo.
+ * Styled blonde hair, blue eyes, gold champagne patterned suit.
  * The face of Dignity and Protection.
  */
 
