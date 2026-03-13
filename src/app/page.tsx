@@ -41,7 +41,8 @@ import {
   User,
   Gauge,
   FileText,
-  Settings
+  Settings,
+  MessageSquare
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -52,28 +53,28 @@ type PageProps = {
 
 /**
  * @fileOverview Main Dashboard Entry. 
- * Rule 1 Compliant: Spans full screen. Fixed parameter unwrapping for Next.js 15.
- * Rule 13 Compliant: No placeholder images.
+ * Rule 1 Compliant: Spans full screen.
+ * Rule 13 Compliant: No placeholder images. Pure functional truth.
  */
 
 export default function Home(props: PageProps) {
-  // Unwrap Next.js 15 promises correctly
   const _params = use(props.params);
   const _searchParams = use(props.searchParams);
 
+  // Default to 'terminal' (Talk to Brockston)
   const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab' | 'evolution' | 'speed' | 'manifesto'>('terminal');
   
   return (
     <div className="h-screen w-screen bg-background text-foreground flex overflow-hidden">
       {/* Sidebar Navigation */}
       <aside className="w-24 flex-none hidden md:flex flex-col items-center py-8 bg-card border-r border-white/5 z-50">
-        {/* Brand Logo Anchor (High-Fidelity Restoration) */}
+        {/* Brand Logo Anchor (The Heart of the Project) */}
         <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-12 shadow-[0_0_25px_rgba(0,255,127,0.3)] group cursor-pointer overflow-hidden border-2 border-accent/40 bg-black/60 transition-all hover:scale-105 active:scale-95">
           <Cpu className="text-accent h-8 w-8 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(0,255,127,0.8)]" />
         </div>
         
         <nav className="flex flex-col gap-5 flex-1 w-full px-4 overflow-y-auto system-log scrollbar-hide">
-          <NavIcon icon={Terminal} active={activeTab === 'terminal'} onClick={() => setActiveTab('terminal')} label="Main Cortex" />
+          <NavIcon icon={MessageSquare} active={activeTab === 'terminal'} onClick={() => setActiveTab('terminal')} label="Talk to Brockston" />
           <NavIcon icon={FileText} active={activeTab === 'manifesto'} onClick={() => setActiveTab('manifesto')} label="Mission Manifesto" />
           <NavIcon icon={Gauge} active={activeTab === 'speed'} onClick={() => setActiveTab('speed')} label="Spam Up (Resonance)" />
           <NavIcon icon={CodeXml} active={activeTab === 'codelab'} onClick={() => setActiveTab('codelab')} label="Code Lab" />
@@ -168,7 +169,7 @@ export default function Home(props: PageProps) {
               <MissionManifesto />
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
-                {/* Chat/Avatar - Main Panel */}
+                {/* Talk to Brockston - Main Panel */}
                 <section className="lg:col-span-8 flex flex-col h-full overflow-hidden">
                   <ChatInterface />
                 </section>
@@ -180,7 +181,7 @@ export default function Home(props: PageProps) {
                     <HapticPanel />
                     <SecurityPanel />
                     
-                    {/* Mission Statement */}
+                    {/* Mission Statement Anchor */}
                     <div className="p-6 bg-accent/5 rounded-2xl border border-accent/20 backdrop-blur-md relative overflow-hidden group shadow-xl">
                         <div className="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-1000">
                           <Infinity className="h-32 w-32 text-accent" />
