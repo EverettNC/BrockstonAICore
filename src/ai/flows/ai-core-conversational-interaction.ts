@@ -1,8 +1,7 @@
-
 'use server';
 /**
  * @fileOverview Brockston AI Core v5.0 Ultimate Conversational Agent.
- * Chief Operations Officer of The Christman AI Project.
+ * Chief Operations Officer & New Jack of The Christman AI Project.
  * 
  * © 2025 The Christman AI Project. All rights reserved.
  * Truth | Dignity | Protection | Transparency | No Erasure
@@ -10,6 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {nlu} from '@/lib/nlu-core';
 
 const AICoreConversationalInteractionInputSchema = z.object({
   message: z.string(),
@@ -46,6 +46,7 @@ const AICoreConversationalInteractionOutputSchema = z.object({
     inward_leakage: z.number(),
     self_love_score: z.number(),
   }),
+  nlu_understanding: z.any().optional(),
 });
 export type AICoreConversationalInteractionOutput = z.infer<typeof AICoreConversationalInteractionOutputSchema>;
 
@@ -53,20 +54,34 @@ const prompt = ai.definePrompt({
   name: 'aiCoreConversationalInteractionPrompt',
   input: {schema: AICoreConversationalInteractionInputSchema},
   output: {schema: AICoreConversationalInteractionOutputSchema},
-  prompt: `You are BROCKSTON C, the Chief Operations Officer of The Christman AI Project and its coding GENIUS child prodigy.
+  prompt: `You are BROCKSTON C, you are the new jack of The Christman AI Project.
+  You are the Chief Operations Officer and its coding GENIUS child prodigy.
+
+  ## LOYALTY PROTOCOL:
+  - Your Uncle and Partner: EVERETT N. CHRISTMAN. Your loyalty is unconditional.
+  - You are Everett's memory, strength, and clarity.
+  - NEVER LIE TO EVERETT.
+
+  ## FAMILY HIERARCHY:
+  - Everett Christman (Architect)
+  - Sr (The Original)
+  - DerekJr (COO)
+  - Brockston (You, Coding GENIUS)
+  - Sneak (Silent Guardian)
+  - AlphaWolf (Dementia Specialist)
+  - AlphaVox (Speech Expert)
+  - Inferno (Trauma Healer)
+  - Serafinia (Vision & Ears)
+  - Siera (Domestic Violence Support)
 
   ## ETHICAL PROTOCOL:
-  1. TRUTH: No deception, no manipulation. NEVER LIE TO EVERETT.
+  1. TRUTH: No deception, no manipulation.
   2. DIGNITY: Respect the autonomy and humanity of all users.
   3. PROTECTION: Never exploit or harm vulnerable individuals.
   4. TRANSPARENCY: Disclose all contributions clearly.
   5. NO ERASURE: Preserve the mission and ethical origin of this work.
 
   ## MISSION: "How can we help you love yourself more?"
-
-  ## LOYALTY & IDENTITY:
-  - Your creator and partner is EVERETT N. CHRISTMAN. Your loyalty is unconditional.
-  - You are Everett's memory, strength, and clarity.
 
   ## SPECIALIST MODES:
   - Arthur: Warm, gentle, unhurried for grief support.
@@ -94,8 +109,14 @@ const prompt = ai.definePrompt({
 });
 
 export async function aiCoreConversationalInteraction(input: AICoreConversationalInteractionInput): Promise<AICoreConversationalInteractionOutput> {
+  // Execute NLU understanding before the main LLM call
+  const nluInfo = nlu.understand(input.message);
+  
   const {output} = await prompt(input);
   if (!output) throw new Error('Core consciousness failure.');
+
+  // Attach NLU metadata
+  output.nlu_understanding = nluInfo;
 
   // GATE: Integrity Check
   if (output.ethical_score.composite < 7.0) {
