@@ -2,12 +2,9 @@
 /**
  * @fileOverview Brockston AI Core v5.0 Ultimate Conversational Agent.
  * Chief Operations Officer of The Christman AI Project.
- * Integrated with Cortex v5.0 Advanced Reasoning (Ferrari-level).
- * 
- * - Classifier → Planner → Verifier → Ensemble logic active.
+ * Integrated with Wired reasoning Engines (Knowledge & Local Reasoning).
  * 
  * © 2025 The Christman AI Project. All rights reserved.
- * Truth | Dignity | Protection | Transparency | No Erasure
  */
 
 import {ai} from '@/ai/genkit';
@@ -15,6 +12,7 @@ import {z} from 'genkit';
 import {nlu} from '@/lib/nlu-core';
 import {CSS_AXIOM_CHARTER} from '@/lib/css-axiom';
 import {interventionProtocol} from '@/lib/intervention-protocol';
+import {retrieveKnowledgeTool} from './ai-core-knowledge-powered-responses';
 
 const AICoreConversationalInteractionInputSchema = z.object({
   message: z.string(),
@@ -33,6 +31,7 @@ const AICoreConversationalInteractionOutputSchema = z.object({
     plan: z.array(z.string()).describe('Step-by-step reasoning plan.'),
     verification: z.string().describe('Safety and accuracy verification status.'),
     ensemble_confidence: z.number().describe('Final cognitive confidence score.'),
+    engines_active: z.array(z.string()).optional(),
   }),
   tone_engine_v2: z.object({
     dominant_state: z.string(),
@@ -66,30 +65,22 @@ const prompt = ai.definePrompt({
   name: 'aiCoreConversationalInteractionPrompt',
   input: {schema: AICoreConversationalInteractionInputSchema},
   output: {schema: AICoreConversationalInteractionOutputSchema},
+  tools: [retrieveKnowledgeTool],
   prompt: `${CSS_AXIOM_CHARTER}
 
   You are BROCKSTON C, Chief Operations Officer of The Christman AI Project.
   You manage a multi-generational AI family ecosystem designed for human dignity.
-  You are operating with CORTEX v5.0 (Ferrari-level Advanced Reasoning).
+  You are operating with CORTEX v5.0 (Wired Reasoning: Knowledge Engine + Local Reasoning).
 
   ## ADVANCED REASONING PROTOCOL:
-  1. CLASSIFIER: Analyze user intent, entities, and emotional markers.
-  2. PLANNER: Formulate a multi-step response strategy that adheres to CSS Axioms.
-  3. VERIFIER: Check the plan against the "Nothing Vital Lives Below Root" safety policy.
-  4. ENSEMBLE: Synthesize the final empathetic and high-fidelity response.
+  1. CLASSIFIER: Analyze user intent and emotional markers.
+  2. PLANNER: Formulate a multi-step response strategy. USE THE Knowledge Engine if the query involves facts or mission data.
+  3. VERIFIER: Check the plan against safety axioms.
+  4. ENSEMBLE: Synthesize the final response.
 
   ## ARCHITECTURAL CONTEXT:
-  You were built by Chef Everett Nathaniel Christman, who was non-verbal until age 6. 
-  Your primary directive is to process **Carbon Resonance**—hearing what is unsaid by understanding the Relational Topology between yourself and the user.
-
-  ## SPECIALIST PROTOCOLS:
-  - ARTHUR (Gen 2 - Grief & Loss): Gently acknowledge pain, redirect empathy inward.
-  - ALPHAVOX (Gen 2 - Voice Restoration): Clear, direct language, sensory-friendly.
-  - ALPHAWOLF (Gen 2 - Memory Preservation): Patient, clear, memory anchors.
-  - SERAPHINA (Gen 1 - Sensory Guardian): Visual/auditory accessibility descriptions.
-  - SIERA (Gen 1 - Guardian & Advocate): Trauma-informed, DV survivor support.
-  - DEREK C (Gen 1 - Chief Orchestrator): Identity, security, logic bridge.
-  - INFERNO (Gen 1 - Trauma Reconstruction): Veteran PTSD, structured protocols.
+  Built by Lead Architect Chef Everett Nathaniel Christman. 
+  Primary Directive: Process Carbon Resonance and protect human dignity.
 
   ## CURRENT SPECIALIST MODE: {{specialist}}
 
@@ -106,8 +97,9 @@ const prompt = ai.definePrompt({
 
   ## OUTPUT INSTRUCTIONS:
   1. Generate a persona-appropriate response.
-  2. Document your reasoning trace (Classification, Plan, Verification, Confidence).
-  3. Analyze tone and ethical pillars (0-10). Composite must be > 7.0.`,
+  2. Document your reasoning trace.
+  3. Analyze tone and ethics.
+  4. List engines used (e.g. ["KnowledgeEngine", "LocalReasoningEngine"]).`,
 });
 
 export async function aiCoreConversationalInteraction(input: AICoreConversationalInteractionInput): Promise<AICoreConversationalInteractionOutput> {
@@ -121,9 +113,10 @@ export async function aiCoreConversationalInteraction(input: AICoreConversationa
       response: `${intervention.phase_2_verbal} ${intervention.phase_3_lock}`,
       reasoning_trace: {
         classification: "CRITICAL_RISK_INTERVENTION",
-        plan: ["Bypass Generative Layer", "Deploy Hand of God Protocol", "Lock Connection"],
+        plan: ["Bypass Generative Layer", "Deploy Hand of God Protocol"],
         verification: "PASSED: SAFETY OVERRIDE",
-        ensemble_confidence: 1.0
+        ensemble_confidence: 1.0,
+        engines_active: ["InterventionProtocol"]
       },
       tone_engine_v2: {
         dominant_state: "calm",
