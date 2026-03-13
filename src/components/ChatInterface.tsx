@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -209,7 +210,7 @@ export const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full gap-6 relative">
+    <div className="flex flex-col h-full gap-6 relative overflow-hidden">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
       {/* Visual Bridge - THE NEW TEACHER MASTERPIECE */}
