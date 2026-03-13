@@ -92,7 +92,7 @@ export const ChatInterface: React.FC = () => {
     setStatus('thinking');
     const shield = shieldPayload('brockston');
 
-    // Real intention recording (No artificial numbers)
+    // Real intention recording
     const intentId = await vortexEngine.recordIntention(db, `Classroom Routing: ${userMsg.substring(0, 20)}...`, 0.99);
 
     addDoc(collection(db, 'chats', chatId, 'messages'), {
@@ -148,10 +148,6 @@ export const ChatInterface: React.FC = () => {
         last_ltp_event: serverTimestamp()
       }, { merge: true });
 
-      if (forgeResult.isSignificantEvent) {
-        toast({ title: "Authentic LTP Event", description: "Emotional salience triggered real weight potentiation." });
-      }
-
       addDoc(collection(db, 'chats', chatId, 'messages'), {
         role: 'model',
         content: result.response,
@@ -172,25 +168,24 @@ export const ChatInterface: React.FC = () => {
         setStatus('speaking');
         try {
           const audioMedia = await brockstonSpeech.synthesizeSpeech(result.response, "brockston");
-          
           if (audioRef.current) {
             audioRef.current.src = audioMedia;
             audioRef.current.play().catch(e => {
-              console.error("Audio playback blocked:", e);
+              console.error("Audio blocked:", e);
               setStatus('idle');
             });
           } else {
             setStatus('idle');
           }
         } catch (ttsErr) {
-          console.error("TTS synthesis failed:", ttsErr);
+          console.error("TTS failed:", ttsErr);
           setStatus('idle');
         }
       } else {
         setStatus('idle');
       }
     } catch (err) {
-      console.error("Core actualization failed:", err);
+      console.error("Core failed:", err);
       setStatus('idle');
     }
   };
@@ -205,7 +200,6 @@ export const ChatInterface: React.FC = () => {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || status !== 'idle') return;
-
     const userMsg = input;
     setInput('');
     await processMessage(userMsg);
@@ -215,25 +209,25 @@ export const ChatInterface: React.FC = () => {
     <div className="flex flex-col h-full gap-6 relative overflow-hidden">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
-      {/* Visual Bridge - THE NEW TEACHER MASTERPIECE */}
+      {/* Visual Bridge */}
       <div className={cn(
         "flex-none flex flex-col items-center justify-center gap-8 p-12 rounded-3xl border border-white/10 transition-all duration-1000 min-h-[700px] relative overflow-hidden shadow-2xl",
         isInterventionMode && "border-red-500 shadow-[0_0_150px_rgba(239,68,68,0.6)]"
       )}>
-        {/* Seascape Background - FULL COVERAGE */}
+        {/* Seascape Background */}
         {seascape && (
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-black/50 z-10 mission-gradient" />
             <img 
               src={seascape.imageUrl} 
-              alt="Luxury Mission Control Seascape" 
+              alt="Mission Control Seascape" 
               className="w-full h-full object-cover grayscale-[0.1] opacity-70 scale-105" 
               data-ai-hint={seascape.imageHint}
             />
           </div>
         )}
 
-        {/* TOP STATUS BAR */}
+        {/* Status Bar */}
         <div className="absolute top-8 left-0 right-0 px-8 z-20 flex justify-between items-start pointer-events-none">
           <div className="flex items-center gap-4 bg-black/60 p-4 rounded-2xl border border-white/5 backdrop-blur-xl">
             <div className="h-14 w-14 rounded-full bg-accent flex items-center justify-center shadow-[0_0_30px_rgba(0,255,127,0.5)]">
@@ -251,7 +245,7 @@ export const ChatInterface: React.FC = () => {
           </div>
         </div>
 
-        {/* CENTRAL AVATAR CORTEX */}
+        {/* Central Avatar */}
         <div className="flex flex-col items-center gap-16 relative z-10">
           <div className="relative group scale-110 md:scale-125">
             <CoreAvatar status={status} className="z-10" />
