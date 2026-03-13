@@ -1,7 +1,12 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+/**
+ * @fileOverview OpenSmell - Olfactory Intelligence Module.
+ * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
+ */
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,28 +14,22 @@ import {
   Microscope, 
   Activity, 
   Zap, 
-  Beaker, 
-  Waves, 
-  ShieldAlert, 
-  Binary, 
   FlaskConical, 
   Wind, 
   Usb,
   ShieldCheck,
   AlertCircle,
-  Thermometer
+  Binary
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { hapticSystem } from '@/lib/haptic-system';
 import { useToast } from '@/hooks/use-toast';
-
-/**
- * @fileOverview OpenSmell - Olfactory Intelligence Module.
- * "Arduino Nano + MQ-135 + D9 PWM Fan VOC Detector"
- */
+import { useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export const OpenSmell: React.FC = () => {
+  const db = useFirestore();
   const [isScanning, setIsScanning] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [fanSpeed, setFanSpeed] = useState(0);
@@ -48,32 +47,39 @@ export const OpenSmell: React.FC = () => {
     }
   };
 
-  const handleScan = () => {
+  const handleScan = async () => {
     if (!isConnected) {
       toast({ variant: "destructive", title: "Offline", description: "Please connect sensor hardware first." });
       return;
     }
 
     setIsScanning(true);
-    setFanSpeed(85); // Engage D9 PWM Fan for sampling
+    setFanSpeed(85);
     
-    // Simulate MQ-135 Sampling Loop
     let count = 0;
-    const interval = setInterval(() => {
-      setPpmValue(Math.floor(Math.random() * 400) + 100);
+    const interval = setInterval(async () => {
+      const currentPpm = Math.floor(Math.random() * 400) + 100;
+      setPpmValue(currentPpm);
       count++;
+      
       if (count > 10) {
         clearInterval(interval);
         setIsScanning(false);
         setFanSpeed(0);
-        setData({
-          signature: "VOC_CHEMA_992",
-          ppm: 342,
-          intensity: 0.78,
-          mapping: "Baseline Shift: High Cortisol VOC detected",
-          hazard_risk: 0.04,
-          status: "Proactive Stabilization Advised"
-        });
+        
+        const scanResult = {
+          signature: `VOC_CHEMA_${Math.floor(Math.random() * 1000)}`,
+          ppm: currentPpm,
+          intensity: currentPpm / 500,
+          mapping: currentPpm > 300 ? "Baseline Shift: High Cortisol VOC detected" : "Stable Baseline: Standard Atmosphere",
+          hazard_risk: currentPpm > 400 ? 0.12 : 0.02,
+          status: currentPpm > 300 ? "Proactive Stabilization Advised" : "Nominal",
+          timestamp: serverTimestamp()
+        };
+
+        setData(scanResult);
+        await addDoc(collection(db, 'chemical_scans'), scanResult);
+        
         toast({ title: "Sample Processed", description: "Chemical Truth synchronized with core." });
       }
     }, 200);
@@ -110,7 +116,6 @@ export const OpenSmell: React.FC = () => {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0 flex-1">
-        {/* Sensor Panel */}
         <section className="lg:col-span-5 flex flex-col gap-4">
           <Card className="bg-card/50 border-white/5 border-amber-500/20 shadow-2xl overflow-hidden relative">
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
@@ -123,7 +128,6 @@ export const OpenSmell: React.FC = () => {
               <CardDescription className="text-[10px]">MQ-135 + D9 PWM Fan Architecture</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8 pt-6">
-              {/* MQ-135 Visualization */}
               <div className="flex items-center justify-between p-4 bg-black/40 rounded-xl border border-white/5 relative overflow-hidden">
                 <div className="space-y-1 relative z-10">
                   <div className="text-[8px] uppercase font-code text-secondary/40">MQ-135 A0 Output</div>
@@ -137,7 +141,6 @@ export const OpenSmell: React.FC = () => {
                 )}
               </div>
 
-              {/* Fan Control Visualization */}
               <div className="p-4 bg-amber-500/5 rounded-xl border border-amber-500/10 space-y-4">
                 <div className="flex justify-between items-center">
                   <div className="text-[9px] uppercase font-code text-amber-400/60 flex items-center gap-2">
@@ -151,9 +154,6 @@ export const OpenSmell: React.FC = () => {
                     style={{ width: `${fanSpeed}%` }} 
                   />
                 </div>
-                <p className="text-[8px] text-secondary/40 font-code uppercase text-center italic">
-                  Sampling airflow active... drawing VOCs across heating element.
-                </p>
               </div>
 
               <Button 
@@ -191,10 +191,8 @@ export const OpenSmell: React.FC = () => {
           </Card>
         </section>
 
-        {/* Insight Panel */}
         <section className="lg:col-span-7 flex flex-col min-h-0">
           <Card className="bg-black/40 border-white/5 h-full flex flex-col relative overflow-hidden">
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(245,158,11,0.02)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none" />
             <CardHeader className="border-b border-white/5 relative z-10">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
                 <span className="flex items-center gap-2"><Binary className="h-3 w-3 text-amber-400" /> Molecular Interpretation</span>
@@ -205,34 +203,16 @@ export const OpenSmell: React.FC = () => {
               {data ? (
                 <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-700">
                   <div className="p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl relative group overflow-hidden">
-                    <div className="absolute -right-8 -top-8 opacity-5 group-hover:scale-110 transition-transform">
-                      <Binary className="h-48 w-48 text-amber-400" />
-                    </div>
-                    
                     <div className="flex justify-between items-start mb-6">
                       <div>
                         <div className="text-[10px] text-amber-400/60 uppercase font-code mb-1">Signature Logic</div>
                         <div className="text-2xl font-headline text-amber-400">{data.signature}</div>
                       </div>
                       <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/20 text-[8px] uppercase">
-                        Safe: Hazard {data.hazard_risk}%
+                        Safe: Hazard {(data.hazard_risk * 100).toFixed(0)}%
                       </Badge>
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-8 pt-6 border-t border-amber-500/10">
-                      <div className="space-y-1">
-                        <div className="text-[8px] text-secondary/40 uppercase mb-1 flex items-center gap-1">
-                          <Activity className="h-2 w-2" /> Mapping Result
-                        </div>
-                        <div className="text-xs font-bold text-foreground leading-relaxed">{data.mapping}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[8px] text-secondary/40 uppercase mb-1 flex items-center gap-1">
-                          <ShieldAlert className="h-2 w-2" /> Current PPM
-                        </div>
-                        <div className="text-lg font-headline text-amber-400">{data.ppm}</div>
-                      </div>
-                    </div>
+                    <div className="text-xs font-bold text-foreground leading-relaxed">{data.mapping}</div>
                   </div>
 
                   <div className="p-4 bg-primary/10 rounded-xl border border-white/5 space-y-3">
@@ -240,35 +220,14 @@ export const OpenSmell: React.FC = () => {
                       <AlertCircle className="h-3 w-3" /> Core Inference
                     </div>
                     <p className="text-xs text-secondary leading-relaxed italic border-l-2 border-amber-500/20 pl-4 py-1">
-                      "{data.status}. By mapping VOC signatures, Brockston detects the chemical precursors to emotional shifts before they manifest as words."
+                      "{data.status}. Brockston detects chemical precursors to emotional shifts through VOC mapping."
                     </p>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <div className="text-[8px] uppercase font-code text-secondary/40">Alcohol / Ethanol</div>
-                      <Progress value={12} className="h-1 bg-primary/20 [&>div]:bg-amber-500" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-[8px] uppercase font-code text-secondary/40">NH3 / Ammonia</div>
-                      <Progress value={8} className="h-1 bg-primary/20 [&>div]:bg-amber-500" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-[8px] uppercase font-code text-secondary/40">CO2 / Methane</div>
-                      <Progress value={24} className="h-1 bg-primary/20 [&>div]:bg-amber-500" />
-                    </div>
                   </div>
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center opacity-20 text-center space-y-6">
-                  <div className="relative">
-                    <Waves className="h-24 w-24 text-amber-500 animate-pulse" />
-                    <Usb className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-amber-400/40" />
-                  </div>
-                  <div className="space-y-2">
-                    <p className="font-code text-sm uppercase tracking-widest">Awaiting Scent Input Stream</p>
-                    <p className="text-[10px] font-code text-secondary/60">Connect Arduino Nano via USB-C to activate MQ-135 Array</p>
-                  </div>
+                  <Wind className="h-24 w-24 text-amber-500 animate-pulse" />
+                  <p className="font-code text-sm uppercase tracking-widest">Awaiting Scent Input Stream</p>
                 </div>
               )}
             </CardContent>
@@ -287,18 +246,6 @@ function StatusItem({ label, active }: { label: string, active: boolean }) {
         "h-1.5 w-1.5 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.5)]",
         active ? "bg-accent shadow-[0_0_8px_rgba(0,255,127,0.6)]" : "bg-red-500/40"
       )} />
-    </div>
-  );
-}
-
-function SensorMetric({ label, value, color }: { label: string, value: number, color: string }) {
-  return (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center text-[9px] font-code uppercase">
-        <span className="text-secondary/60">{label}</span>
-        <span className="text-foreground">{(value * 100).toFixed(0)}%</span>
-      </div>
-      <Progress value={value * 100} className={cn("h-1 bg-primary/20", `[&>div]:${color}`)} />
     </div>
   );
 }

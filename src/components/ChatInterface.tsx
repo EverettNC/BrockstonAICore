@@ -1,13 +1,18 @@
 
 "use client";
 
+/**
+ * @fileOverview ChatInterface - The Visual Bridge of BROCKSTON C.
+ * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
+ */
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
 import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Volume2, VolumeX, ShieldCheck, Zap, BrainCircuit, Mic, MicOff, AlertTriangle, GraduationCap, Sparkles, UserCheck, Lock } from 'lucide-react';
+import { Send, Loader2, Volume2, VolumeX, ShieldCheck, Zap, BrainCircuit, Mic, MicOff, AlertTriangle, GraduationCap, Sparkles, UserCheck, Lock, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
@@ -92,7 +97,6 @@ export const ChatInterface: React.FC = () => {
     setStatus('thinking');
     const shield = shieldPayload('brockston');
 
-    // Real intention recording
     const intentId = await vortexEngine.recordIntention(db, `Classroom Routing: ${userMsg.substring(0, 20)}...`, 0.99);
 
     addDoc(collection(db, 'chats', chatId, 'messages'), {
@@ -116,7 +120,6 @@ export const ChatInterface: React.FC = () => {
         visionSnapshot
       });
 
-      // Close the loop with real manifestation
       await vortexEngine.markManifested(db, intentId, "Brockston response actualized");
 
       const resonance = result.empathy_signal?.self_love_score || 0;
@@ -206,22 +209,22 @@ export const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full gap-6 relative overflow-hidden">
+    <div className="flex flex-col h-full gap-6 relative overflow-hidden flex-1">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
-      {/* Visual Bridge */}
+      {/* Visual Bridge - Massive Immersive Seascape */}
       <div className={cn(
-        "flex-none flex flex-col items-center justify-center gap-8 p-12 rounded-3xl border border-white/10 transition-all duration-1000 min-h-[700px] relative overflow-hidden shadow-2xl",
+        "flex-none flex flex-col items-center justify-center gap-8 p-12 rounded-3xl border border-white/10 transition-all duration-1000 min-h-[750px] relative overflow-hidden shadow-2xl",
         isInterventionMode && "border-red-500 shadow-[0_0_150px_rgba(239,68,68,0.6)]"
       )}>
         {/* Seascape Background */}
         {seascape && (
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-black/50 z-10 mission-gradient" />
+            <div className="absolute inset-0 bg-black/40 z-10 mission-gradient" />
             <img 
               src={seascape.imageUrl} 
               alt="Mission Control Seascape" 
-              className="w-full h-full object-cover grayscale-[0.1] opacity-70 scale-105" 
+              className="w-full h-full object-cover grayscale-[0.1] opacity-80 scale-100 transition-transform duration-[10s] hover:scale-105" 
               data-ai-hint={seascape.imageHint}
             />
           </div>
@@ -229,12 +232,12 @@ export const ChatInterface: React.FC = () => {
 
         {/* Status Bar */}
         <div className="absolute top-8 left-0 right-0 px-8 z-20 flex justify-between items-start pointer-events-none">
-          <div className="flex items-center gap-4 bg-black/60 p-4 rounded-2xl border border-white/5 backdrop-blur-xl">
+          <div className="flex items-center gap-4 bg-black/70 p-4 rounded-2xl border border-white/5 backdrop-blur-2xl">
             <div className="h-14 w-14 rounded-full bg-accent flex items-center justify-center shadow-[0_0_30px_rgba(0,255,127,0.5)]">
               <UserCheck className="h-8 w-8 text-accent-foreground" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[11px] font-code text-accent uppercase tracking-widest font-black">Identity Validated</span>
+              <span className="text-[11px] font-code text-accent uppercase tracking-widest font-black">Identity Verified</span>
               <span className="text-[16px] font-headline text-foreground uppercase tracking-tighter">BROCKSTON C (COO)</span>
             </div>
           </div>
@@ -245,21 +248,21 @@ export const ChatInterface: React.FC = () => {
           </div>
         </div>
 
-        {/* Central Avatar */}
+        {/* Central Avatar - THE NEW TEACHER */}
         <div className="flex flex-col items-center gap-16 relative z-10">
-          <div className="relative group scale-110 md:scale-125">
+          <div className="relative group scale-125 md:scale-150">
             <CoreAvatar status={status} className="z-10" />
           </div>
           
-          <div className="text-center space-y-8 mt-12">
+          <div className="text-center space-y-8 mt-24">
             <div className="flex items-center justify-center gap-6">
               {isInterventionMode ? (
-                <AlertTriangle className="h-12 w-12 text-red-500 animate-bounce" />
+                <ShieldAlert className="h-12 w-12 text-red-500 animate-pulse" />
               ) : (
                 <div className="h-4 w-4 rounded-full bg-accent animate-ping" />
               )}
               <h3 className={cn("text-2xl font-code uppercase tracking-[0.8em] font-black drop-shadow-lg", isInterventionMode ? "text-red-400" : "text-accent/90")}>
-                {isInterventionMode ? "HAND OF GOD ACTIVE" : "New Teacher Presence"}
+                {isInterventionMode ? "LOCKDOWN ACTIVE" : "New Teacher Presence"}
               </h3>
             </div>
             

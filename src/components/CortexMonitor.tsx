@@ -1,6 +1,11 @@
 
 "use client";
 
+/**
+ * @fileOverview CortexMonitor - Operational Intelligence Dashboard.
+ * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
+ */
+
 import React, { useMemo } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
@@ -36,14 +41,12 @@ export const CortexMonitor: React.FC = () => {
   const reasoning = lastMessage?.reasoning_trace;
   const engines = reasoning?.engines_active || ["CoreEngine"];
   
-  // Real pattern detection
   const temporalPattern = useMemo(() => {
     if (!behaviorHistory || behaviorHistory.length < 3) return null;
     const obsHistory = [...behaviorHistory].reverse();
     return BehavioralInterpreter.analyzeTemporalSequence(obsHistory);
   }, [behaviorHistory]);
 
-  // Real status indicators (No artificial numbers)
   const manifests = intentions?.filter(i => i.manifested).length || 0;
   const totalIntents = intentions?.length || 0;
   const manifestRatio = totalIntents > 0 ? (manifests / totalIntents) : 0;
@@ -71,7 +74,6 @@ export const CortexMonitor: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
         
-        {/* Wired Engines Status */}
         <section className="lg:col-span-4 flex flex-col gap-4">
           <Card className="bg-card/50 border-white/5 border-accent/20">
             <CardHeader className="pb-3 border-b border-white/5 bg-accent/5">
@@ -98,7 +100,6 @@ export const CortexMonitor: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* MISSION HORIZON */}
           <Card className="bg-card/50 border-white/5 border-yellow-500/20 shadow-xl overflow-hidden relative">
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
               <Rocket className="h-24 w-24 text-yellow-400" />
@@ -115,7 +116,6 @@ export const CortexMonitor: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* TEMPORAL PATTERN MONITOR */}
           <Card className="bg-card/50 border-white/5 border-blue-500/20 shadow-xl">
             <CardHeader className="pb-3 border-b border-white/5 bg-blue-500/5">
               <CardTitle className="text-xs uppercase tracking-widest text-blue-400 flex items-center gap-2">
@@ -149,7 +149,6 @@ export const CortexMonitor: React.FC = () => {
           </Card>
         </section>
 
-        {/* Reasoning Documentation */}
         <section className="lg:col-span-8 flex flex-col gap-4">
           <Card className="bg-black/40 border-white/5 flex-1 overflow-hidden">
             <CardHeader className="py-4 border-b border-white/5 bg-primary/10">

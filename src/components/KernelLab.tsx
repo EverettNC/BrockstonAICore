@@ -1,6 +1,11 @@
 
 "use client";
 
+/**
+ * @fileOverview KernelLab - High-Performance Symbolic Solver.
+ * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
+ */
+
 import React, { useState } from 'react';
 import { kernelFuse } from '@/ai/flows/kernel-fusion-flow';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -9,8 +14,11 @@ import { Slider } from '@/components/ui/slider';
 import { Cpu, Zap, Activity, Binary, ShieldCheck, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export const KernelLab: React.FC = () => {
+  const db = useFirestore();
   const [affection, setAffection] = useState(0.6);
   const [urgency, setUrgency] = useState(0.2);
   const [loading, setLoading] = useState(false);
@@ -22,6 +30,17 @@ export const KernelLab: React.FC = () => {
     try {
       const data = await kernelFuse({ affection, urgency, ruleIdx: 0 });
       setResult(data);
+      
+      await addDoc(collection(db, 'kernel_fusions'), {
+        affection,
+        urgency,
+        output_phrase: data.output_phrase,
+        latent_hash: data.latent_hash,
+        rule_applied: data.rule_applied,
+        confidence: data.confidence,
+        timestamp: serverTimestamp()
+      });
+
       toast({ title: "Fusion Successful", description: "Neural latent bound to symbolic kernel." });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Fusion Error", description: e.message });
@@ -31,7 +50,7 @@ export const KernelLab: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full gap-6 animate-in fade-in duration-500">
+    <div className="flex flex-col h-full gap-6 animate-in fade-in duration-500 overflow-y-auto system-log pr-2 pb-12">
       <header className="p-4 bg-accent/5 border border-accent/20 rounded-xl">
         <h2 className="text-xl font-headline uppercase tracking-tighter text-accent flex items-center gap-2">
           <Cpu className="h-5 w-5" /> Kernel Fusion Lab
