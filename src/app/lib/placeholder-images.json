@@ -1,23 +1,4 @@
 
 {
-  "placeholderImages": [
-    {
-      "id": "ai-core-bg",
-      "description": "Luxury mission control with a wide view of a calm blue ocean seascape at dusk",
-      "imageUrl": "https://picsum.photos/seed/lux-mission-v12/1920/1080",
-      "imageHint": "luxury seascape"
-    },
-    {
-      "id": "brockston-avatar",
-      "description": "BROCKSTON C: The New Teacher. Young man, styled blonde hair, striking blue eyes, gold champagne patterned suit, white shirt, luxury interior, wearing a watch.",
-      "imageUrl": "https://picsum.photos/seed/brockston-gold-suit-v5/800/1000",
-      "imageHint": "man blonde blue eyes gold suit"
-    },
-    {
-      "id": "brand-logo",
-      "description": "The Christman AI Project Brand Logo - Sophisticated Neuro-Symbolic Shield with Neon Accents",
-      "imageUrl": "https://picsum.photos/seed/christman-shield-logo/200/200",
-      "imageHint": "tech logo shield"
-    }
-  ]
+  "placeholderImages": []
 }

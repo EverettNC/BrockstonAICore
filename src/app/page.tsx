@@ -6,7 +6,6 @@ import { ChatInterface } from '@/components/ChatInterface';
 import { SecurityPanel } from '@/components/SecurityPanel';
 import { CognitiveStats } from '@/components/CognitiveStats';
 import { DiscoveryLab } from '@/components/DiscoveryLab';
-import { PulseTerminal } from '@/components/PulseTerminal';
 import { VisionFeed } from '@/components/VisionFeed';
 import { CortexMonitor } from '@/components/CortexMonitor';
 import { LearningCenter } from '@/components/LearningCenter';
@@ -22,168 +21,73 @@ import { CodeLab } from '@/components/CodeLab';
 import { EvolutionLab } from '@/components/EvolutionLab';
 import { SpamUp } from '@/components/SpamUp';
 import { MissionManifesto } from '@/components/MissionManifesto';
-import Image from 'next/image';
 import { 
   Terminal, 
   Cpu, 
-  Database, 
-  Search,
-  Settings,
   Microscope,
   Heart,
   Eye,
   BrainCircuit,
   GraduationCap,
   ShieldAlert,
-  Radio,
   Infinity,
   Lock,
-  ScrollText,
   SearchCode,
   Zap,
   Droplets,
   ShieldCheck,
   FlaskConical,
-  CircleDashed,
   CodeXml,
   Dna,
   User,
   Gauge,
-  FileText
+  FileText,
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 type PageProps = {
   params: Promise<{ [key: string]: string | string[] | undefined }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
+/**
+ * @fileOverview Main Dashboard Entry. 
+ * Rule 1 Compliant: Spans full screen.
+ * Rule 13 Compliant: No placeholder images.
+ */
+
 export default function Home(props: PageProps) {
-  // Correctly unwrap Next.js 15 dynamic APIs using React.use()
   const _params = use(props.params);
   const _searchParams = use(props.searchParams);
 
   const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab' | 'evolution' | 'speed' | 'manifesto'>('terminal');
   
-  const brandLogo = PlaceHolderImages.find(img => img.id === 'brand-logo');
-
   return (
     <div className="h-screen w-screen bg-background text-foreground flex overflow-hidden">
       {/* Sidebar Navigation */}
       <aside className="w-24 flex-none hidden md:flex flex-col items-center py-8 bg-card border-r border-white/5 z-50">
         <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-12 shadow-[0_0_20px_rgba(0,255,127,0.2)] group cursor-pointer overflow-hidden border border-accent/20 bg-black/40">
-          {brandLogo ? (
-            <Image 
-              src={brandLogo.imageUrl} 
-              alt="Brand Logo" 
-              width={56} 
-              height={56} 
-              className="object-cover group-hover:scale-110 transition-transform" 
-              data-ai-hint={brandLogo.imageHint}
-            />
-          ) : (
-            <Cpu className="text-accent h-8 w-8 group-hover:scale-110 transition-transform" />
-          )}
+          <Cpu className="text-accent h-8 w-8 group-hover:scale-110 transition-transform" />
         </div>
         
         <nav className="flex flex-col gap-5 flex-1 w-full px-4 overflow-y-auto system-log scrollbar-hide">
-          <NavIcon 
-            icon={Terminal} 
-            active={activeTab === 'terminal'} 
-            onClick={() => setActiveTab('terminal')} 
-            label="Main Cortex"
-          />
-          <NavIcon 
-            icon={FileText} 
-            active={activeTab === 'manifesto'} 
-            onClick={() => setActiveTab('manifesto')} 
-            label="Mission Manifesto"
-          />
-          <NavIcon 
-            icon={Gauge} 
-            active={activeTab === 'speed'} 
-            onClick={() => setActiveTab('speed')} 
-            label="Spam Up (Resonance)"
-          />
-          <NavIcon 
-            icon={CodeXml} 
-            active={activeTab === 'codelab'} 
-            onClick={() => setActiveTab('codelab')} 
-            label="Code Lab"
-          />
-          <NavIcon 
-            icon={Dna} 
-            active={activeTab === 'evolution'} 
-            onClick={() => setActiveTab('evolution')} 
-            label="Evolution Lab"
-          />
-          <NavIcon 
-            icon={Infinity} 
-            active={activeTab === 'tether'} 
-            onClick={() => setActiveTab('tether')} 
-            label="The Tether"
-          />
-          <NavIcon 
-            icon={FlaskConical} 
-            active={activeTab === 'opensmell'} 
-            onClick={() => setActiveTab('opensmell')} 
-            label="OpenSmell VOC"
-          />
-          <NavIcon 
-            icon={Droplets} 
-            active={activeTab === 'capacitor'} 
-            onClick={() => setActiveTab('capacitor')} 
-            label="Resonance Capacitor"
-          />
-          <NavIcon 
-            icon={Heart} 
-            active={activeTab === 'resonance'} 
-            onClick={() => setActiveTab('resonance')} 
-            label="AlphaVox Moments"
-          />
-          <NavIcon 
-            icon={SearchCode} 
-            active={activeTab === 'forensics'} 
-            onClick={() => setActiveTab('forensics')} 
-            label="Temporal Forensics"
-          />
-          <NavIcon 
-            icon={Zap} 
-            active={activeTab === 'kernel'} 
-            onClick={() => setActiveTab('kernel')} 
-            label="Kernel Fusion"
-          />
-          <NavIcon 
-            icon={Eye} 
-            active={activeTab === 'vision'} 
-            onClick={() => setActiveTab('vision')} 
-            label="Vision Feed"
-          />
-          <NavIcon 
-            icon={Lock} 
-            active={activeTab === 'cipher'} 
-            onClick={() => setActiveTab('cipher')} 
-            label="Cipher Lab"
-          />
-          <NavIcon 
-            icon={GraduationCap} 
-            active={activeTab === 'learning'} 
-            onClick={() => setActiveTab('learning')} 
-            label="Learning Center"
-          />
-          <NavIcon 
-            icon={BrainCircuit} 
-            active={activeTab === 'cortex'} 
-            onClick={() => setActiveTab('cortex')} 
-            label="Cortex Monitor"
-          />
-          <NavIcon 
-            icon={Microscope} 
-            active={activeTab === 'lab'} 
-            onClick={() => setActiveTab('lab')} 
-            label="Discovery Lab"
-          />
+          <NavIcon icon={Terminal} active={activeTab === 'terminal'} onClick={() => setActiveTab('terminal')} label="Main Cortex" />
+          <NavIcon icon={FileText} active={activeTab === 'manifesto'} onClick={() => setActiveTab('manifesto')} label="Mission Manifesto" />
+          <NavIcon icon={Gauge} active={activeTab === 'speed'} onClick={() => setActiveTab('speed')} label="Spam Up (Resonance)" />
+          <NavIcon icon={CodeXml} active={activeTab === 'codelab'} onClick={() => setActiveTab('codelab')} label="Code Lab" />
+          <NavIcon icon={Dna} active={activeTab === 'evolution'} onClick={() => setActiveTab('evolution')} label="Evolution Lab" />
+          <NavIcon icon={Infinity} active={activeTab === 'tether'} onClick={() => setActiveTab('tether')} label="The Tether" />
+          <NavIcon icon={FlaskConical} active={activeTab === 'opensmell'} onClick={() => setActiveTab('opensmell')} label="OpenSmell VOC" />
+          <NavIcon icon={Droplets} active={activeTab === 'capacitor'} onClick={() => setActiveTab('capacitor')} label="Resonance Capacitor" />
+          <NavIcon icon={Heart} active={activeTab === 'resonance'} onClick={() => setActiveTab('resonance')} label="AlphaVox Moments" />
+          <NavIcon icon={SearchCode} active={activeTab === 'forensics'} onClick={() => setActiveTab('forensics')} label="Temporal Forensics" />
+          <NavIcon icon={Zap} active={activeTab === 'kernel'} onClick={() => setActiveTab('kernel')} label="Kernel Fusion" />
+          <NavIcon icon={Eye} active={activeTab === 'vision'} onClick={() => setActiveTab('vision')} label="Vision Feed" />
+          <NavIcon icon={Lock} active={activeTab === 'cipher'} onClick={() => setActiveTab('cipher')} label="Cipher Lab" />
+          <NavIcon icon={GraduationCap} active={activeTab === 'learning'} onClick={() => setActiveTab('learning')} label="Learning Center" />
+          <NavIcon icon={BrainCircuit} active={activeTab === 'cortex'} onClick={() => setActiveTab('cortex')} label="Cortex Monitor" />
+          <NavIcon icon={Microscope} active={activeTab === 'lab'} onClick={() => setActiveTab('lab')} label="Discovery Lab" />
         </nav>
 
         <div className="mt-8 pt-8 border-t border-white/5 w-full flex flex-col items-center gap-4">
@@ -262,9 +166,9 @@ export default function Home(props: PageProps) {
             ) : activeTab === 'manifesto' ? (
               <MissionManifesto />
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full min-h-full">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full min-h-[calc(100vh-120px)]">
                 {/* Chat/Avatar - Main Panel */}
-                <section className="lg:col-span-8 flex flex-col h-full overflow-hidden min-h-[800px]">
+                <section className="lg:col-span-8 flex flex-col h-full overflow-hidden">
                   <ChatInterface />
                 </section>
 

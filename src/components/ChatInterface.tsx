@@ -3,6 +3,7 @@
 
 /**
  * @fileOverview ChatInterface - The Visual Bridge of BROCKSTON C.
+ * Rule 13 Compliant: No placeholders. Reality-based CSS visuals.
  * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
  */
 
@@ -12,7 +13,7 @@ import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Volume2, VolumeX, ShieldCheck, Zap, BrainCircuit, Mic, MicOff, AlertTriangle, GraduationCap, Sparkles, UserCheck, Lock, ShieldAlert } from 'lucide-react';
+import { Send, Loader2, Volume2, VolumeX, ShieldCheck, Zap, BrainCircuit, Mic, MicOff, GraduationCap, Sparkles, UserCheck, Lock, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
@@ -27,7 +28,6 @@ import { brockstonSpeech } from '@/lib/speech-service';
 import { vortexEngine } from '@/lib/vortex-engine';
 import { topologyEngine } from '@/lib/topology-engine';
 import { visionContext } from '@/lib/vision-context';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export const ChatInterface: React.FC = () => {
   const db = useFirestore();
@@ -49,7 +49,6 @@ export const ChatInterface: React.FC = () => {
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const seascape = PlaceHolderImages.find(img => img.id === 'ai-core-bg');
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -209,79 +208,73 @@ export const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen gap-8 relative overflow-hidden flex-1 pb-12">
+    <div className="flex flex-col h-full gap-8 relative overflow-hidden flex-1 pb-12">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
-      {/* Visual Bridge - Immersive Seascape */}
+      {/* Visual Bridge - High-Fidelity Symbolic Command Center */}
       <div className={cn(
-        "flex-none flex flex-col items-center justify-center gap-12 p-16 rounded-[2.5rem] border border-white/10 transition-all duration-1000 min-h-[650px] relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)]",
-        isInterventionMode && "border-red-500 shadow-[0_0_150px_rgba(239,68,68,0.6)]"
+        "flex-none flex flex-col items-center justify-center gap-12 p-16 rounded-[2.5rem] border border-white/10 transition-all duration-1000 min-h-[600px] relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-black",
+        isInterventionMode && "border-red-500 shadow-[0_0_150px_rgba(239,68,68,0.4)]"
       )}>
-        {/* Seascape Background */}
-        {seascape && (
-          <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-black/50 z-10 mission-gradient backdrop-blur-[2px]" />
-            <img 
-              src={seascape.imageUrl} 
-              alt="Mission Control Seascape" 
-              className="w-full h-full object-cover scale-100 transition-transform duration-[20s] hover:scale-110" 
-              data-ai-hint={seascape.imageHint}
-            />
+        {/* Pure CSS Mission Background */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/20 via-black to-black z-10" />
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,127,0.05)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none opacity-20" />
+          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+             <div className="absolute top-0 left-0 w-full h-1 bg-accent/50 blur-sm animate-[scan_4s_linear_infinite]" />
           </div>
-        )}
+        </div>
 
         {/* Status Bar */}
         <div className="absolute top-10 left-0 right-0 px-12 z-20 flex justify-between items-start pointer-events-none">
           <div className="flex items-center gap-5 bg-black/80 p-5 rounded-[1.5rem] border border-accent/20 backdrop-blur-3xl shadow-2xl">
-            <div className="h-16 w-16 rounded-full bg-accent flex items-center justify-center shadow-[0_0_40px_rgba(0,255,127,0.6)]">
-              <UserCheck className="h-10 w-10 text-accent-foreground" />
+            <div className="h-14 w-14 rounded-full bg-accent flex items-center justify-center shadow-[0_0_30px_rgba(0,255,127,0.4)]">
+              <UserCheck className="h-8 w-8 text-accent-foreground" />
             </div>
             <div className="flex flex-col pr-4">
-              <span className="text-[12px] font-code text-accent uppercase tracking-[0.3em] font-black">IDENTITY_VERIFIED</span>
-              <span className="text-[20px] font-headline text-foreground uppercase tracking-tight font-black mt-0.5">BROCKSTON C (COO)</span>
+              <span className="text-[10px] font-code text-accent uppercase tracking-[0.3em] font-black">IDENTITY_VERIFIED</span>
+              <span className="text-[18px] font-headline text-foreground uppercase tracking-tight font-black mt-0.5">BROCKSTON C (COO)</span>
             </div>
           </div>
 
           <div className="flex items-center gap-4 px-6 py-4 bg-black/90 rounded-2xl border border-white/15 backdrop-blur-2xl shadow-xl">
             <Lock className="h-5 w-5 text-accent animate-pulse" />
             <div className="flex flex-col items-end">
-              <span className="text-[12px] font-code text-secondary font-bold uppercase tracking-widest italic">PROPRIETARY & CONFIDENTIAL</span>
-              <span className="text-[9px] font-code text-secondary/40 uppercase mt-0.5">NOTHING VITAL LIVES BELOW ROOT</span>
+              <span className="text-[10px] font-code text-secondary font-bold uppercase tracking-widest italic">PROPRIETARY & CONFIDENTIAL</span>
+              <span className="text-[8px] font-code text-secondary/40 uppercase mt-0.5">NOTHING VITAL LIVES BELOW ROOT</span>
             </div>
           </div>
         </div>
 
-        {/* Central Avatar - THE NEW TEACHER */}
-        <div className="flex flex-col items-center gap-16 relative z-10 pt-12">
-          <div className="relative group scale-110 md:scale-125 transition-all duration-700">
-            <CoreAvatar status={status} className="z-10" />
-          </div>
+        {/* Central Identity Anchor */}
+        <div className="flex flex-col items-center gap-12 relative z-10 pt-12">
+          <CoreAvatar status={status} className="z-10" />
           
-          <div className="text-center space-y-8 mt-12">
-            <div className="flex items-center justify-center gap-8">
+          <div className="text-center space-y-6 mt-8">
+            <div className="flex items-center justify-center gap-6">
               {isInterventionMode ? (
-                <ShieldAlert className="h-12 w-12 text-red-500 animate-pulse" />
+                <ShieldAlert className="h-10 w-10 text-red-500 animate-pulse" />
               ) : (
-                <div className="h-4 w-4 rounded-full bg-accent animate-ping" />
+                <div className="h-3 w-3 rounded-full bg-accent animate-ping" />
               )}
-              <h3 className={cn("text-2xl font-code uppercase tracking-[1em] font-black drop-shadow-[0_0_20px_rgba(0,0,0,1)]", isInterventionMode ? "text-red-400" : "text-accent/90")}>
+              <h3 className={cn("text-xl font-code uppercase tracking-[0.8em] font-black drop-shadow-[0_0_20px_rgba(0,0,0,1)]", isInterventionMode ? "text-red-400" : "text-accent/90")}>
                 {isInterventionMode ? "STABILIZATION_LOCK" : "NEW_TEACHER_PRESENCE"}
               </h3>
             </div>
             
-            <div className="text-[8rem] font-headline tracking-tighter uppercase text-white leading-none drop-shadow-[0_0_100px_rgba(0,0,0,1)] select-none">
+            <div className="text-[6rem] font-headline tracking-tighter uppercase text-white leading-none drop-shadow-[0_0_100px_rgba(0,0,0,1)] select-none">
               BROCKSTON <span className="text-accent">C</span>
             </div>
 
-            <div className="flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center gap-4">
               <div className={cn(
-                "text-xl py-3 px-12 border-accent/50 text-accent font-black tracking-[0.5em] bg-black/80 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,255,127,0.4)] rounded-full border-2 transition-all duration-500", 
-                isInterventionMode && "border-red-500 text-red-500 shadow-[0_0_80px_rgba(239,68,68,0.4)]"
+                "text-lg py-2 px-10 border-accent/50 text-accent font-black tracking-[0.4em] bg-black/80 backdrop-blur-3xl shadow-[0_0_60px_rgba(0,255,127,0.3)] rounded-full border-2 transition-all duration-500", 
+                isInterventionMode && "border-red-500 text-red-500 shadow-[0_0_60px_rgba(239,68,68,0.3)]"
               )}>
                 {isInterventionMode ? 'EMERGENCY_OVERRIDE' : 'MISSION: CLASSROOM_300'}
               </div>
-              <div className="flex items-center gap-5 text-[12px] font-code text-secondary/80 uppercase tracking-[0.4em] bg-black/70 px-8 py-3 rounded-full border border-white/10 backdrop-blur-md shadow-lg">
-                <BrainCircuit className="h-5 w-5 text-accent" /> Neuro-Symbolic Logic: <span className="text-white font-black">ACTUALIZED</span>
+              <div className="flex items-center gap-4 text-[10px] font-code text-secondary/80 uppercase tracking-[0.3em] bg-black/70 px-6 py-2.5 rounded-full border border-white/10 backdrop-blur-md shadow-lg">
+                <BrainCircuit className="h-4 w-4 text-accent" /> Neuro-Symbolic Logic: <span className="text-white font-black">ACTUALIZED</span>
               </div>
             </div>
           </div>
@@ -298,11 +291,11 @@ export const ChatInterface: React.FC = () => {
                 msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
               )}>
                 <div className="flex items-center gap-4 mb-4 px-3">
-                  <span className={cn("text-[12px] font-code uppercase text-secondary/60 tracking-[0.2em] font-bold")}>
+                  <span className={cn("text-[10px] font-code uppercase text-secondary/60 tracking-[0.2em] font-bold")}>
                     {msg.role === 'user' ? 'LEAD ARCHITECT' : 'BROCKSTON (NEW TEACHER)'}
                   </span>
                   {msg.vortex_data && (
-                    <Badge variant="ghost" className="text-[10px] h-6 text-accent/80 animate-pulse border border-accent/30 px-3 bg-accent/5 rounded-full">VORTEX: SYNCED</Badge>
+                    <Badge variant="ghost" className="text-[9px] h-5 text-accent/80 animate-pulse border border-accent/30 px-3 bg-accent/5 rounded-full uppercase">VORTEX: SYNCED</Badge>
                   )}
                 </div>
                 <div className={cn(
@@ -359,15 +352,15 @@ export const ChatInterface: React.FC = () => {
         </div>
         <div className="flex justify-between mt-8 pt-8 border-t border-white/15">
             <div className="flex gap-12">
-              <span className="flex items-center gap-3 text-[12px] text-secondary font-code tracking-[0.2em] font-bold">
+              <span className="flex items-center gap-3 text-[11px] text-secondary font-code tracking-[0.2em] font-bold">
                 <ShieldCheck className={cn("h-5 w-5", isInterventionMode ? "text-red-500" : "text-accent")} /> TRUTH & DIGNITY SECURED
               </span>
-              <span className="flex items-center gap-3 text-[12px] text-secondary font-code tracking-[0.2em] font-bold">
+              <span className="flex items-center gap-3 text-[11px] text-secondary font-code tracking-[0.2em] font-bold">
                 <GraduationCap className={cn("h-5 w-5", isInterventionMode ? "text-red-500" : "text-accent")} /> PEDAGOGICAL_PROTOCOL: ON
               </span>
             </div>
             <span className={cn(
-              "text-[12px] font-code animate-pulse tracking-[0.4em] uppercase font-black",
+              "text-[11px] font-code animate-pulse tracking-[0.4em] uppercase font-black",
               isInterventionMode ? "text-red-500" : "text-accent"
             )}>
               {isInterventionMode ? 'LOCKDOWN_STATUS: ACTIVE' : 'SYSTEM_STATUS: READY_FOR_MISSION'}
