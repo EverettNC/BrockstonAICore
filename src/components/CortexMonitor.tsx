@@ -5,7 +5,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BrainCircuit, Zap, Search, ShieldAlert, Cpu, Sparkles, Activity, Heart, User } from 'lucide-react';
+import { BrainCircuit, Zap, Search, ShieldAlert, Cpu, Sparkles, Activity, Heart, User, Languages, BookOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -17,10 +17,10 @@ export const CortexMonitor: React.FC = () => {
     valence: 0, arousal: 0.5, dominance: 0.5, frustration: 0, satisfaction: 0, uncertainty: 0.5, attention: 0.5
   });
 
-  const insightsQuery = useMemo(() => query(
-    collection(db, 'proactive_insights'),
+  const messagesQuery = useMemo(() => query(
+    collection(db, 'chats', 'v5-alpha-session', 'messages'),
     orderBy('timestamp', 'desc'),
-    limit(5)
+    limit(10)
   ), [db]);
 
   const behaviorQuery = useMemo(() => query(
@@ -29,12 +29,14 @@ export const CortexMonitor: React.FC = () => {
     limit(20)
   ), [db]);
 
-  const { data: insights } = useCollection<any>(insightsQuery);
+  const { data: messages } = useCollection<any>(messagesQuery);
   const { data: behaviorHistory } = useCollection<any>(behaviorQuery);
+
+  const lastMessage = messages?.[0];
+  const linguisticMetrics = lastMessage?.nlu_understanding?.linguistic_metrics;
 
   useEffect(() => {
     if (behaviorHistory && behaviorHistory.length > 0) {
-      // Process history to get current state (simplified cumulative logic)
       let state = { valence: 0, arousal: 0.5, dominance: 0.5, frustration: 0, satisfaction: 0, uncertainty: 0.5, attention: 0.5 };
       const sorted = [...behaviorHistory].reverse();
       sorted.forEach(obs => {
@@ -73,10 +75,10 @@ export const CortexMonitor: React.FC = () => {
               
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-[10px] uppercase font-code">
-                  <span className="text-secondary/60">Loyalty Index (Everett)</span>
-                  <span className="text-accent">100.0%</span>
+                  <span className="text-secondary/60">Linguistic Richness</span>
+                  <span className="text-accent">{((linguisticMetrics?.vocabularyRichness || 0) * 10).toFixed(1)}%</span>
                 </div>
-                <Progress value={100} className="h-1.5 bg-primary/20" />
+                <Progress value={(linguisticMetrics?.vocabularyRichness || 0) * 10} className="h-1.5 bg-primary/20" />
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
@@ -95,12 +97,16 @@ export const CortexMonitor: React.FC = () => {
           <Card className="bg-primary/5 border-white/5">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 text-[10px] text-accent font-code mb-2">
-                <ShieldAlert className="h-3 w-3" /> Behavioral Need Prediction
+                <ShieldAlert className="h-3 w-3" /> Linguistic Profile
               </div>
-              <div className="p-3 bg-accent/10 rounded border border-accent/20 text-center">
-                <div className="text-[9px] uppercase font-code text-accent/60 mb-1">Predicted Current Need</div>
-                <div className="text-sm font-headline text-accent uppercase tracking-tighter">
-                  {BehavioralInterpreter.predictNeeds(behavioralState).replace('_', ' ')}
+              <div className="space-y-3">
+                <MeshMetric label="Stem Reduction" value={linguisticMetrics?.stemReductionRatio || 0} color="bg-blue-400" />
+                <MeshMetric label="Lexical Diversity" value={linguisticMetrics?.typeTokenRatio || 0} color="bg-emerald-400" />
+                <div className="pt-2">
+                   <div className="text-[8px] uppercase font-code text-secondary/40 mb-1">Filler Word Impact</div>
+                   <div className="text-[10px] font-bold text-secondary">
+                     {(linguisticMetrics?.fillerWordRatio * 100 || 0).toFixed(1)}% Frequency
+                   </div>
                 </div>
               </div>
             </CardContent>
@@ -113,20 +119,20 @@ export const CortexMonitor: React.FC = () => {
             <CardHeader className="py-4 border-b border-white/5">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
                 <span className="flex items-center gap-2"><Activity className="h-3 w-3 text-accent" /> Social-Cognitive Mesh</span>
-                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent">Behavioral Diagnostics</Badge>
+                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent">Linguistic Patterns Active</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
-                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-2">Emotional Dimensions</h4>
+                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-2">Linguistic Dimensions</h4>
                 <MeshMetric label="Attention" value={behavioralState.attention} />
                 <MeshMetric label="Satisfaction" value={behavioralState.satisfaction} />
-                <MeshMetric label="Frustration" value={behavioralState.frustration} color="bg-red-500" />
-                <MeshMetric label="Uncertainty" value={behavioralState.uncertainty} color="bg-yellow-500" />
+                <MeshMetric label="Complexity" value={linguisticMetrics?.vocabularyRichness || 0} color="bg-purple-500" />
+                <MeshMetric label="Clarity" value={1 - (linguisticMetrics?.fillerWordRatio || 0)} color="bg-yellow-500" />
               </div>
               
               <div className="space-y-4">
-                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-2">Detected Patterns</h4>
+                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-2">Academic Patterns</h4>
                 <div className="space-y-2">
                   {detectedPatterns.map((p, i) => (
                     <div key={i} className="p-2 bg-primary/20 rounded border border-white/5 text-[10px] animate-in slide-in-from-right-2">
@@ -137,9 +143,15 @@ export const CortexMonitor: React.FC = () => {
                       <div className="text-secondary/80 italic">"{p.interpretation}"</div>
                     </div>
                   ))}
-                  {detectedPatterns.length === 0 && (
-                    <div className="h-24 flex items-center justify-center opacity-20 text-[10px] uppercase tracking-widest">
-                      No significant patterns detected
+                  {lastMessage?.nlu_understanding?.expert_match && (
+                    <div className="p-2 bg-accent/10 rounded border border-accent/20 text-[10px] animate-in zoom-in-95">
+                      <div className="flex items-center gap-2 mb-1">
+                        <BookOpen className="h-3 w-3 text-accent" />
+                        <span className="font-bold text-accent uppercase">Clinical Reference Match</span>
+                      </div>
+                      <div className="text-foreground/90 font-bold mb-1">{lastMessage.nlu_understanding.expert_match.title}</div>
+                      <div className="text-secondary/80 italic mb-2">"{lastMessage.nlu_understanding.expert_match.strategy}"</div>
+                      <div className="text-[8px] text-accent/60 uppercase">Source: {lastMessage.nlu_understanding.expert_match.references[0].journal} ({lastMessage.nlu_understanding.expert_match.references[0].year})</div>
                     </div>
                   )}
                 </div>
@@ -150,15 +162,15 @@ export const CortexMonitor: React.FC = () => {
           <Card className="bg-black/20 border-white/5 flex-none">
              <CardHeader className="py-2 px-4 border-b border-white/5">
                 <div className="text-[9px] uppercase font-code text-secondary/40 flex items-center gap-2">
-                  <User className="h-3 w-3" /> Recent Behavior Logs
+                  <Languages className="h-3 w-3" /> Recent Linguistic Logs
                 </div>
              </CardHeader>
              <CardContent className="p-2 h-32 overflow-y-auto system-log">
-                {behaviorHistory?.map((obs, i) => (
+                {messages?.slice(0, 5).map((msg, i) => (
                   <div key={i} className="text-[9px] font-code py-1 flex items-center justify-between border-b border-white/5 last:border-0">
-                    <span className="text-secondary/60">[{new Date(obs.timestamp).toLocaleTimeString()}]</span>
-                    <span className="text-accent/80 uppercase">{obs.type}</span>
-                    <span className="text-secondary/40">Int: {obs.intensity.toFixed(2)}</span>
+                    <span className="text-secondary/60">[{msg.timestamp?.toDate ? new Date(msg.timestamp.toDate()).toLocaleTimeString() : '...'}]</span>
+                    <span className="text-accent/80 uppercase truncate max-w-[200px]">{msg.content}</span>
+                    <span className="text-secondary/40">TTR: {(msg.nlu_understanding?.linguistic_metrics?.typeTokenRatio || 0).toFixed(2)}</span>
                   </div>
                 ))}
              </CardContent>
@@ -179,7 +191,7 @@ function MeshMetric({ label, value, color = "bg-accent" }: { label: string, valu
       <div className="h-1 w-full bg-primary/20 rounded-full overflow-hidden">
         <div 
           className={cn("h-full transition-all duration-500", color)} 
-          style={{ width: `${value * 100}%` }} 
+          style={{ width: `${Math.min(100, value * 100)}%` }} 
         />
       </div>
     </div>

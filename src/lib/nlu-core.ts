@@ -1,20 +1,22 @@
 /**
  * © 2025 The Christman AI Project. All rights reserved.
  * 
- * This code is released as part of a trauma-informed, dignity-first AI ecosystem
- * designed to protect, empower, and elevate vulnerable populations.
- * 
- * By using, modifying, or distributing this software, you agree to uphold the following:
- * 1. Truth — No deception, no manipulation.
- * 2. Dignity — Respect the autonomy and humanity of all users.
- * 3. Protection — Never use this to exploit or harm vulnerable individuals.
- * 4. Transparency — Disclose all modifications and contributions clearly.
- * 5. No Erasure — Preserve the mission and ethical origin of this work.
- * 
- * This is not just code. This is redemption in code.
- * Contact: lumacognify@thechristmanaiproject.com
- * https://thechristmanaiproject.com
+ * NLU Core with Linguistic Pattern Analysis.
  */
+
+import { stemmingService, LinguisticMetrics } from './stemming-service';
+import { searchExpertise } from './nonverbal-expertise';
+
+export interface NLUUnderstanding {
+  text: string;
+  processed: boolean;
+  understanding: string;
+  timestamp: string;
+  mission_alignment: string;
+  linguistic_metrics: LinguisticMetrics;
+  filler_words: string[];
+  expert_match?: any;
+}
 
 export class NLUCore {
   initialized: boolean;
@@ -26,22 +28,24 @@ export class NLUCore {
   /**
    * Understand the meaning of user input within the Christman AI context.
    */
-  understand(text: string) {
+  understand(text: string): NLUUnderstanding {
+    const analysis = stemmingService.analyze(text);
+    const expertKnowledge = searchExpertise(text);
+
     return {
       text,
       processed: true,
-      understanding: `Understanding provided intent: ${text}`,
+      understanding: `Analyzing intent: ${text}`,
       timestamp: new Date().toISOString(),
-      mission_alignment: "How can we help you love yourself more?"
+      mission_alignment: "How can we help you love yourself more?",
+      linguistic_metrics: analysis.metrics,
+      filler_words: analysis.fillerWords,
+      expert_match: expertKnowledge
     };
   }
 
-  /**
-   * Internal processing logic mirroring the core NLU cycle.
-   */
   process(text: string): string {
-    // In the real system, this interacts with the LLM via Genkit flows
-    return `(NLU understood: '${text}')`;
+    return `(NLU analyzed: '${text}' | Richness: ${stemmingService.analyze(text).metrics.vocabularyRichness.toFixed(2)})`;
   }
 }
 
