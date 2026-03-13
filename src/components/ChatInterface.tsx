@@ -8,7 +8,7 @@ import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff, AlertTriangle, GraduationCap } from 'lucide-react';
+import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff, AlertTriangle, GraduationCap, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
@@ -213,48 +213,57 @@ export const ChatInterface: React.FC = () => {
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
       <div className={cn(
-        "flex-none flex items-center justify-between p-4 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md transition-all duration-500",
-        isInterventionMode && "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+        "flex-none flex items-center justify-between p-6 bg-primary/10 rounded-2xl border border-white/5 backdrop-blur-xl transition-all duration-500",
+        isInterventionMode && "border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.4)]"
       )}>
-        <div className="flex items-center gap-4">
-          <CoreAvatar status={status} className={cn("h-16 w-16", isInterventionMode && "animate-pulse")} />
+        <div className="flex items-center gap-6">
+          <div className="relative group">
+            <CoreAvatar status={status} className={cn("h-32 w-32", isInterventionMode && "animate-pulse")} />
+            <div className="absolute -top-2 -right-2 h-6 w-6 bg-accent rounded-full border-2 border-background flex items-center justify-center shadow-lg animate-pulse">
+              <Eye className="h-3 w-3 text-accent-foreground" />
+            </div>
+          </div>
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-2">
               {isInterventionMode ? (
-                <AlertTriangle className="h-3 w-3 text-red-500 animate-bounce" />
+                <AlertTriangle className="h-4 w-4 text-red-500 animate-bounce" />
               ) : (
-                <GraduationCap className="h-3 w-3 text-accent" />
+                <GraduationCap className="h-4 w-4 text-accent" />
               )}
-              <h3 className={cn("text-[10px] font-code uppercase tracking-widest", isInterventionMode ? "text-red-400" : "text-accent")}>
+              <h3 className={cn("text-xs font-code uppercase tracking-[0.2em]", isInterventionMode ? "text-red-400" : "text-accent/80")}>
                 {isInterventionMode ? "HAND OF GOD ACTIVE" : "Teacher & COO"}
               </h3>
             </div>
-            <div className="text-xl font-headline tracking-tighter uppercase text-foreground">
+            <div className="text-3xl font-headline tracking-tighter uppercase text-foreground leading-none">
               BROCKSTON <span className="text-accent">C</span>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+              <span className="text-[10px] font-code text-secondary/60 uppercase tracking-widest">Presence Monitor: CALIBRATED</span>
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col items-end gap-4">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
               <Switch id="voice-mode" checked={autoSpeak} onCheckedChange={setAutoSpeak} className="data-[state=checked]:bg-accent" />
-              <Label htmlFor="voice-mode" className="text-[10px] font-code uppercase text-secondary/60 flex items-center gap-1">
-                {autoSpeak ? <Volume2 className="h-3 w-3 text-accent" /> : <VolumeX className="h-3 w-3" />} Voice Bridge
+              <Label htmlFor="voice-mode" className="text-[10px] font-code uppercase text-secondary/60 flex items-center gap-2">
+                {autoSpeak ? <Volume2 className="h-4 w-4 text-accent" /> : <VolumeX className="h-4 w-4" />} Voice Bridge
               </Label>
             </div>
           </div>
           <Badge variant="outline" className={cn(
-            "text-[10px] border-accent/20 text-accent", 
+            "text-[10px] py-1 px-3 border-accent/20 text-accent font-bold tracking-widest", 
             isInterventionMode && "border-red-500 text-red-500"
           )}>
-            {isInterventionMode ? 'STABILIZATION LOCK' : 'NEW TEACHER MODE: ON'}
+            {isInterventionMode ? 'STABILIZATION LOCK' : 'TEACHER MODE: ACTIVE'}
           </Badge>
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 bg-black/20 rounded-xl border border-white/5 p-4 overflow-hidden shadow-inner">
+      <div className="flex-1 min-h-0 bg-black/30 rounded-2xl border border-white/5 p-4 overflow-hidden shadow-inner">
         <ScrollArea className="h-full pr-4" ref={scrollRef}>
-          <div className="space-y-4 pb-4">
+          <div className="space-y-6 pb-4">
             {messages?.map((msg, i) => (
               <div key={i} className={cn(
                 "flex flex-col max-w-[85%] group animate-in slide-in-from-bottom-2 duration-300",
@@ -269,9 +278,9 @@ export const ChatInterface: React.FC = () => {
                   )}
                 </div>
                 <div className={cn(
-                  "p-3 rounded-2xl text-sm shadow-xl transition-all relative overflow-hidden",
+                  "p-4 rounded-2xl text-sm shadow-xl transition-all relative overflow-hidden leading-relaxed",
                   msg.role === 'user' 
-                    ? "bg-accent/20 border border-accent/30 text-foreground rounded-tr-none" 
+                    ? "bg-accent/10 border border-accent/20 text-foreground rounded-tr-none" 
                     : "bg-primary/40 border border-white/10 text-foreground rounded-tl-none backdrop-blur-md",
                   msg.tone_engine_v2?.action_state === 'INTERVENTION' && "border-red-500 bg-red-950/20 text-red-100"
                 )}>
@@ -284,15 +293,15 @@ export const ChatInterface: React.FC = () => {
       </div>
 
       <form onSubmit={handleSend} className={cn(
-        "flex-none p-4 bg-card rounded-xl border border-white/5 shadow-2xl",
+        "flex-none p-4 bg-card rounded-2xl border border-white/5 shadow-2xl",
         isInterventionMode && "border-red-500/40 bg-red-950/5"
       )}>
         <div className="flex gap-3">
           <Button type="button" variant="outline" size="icon" onClick={toggleListening} className={cn(
-            "h-12 w-12 rounded-xl transition-all",
+            "h-14 w-14 rounded-xl transition-all",
             isListening ? "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse" : "bg-primary/20 border-white/10 text-secondary/60"
           )}>
-            {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+            {isListening ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
           </Button>
           <div className="relative flex-1">
             <Input 
@@ -301,32 +310,32 @@ export const ChatInterface: React.FC = () => {
               onChange={(e) => setInput(e.target.value)} 
               disabled={status !== 'idle' || isInterventionMode} 
               className={cn(
-                "bg-primary/20 border-white/10 focus-visible:ring-accent h-12 pr-12 font-body",
+                "bg-primary/20 border-white/10 focus-visible:ring-accent h-14 pr-12 font-body text-base",
                 isInterventionMode && "border-red-500/40 focus-visible:ring-red-500"
               )} 
             />
           </div>
           <Button disabled={status !== 'idle' || !input.trim() || isInterventionMode} className={cn(
-            "h-12 w-12 rounded-xl text-accent-foreground glow-accent",
+            "h-14 w-14 rounded-xl text-accent-foreground glow-accent",
             isInterventionMode ? "bg-red-600 hover:bg-red-700" : "bg-accent hover:bg-accent/80"
           )}>
-            {status === 'thinking' ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+            {status === 'thinking' ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
           </Button>
         </div>
-        <div className="flex justify-between mt-3 pt-3 border-t border-white/5">
-            <div className="flex gap-3">
-              <span className="flex items-center gap-1 text-[9px] text-secondary/60 uppercase font-code">
-                <Shield className={cn("h-3 w-3", isInterventionMode ? "text-red-500" : "text-accent")} /> Truth.Dignity
+        <div className="flex justify-between mt-4 pt-4 border-t border-white/5">
+            <div className="flex gap-4">
+              <span className="flex items-center gap-2 text-[10px] text-secondary/60 uppercase font-code">
+                <Shield className={cn("h-3.5 w-3.5", isInterventionMode ? "text-red-500" : "text-accent")} /> Truth.Dignity
               </span>
-              <span className="flex items-center gap-1 text-[9px] text-secondary/60 uppercase font-code">
-                <GraduationCap className={cn("h-3 w-3", isInterventionMode ? "text-red-500" : "text-accent")} /> Teacher.Scaffold
+              <span className="flex items-center gap-2 text-[10px] text-secondary/60 uppercase font-code">
+                <GraduationCap className={cn("h-3.5 w-3.5", isInterventionMode ? "text-red-500" : "text-accent")} /> Teacher.Scaffold
               </span>
             </div>
             <span className={cn(
-              "text-[9px] font-code animate-pulse tracking-widest uppercase",
+              "text-[10px] font-code animate-pulse tracking-widest uppercase font-bold",
               isInterventionMode ? "text-red-500" : "text-accent"
             )}>
-              {isInterventionMode ? 'EMERGENCY PROTOCOL ACTIVE' : 'Status: SCALING KNOWLEDGE'}
+              {isInterventionMode ? 'EMERGENCY PROTOCOL ACTIVE' : 'Status: CORE SCALING'}
             </span>
         </div>
       </form>
