@@ -28,6 +28,21 @@
       },
       "required": ["role", "content", "timestamp"]
     },
+    "ResearchDiscovery": {
+      "title": "Research Discovery",
+      "description": "A collaborative breakthrough record between Everett and Derek.",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "research_area": { "type": "string" },
+        "insight": { "type": "string" },
+        "derek_analysis": { "type": "string" },
+        "hypotheses": { "type": "array", "items": { "type": "object" } },
+        "publication_potential": { "type": "object" },
+        "next_steps": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["timestamp", "research_area", "insight"]
+    },
     "SoulForgeState": {
       "title": "Soul Forge State",
       "description": "Biological factor weights for adaptive learning based on emotional salience.",
@@ -59,6 +74,10 @@
     "/chats/{chatId}/messages/{messageId}": {
       "schema": "#/entities/Message",
       "description": "Individual messages within a specific chat session."
+    },
+    "/research_discoveries/{discoveryId}": {
+      "schema": "#/entities/ResearchDiscovery",
+      "description": "Collaborative medical research breakthroughs."
     },
     "/cognitive_core/{coreId}": {
       "schema": "#/entities/SoulForgeState",
