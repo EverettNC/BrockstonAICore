@@ -11,7 +11,7 @@ import wav from 'wav';
 
 const TTSInputSchema = z.object({
   text: z.string(),
-  specialist: z.string().optional().default('derek'),
+  specialist: z.string().optional().default('brockston'),
   fusion_prob: z.number().optional().default(0.8),
   valence: z.number().optional().default(0.5),
 });
@@ -21,8 +21,8 @@ const TTSOutputSchema = z.object({
 });
 
 const VOICE_MAPPING: Record<string, string> = {
-  derek: 'Algenib',
   brockston: 'Algenib',
+  derek: 'Algenib',
   arthur: 'Algenib',
   alphavox: 'Algenib',
   alphawolf: 'Algenib',
@@ -43,14 +43,13 @@ const ttsFlow = ai.defineFlow(
   },
   async (input) => {
     const { text, specialist, fusion_prob, valence } = input;
-    
     const voiceName = VOICE_MAPPING[specialist.toLowerCase()] || 'Algenib';
     
     // Quantum Prosody Logic
-    // Confidence (fusion_prob) affects speaking rate/urgency
-    // Valence (emotion) affects pitch/warmth
-    const speed = fusion_prob > 0.7 ? 1.0 : 0.85;
-    const pitch = 1.0 + (valence - 0.5) * 0.2; // Higher valence = slightly higher pitch
+    // Rate: Confidence (fusion_prob) affects speed (0.7+ is normal, below is slow)
+    // Pitch: Valence (emotion) affects pitch (+/- 10%)
+    const rate = fusion_prob > 0.7 ? "medium" : "slow";
+    const pitch = valence > 0.7 ? "happy" : valence < 0.3 ? "serious" : "steady";
 
     const { media } = await ai.generate({
       model: googleAI.model('gemini-2.5-flash-preview-tts'),
@@ -62,12 +61,10 @@ const ttsFlow = ai.defineFlow(
           },
         },
       },
-      prompt: `Speak this message with a ${valence > 0.7 ? 'happy' : valence < 0.3 ? 'calm and slow' : 'steady'} tone: ${text}`,
+      prompt: `Speak this text at a ${rate} speed with a ${pitch} tone: ${text}`,
     });
 
-    if (!media) {
-      throw new Error('Ultimate Voice failure: No media returned');
-    }
+    if (!media) throw new Error('Voice bridge failure');
 
     const audioBuffer = Buffer.from(
       media.url.substring(media.url.indexOf(',') + 1),
@@ -87,21 +84,11 @@ async function toWav(
   sampleWidth = 2
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const writer = new wav.Writer({
-      channels,
-      sampleRate: rate,
-      bitDepth: sampleWidth * 8,
-    });
-
+    const writer = new wav.Writer({ channels, sampleRate: rate, bitDepth: sampleWidth * 8 });
     let bufs = [] as any[];
     writer.on('error', reject);
-    writer.on('data', function (d) {
-      bufs.push(d);
-    });
-    writer.on('end', function () {
-      resolve(Buffer.concat(bufs).toString('base64'));
-    });
-
+    writer.on('data', (d) => bufs.push(d));
+    writer.on('end', () => resolve(Buffer.concat(bufs).toString('base64')));
     writer.write(pcmData);
     writer.end();
   });

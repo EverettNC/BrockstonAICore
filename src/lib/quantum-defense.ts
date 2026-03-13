@@ -1,10 +1,9 @@
-
 'use client';
 
 /**
  * @fileOverview Quantum Defense Layer v2.0
  * Post-Quantum Cryptographic Shield for Christman AI Project.
- * Implements ML-KEM (FIPS 203) and Hybrid Signature logic simulations.
+ * Implements ML-KEM (FIPS 203) logic simulations for long-term PHI protection.
  */
 
 export enum PatientDataClass {
@@ -28,6 +27,7 @@ export const RETENTION_SCHEDULE: Record<PatientDataClass, number> = {
   [PatientDataClass.ULTRA]: 20
 };
 
+// Auto-classify by specialist
 export const SPECIALIST_CLASSIFICATION: Record<string, PatientDataClass> = {
   "siera": PatientDataClass.ULTRA,
   "inferno": PatientDataClass.ULTRA,
@@ -35,6 +35,7 @@ export const SPECIALIST_CLASSIFICATION: Record<string, PatientDataClass> = {
   "alphavox": PatientDataClass.CRITICAL,
   "arthur": PatientDataClass.CRITICAL,
   "serafinia": PatientDataClass.SENSITIVE,
+  "brockston": PatientDataClass.SENSITIVE,
   "derek": PatientDataClass.SENSITIVE,
   "general": PatientDataClass.SENSITIVE
 };
@@ -50,8 +51,9 @@ export interface QuantumShieldMetadata {
 
 /**
  * Automatically shields a memory payload based on specialist classification.
+ * "Harvest Now, Decrypt Later" defense for vulnerable populations.
  */
-export function shieldPayload(specialist: string = 'derek'): QuantumShieldMetadata {
+export function shieldPayload(specialist: string = 'brockston'): QuantumShieldMetadata {
   const dataClass = SPECIALIST_CLASSIFICATION[specialist.toLowerCase()] || PatientDataClass.SENSITIVE;
   
   return {

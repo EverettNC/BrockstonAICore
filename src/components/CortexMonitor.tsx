@@ -1,11 +1,10 @@
-
 "use client";
 
 import React, { useMemo, useEffect, useState } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BrainCircuit, Zap, Search, ShieldAlert, Cpu, Sparkles, Activity, Heart, User, Languages, BookOpen } from 'lucide-react';
+import { BrainCircuit, ShieldAlert, BookOpen, Activity, Languages, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -18,7 +17,7 @@ export const CortexMonitor: React.FC = () => {
   });
 
   const messagesQuery = useMemo(() => query(
-    collection(db, 'chats', 'v5-alpha-session', 'messages'),
+    collection(db, 'chats', 'ultimate-v5-session', 'messages'),
     orderBy('timestamp', 'desc'),
     limit(10)
   ), [db]);
@@ -57,7 +56,7 @@ export const CortexMonitor: React.FC = () => {
         
         {/* Logic Core Status */}
         <section className="lg:col-span-4 flex flex-col gap-4">
-          <Card className="bg-card/50 border-white/5 border-accent/20">
+          <Card className="bg-card/50 border-white/5 border-accent/20 shadow-[0_0_15px_rgba(0,255,127,0.05)]">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm uppercase tracking-widest text-accent flex items-center gap-2">
                 <BrainCircuit className="h-4 w-4" /> Brockston Cortex v5
@@ -82,19 +81,19 @@ export const CortexMonitor: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="p-3 bg-primary/20 rounded-lg border border-white/5 text-center">
-                  <div className="text-[8px] uppercase font-code text-secondary/60 mb-1">Knowledge Mesh</div>
+                <div className="p-3 bg-primary/20 rounded-lg border border-white/5 text-center group cursor-default">
+                  <div className="text-[8px] uppercase font-code text-secondary/60 mb-1 group-hover:text-accent transition-colors">Knowledge Mesh</div>
                   <div className="text-xs font-bold text-accent">SYNCHRONIZED</div>
                 </div>
-                <div className="p-3 bg-primary/20 rounded-lg border border-white/5 text-center">
-                  <div className="text-[8px] uppercase font-code text-secondary/60 mb-1">Ethics Gate</div>
+                <div className="p-3 bg-primary/20 rounded-lg border border-white/5 text-center group cursor-default">
+                  <div className="text-[8px] uppercase font-code text-secondary/60 mb-1 group-hover:text-accent transition-colors">Ethics Gate</div>
                   <div className="text-xs font-bold text-accent">LOCKED</div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-primary/5 border-white/5">
+          <Card className="bg-primary/5 border-white/5 border-blue-500/10">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 text-[10px] text-accent font-code mb-2">
                 <ShieldAlert className="h-3 w-3" /> Linguistic Profile
@@ -115,16 +114,19 @@ export const CortexMonitor: React.FC = () => {
 
         {/* Behavioral Mesh & Patterns */}
         <section className="lg:col-span-8 flex flex-col gap-4 min-h-0">
-          <Card className="bg-black/40 border-white/5 flex-1">
-            <CardHeader className="py-4 border-b border-white/5">
+          <Card className="bg-black/40 border-white/5 flex-1 relative overflow-hidden group">
+            <div className="absolute -right-16 -top-16 opacity-5 group-hover:scale-110 transition-transform">
+              <BrainCircuit className="h-64 w-64 text-accent" />
+            </div>
+            <CardHeader className="py-4 border-b border-white/5 relative z-10">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
                 <span className="flex items-center gap-2"><Activity className="h-3 w-3 text-accent" /> Social-Cognitive Mesh</span>
-                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent">Linguistic Patterns Active</Badge>
+                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent animate-pulse">Linguistic Patterns Active</Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
               <div className="space-y-4">
-                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-2">Linguistic Dimensions</h4>
+                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-2 border-b border-white/5 pb-1">Linguistic Dimensions</h4>
                 <MeshMetric label="Attention" value={behavioralState.attention} />
                 <MeshMetric label="Satisfaction" value={behavioralState.satisfaction} />
                 <MeshMetric label="Complexity" value={linguisticMetrics?.vocabularyRichness || 0} color="bg-purple-500" />
@@ -132,17 +134,21 @@ export const CortexMonitor: React.FC = () => {
               </div>
               
               <div className="space-y-4">
-                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-2">Academic Patterns</h4>
+                <h4 className="text-[10px] uppercase font-code text-secondary/60 mb-2 border-b border-white/5 pb-1">Academic Patterns</h4>
                 <div className="space-y-2">
-                  {detectedPatterns.map((p, i) => (
-                    <div key={i} className="p-2 bg-primary/20 rounded border border-white/5 text-[10px] animate-in slide-in-from-right-2">
+                  {detectedPatterns.length > 0 ? detectedPatterns.map((p, i) => (
+                    <div key={i} className="p-2 bg-primary/20 rounded border border-white/5 text-[10px] animate-in slide-in-from-right-2 hover:border-accent/20 transition-all">
                       <div className="flex justify-between items-center mb-1">
                         <span className="font-bold text-accent uppercase">{p.id.replace('_', ' ')}</span>
                         <span className="text-secondary/40">{(p.confidence * 100).toFixed(0)}% Conf</span>
                       </div>
                       <div className="text-secondary/80 italic">"{p.interpretation}"</div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-[9px] text-secondary/40 font-code p-2 text-center border border-dashed border-white/5 rounded">
+                      Awaiting Pattern Detection...
+                    </div>
+                  )}
                   {lastMessage?.nlu_understanding?.expert_match && (
                     <div className="p-2 bg-accent/10 rounded border border-accent/20 text-[10px] animate-in zoom-in-95">
                       <div className="flex items-center gap-2 mb-1">
@@ -159,7 +165,7 @@ export const CortexMonitor: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-black/20 border-white/5 flex-none">
+          <Card className="bg-black/20 border-white/5 flex-none shadow-inner">
              <CardHeader className="py-2 px-4 border-b border-white/5">
                 <div className="text-[9px] uppercase font-code text-secondary/40 flex items-center gap-2">
                   <Languages className="h-3 w-3" /> Recent Linguistic Logs
@@ -167,10 +173,10 @@ export const CortexMonitor: React.FC = () => {
              </CardHeader>
              <CardContent className="p-2 h-32 overflow-y-auto system-log">
                 {messages?.slice(0, 5).map((msg, i) => (
-                  <div key={i} className="text-[9px] font-code py-1 flex items-center justify-between border-b border-white/5 last:border-0">
+                  <div key={i} className="text-[9px] font-code py-1.5 flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors px-2 rounded">
                     <span className="text-secondary/60">[{msg.timestamp?.toDate ? new Date(msg.timestamp.toDate()).toLocaleTimeString() : '...'}]</span>
-                    <span className="text-accent/80 uppercase truncate max-w-[200px]">{msg.content}</span>
-                    <span className="text-secondary/40">TTR: {(msg.nlu_understanding?.linguistic_metrics?.typeTokenRatio || 0).toFixed(2)}</span>
+                    <span className="text-accent/80 uppercase truncate flex-1 mx-4">{msg.content}</span>
+                    <Badge variant="outline" className="text-[8px] h-4 border-accent/20 text-accent/60">TTR: {(msg.nlu_understanding?.linguistic_metrics?.typeTokenRatio || 0).toFixed(2)}</Badge>
                   </div>
                 ))}
              </CardContent>
@@ -183,14 +189,14 @@ export const CortexMonitor: React.FC = () => {
 
 function MeshMetric({ label, value, color = "bg-accent" }: { label: string, value: number, color?: string }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5 group">
       <div className="flex justify-between items-center text-[9px] font-code uppercase">
-        <span className="text-secondary/60">{label}</span>
-        <span className="text-foreground">{(value * 100).toFixed(0)}%</span>
+        <span className="text-secondary/60 group-hover:text-accent transition-colors">{label}</span>
+        <span className="text-foreground font-bold">{(value * 100).toFixed(0)}%</span>
       </div>
-      <div className="h-1 w-full bg-primary/20 rounded-full overflow-hidden">
+      <div className="h-1 w-full bg-primary/20 rounded-full overflow-hidden shadow-inner">
         <div 
-          className={cn("h-full transition-all duration-500", color)} 
+          className={cn("h-full transition-all duration-1000 ease-out", color)} 
           style={{ width: `${Math.min(100, value * 100)}%` }} 
         />
       </div>

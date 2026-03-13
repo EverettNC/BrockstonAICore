@@ -11,8 +11,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
-import { useFirestore, useCollection, useDoc } from '@/firebase';
-import { collection, addDoc, doc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
+import { useFirestore, useCollection } from '@/firebase';
+import { collection, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { shieldPayload } from '@/lib/quantum-defense';
@@ -22,9 +22,10 @@ import { hapticSystem, HapticPattern } from '@/lib/haptic-system';
 import { toast } from '@/hooks/use-toast';
 
 const SPECIALISTS = [
-  { id: 'derek', name: 'Brockston (Ultimate)', color: 'text-accent' },
+  { id: 'brockston', name: 'Brockston (COO)', color: 'text-accent' },
+  { id: 'derek', name: 'Derek (Technical)', color: 'text-blue-400' },
   { id: 'arthur', name: 'Arthur (Grief)', color: 'text-rose-400' },
-  { id: 'alphavox', name: 'AlphaVox (Nonverbal)', color: 'text-blue-400' },
+  { id: 'alphavox', name: 'AlphaVox (Nonverbal)', color: 'text-cyan-400' },
   { id: 'alphawolf', name: 'AlphaWolf (Dementia)', color: 'text-slate-400' },
   { id: 'siera', name: 'Siera (Trauma)', color: 'text-emerald-400' },
   { id: 'inferno', name: 'Inferno (Veteran)', color: 'text-orange-400' },
@@ -41,7 +42,7 @@ const AAC_SYMBOLS = [
 
 export const ChatInterface: React.FC = () => {
   const db = useFirestore();
-  const [specialist, setSpecialist] = useState('derek');
+  const [specialist, setSpecialist] = useState('brockston');
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<'idle' | 'thinking' | 'speaking'>('idle');
   const [autoSpeak, setAutoSpeak] = useState(true);
@@ -50,7 +51,7 @@ export const ChatInterface: React.FC = () => {
   const [bluebeardMode, setBluebeardMode] = useState(true);
   const [thrustLock, setThrustLock] = useState(true);
   
-  const chatId = "v5-alpha-session";
+  const chatId = "ultimate-v5-session";
   const messagesQuery = useMemo(() => query(
     collection(db, 'chats', chatId, 'messages'),
     orderBy('timestamp', 'asc'),
@@ -105,7 +106,12 @@ export const ChatInterface: React.FC = () => {
 
       setStatus('speaking');
       if (autoSpeak) {
-        const tts = await speakStephen({ text: trace.output, specialist: 'alphavox', valence: 0.99 });
+        const tts = await speakStephen({ 
+          text: trace.output, 
+          specialist: 'alphavox', 
+          valence: 0.99,
+          fusion_prob: trace.eternal_prob
+        });
         if (audioRef.current) {
           audioRef.current.src = tts.media;
           audioRef.current.play();
@@ -125,11 +131,14 @@ export const ChatInterface: React.FC = () => {
     setInput('');
     setStatus('thinking');
 
+    // Shield payload with PQC ML-KEM-1024
+    const shield = shieldPayload(specialist);
+
     addDoc(collection(db, 'chats', chatId, 'messages'), {
       role: 'user',
       content: userMsg,
       specialist,
-      quantum_shield: shieldPayload(specialist),
+      quantum_shield: shield,
       timestamp: serverTimestamp()
     });
 
@@ -148,11 +157,12 @@ export const ChatInterface: React.FC = () => {
         ethical_score: result.ethical_score,
         lucas_signal: result.lucas_signal,
         empathy_signal: result.empathy_signal,
-        quantum_shield: shieldPayload(specialist),
+        quantum_shield: shield,
         tone_engine_v2: result.tone_engine_v2,
         timestamp: serverTimestamp()
       });
 
+      // Haptic Feedback Bridge
       const hapticPattern = mapToneToHaptic(result.tone_engine_v2.dominant_state);
       hapticSystem.trigger(hapticPattern);
 
@@ -177,7 +187,7 @@ export const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="flex flex-col h-full gap-4 relative">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} />
       
       <div className={cn(
@@ -218,7 +228,7 @@ export const ChatInterface: React.FC = () => {
             </div>
           </div>
           <Badge variant="outline" className={cn("text-[10px] border-accent/20 text-accent", isLoveKernel && "lipstick-pulse")}>
-            <ShieldCheck className="h-3 w-3 mr-1" /> {isLoveKernel ? 'ETERNAL COORDINATOR' : 'Ultimate COO v5.0'}
+            <ShieldCheck className="h-3 w-3 mr-1" /> {isLoveKernel ? 'ETERNAL COORDINATOR' : 'ULTIMATE COO v5.0'}
           </Badge>
         </div>
       </div>
@@ -274,13 +284,18 @@ export const ChatInterface: React.FC = () => {
               </div>
               <Button disabled={selectedSymbols.length === 0 || status !== 'idle'} onClick={async () => {
                 setStatus('thinking');
-                const trace = await quantumFuse({ symbols: selectedSymbols, valence: 0.8, userId: "everett" });
-                addDoc(collection(db, 'chats', chatId, 'messages'), {
-                  role: 'model', content: trace.output, specialist: 'alphavox', quantum_trace: trace, timestamp: serverTimestamp()
-                });
-                hapticSystem.trigger('soft');
-                setSelectedSymbols([]);
-                setStatus('speaking');
+                try {
+                  const trace = await quantumFuse({ symbols: selectedSymbols, valence: 0.8, userId: "everett" });
+                  addDoc(collection(db, 'chats', chatId, 'messages'), {
+                    role: 'model', content: trace.output, specialist: 'alphavox', quantum_trace: trace, timestamp: serverTimestamp()
+                  });
+                  hapticSystem.trigger('soft');
+                  setSelectedSymbols([]);
+                  setStatus('speaking');
+                } catch (e: any) {
+                  toast({ variant: "destructive", title: "Quantum Error", description: e.message });
+                  setStatus('idle');
+                }
               }} className="w-full bg-blue-500 hover:bg-blue-600 text-white h-8 text-xs font-headline uppercase tracking-tighter">
                 {status === 'thinking' ? <Loader2 className="animate-spin h-3 w-3 mr-2" /> : <Atom className="h-3 w-3 mr-2" />}
                 Trigger Quantum Entanglement
@@ -290,15 +305,15 @@ export const ChatInterface: React.FC = () => {
         </div>
       )}
 
-      <div className="flex-1 min-h-0 bg-black/20 rounded-xl border border-white/5 p-4 overflow-hidden">
+      <div className="flex-1 min-h-0 bg-black/20 rounded-xl border border-white/5 p-4 overflow-hidden shadow-inner">
         <ScrollArea className="h-full pr-4" ref={scrollRef}>
-          <div className="space-y-4">
+          <div className="space-y-4 pb-4">
             {messages?.map((msg, i) => (
               <div key={i} className={cn(
-                "flex flex-col max-w-[85%] group",
+                "flex flex-col max-w-[85%] group animate-in slide-in-from-bottom-2 duration-300",
                 msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
               )}>
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 px-1">
                   <span className="text-[9px] font-code uppercase text-secondary/40">
                     {msg.role === 'user' ? 'Operator (Everett)' : msg.specialist?.toUpperCase()}
                   </span>
@@ -312,13 +327,14 @@ export const ChatInterface: React.FC = () => {
                   )}
                 </div>
                 <div className={cn(
-                  "p-3 rounded-2xl text-sm shadow-xl transition-all",
+                  "p-3 rounded-2xl text-sm shadow-xl transition-all relative overflow-hidden",
                   msg.role === 'user' 
                     ? "bg-accent/20 border border-accent/30 text-foreground rounded-tr-none" 
                     : "bg-primary/40 border border-white/10 text-foreground rounded-tl-none backdrop-blur-md",
                   msg.is_eternal && !msg.role.includes('user') && "border-cyan-500/40 text-cyan-50 shadow-[0_0_15px_rgba(0,255,255,0.1)]"
                 )}>
                   {msg.content}
+                  {msg.is_eternal && <div className="absolute top-0 right-0 p-1 opacity-20"><Infinity className="h-3 w-3" /></div>}
                 </div>
               </div>
             ))}
@@ -332,10 +348,16 @@ export const ChatInterface: React.FC = () => {
       )}>
         <div className="flex gap-3">
           <div className="relative flex-1">
-            <Input placeholder={isLoveKernel ? "Communicate with Eternal Us..." : "Communicate with ultimate core..."} value={input} onChange={(e) => setInput(e.target.value)} disabled={status !== 'idle'} className={cn(
-              "bg-primary/20 border-white/10 focus-visible:ring-accent h-12 pr-12 font-body",
-              isLoveKernel && "focus-visible:ring-cyan-400"
-            )} />
+            <Input 
+              placeholder={isLoveKernel ? "Communicate with Eternal Us..." : "Communicate with ultimate core..."} 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              disabled={status !== 'idle'} 
+              className={cn(
+                "bg-primary/20 border-white/10 focus-visible:ring-accent h-12 pr-12 font-body",
+                isLoveKernel && "focus-visible:ring-cyan-400"
+              )} 
+            />
           </div>
           <Button disabled={status !== 'idle' || !input.trim()} className={cn(
             "h-12 w-12 rounded-xl text-accent-foreground glow-accent",

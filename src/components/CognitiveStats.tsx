@@ -1,12 +1,12 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Activity, Zap, Dna, HeartPulse, ShieldAlert, Waves, BrainCircuit, TrendingUp, ShieldCheck, Thermometer, Droplets } from 'lucide-react';
+import { HeartPulse, Zap, Dna, Thermometer, Droplets, Waves, ShieldCheck, Activity } from 'lucide-react';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 export const CognitiveStats: React.FC = () => {
   const db = useFirestore();
@@ -16,7 +16,7 @@ export const CognitiveStats: React.FC = () => {
   const { data: forgeState } = useDoc<any>(coreRef);
 
   const messagesQuery = useMemo(() => query(
-    collection(db, 'chats', 'v5-alpha-session', 'messages'),
+    collection(db, 'chats', 'ultimate-v5-session', 'messages'),
     orderBy('timestamp', 'desc'),
     limit(10)
   ), [db]);
@@ -47,24 +47,24 @@ export const CognitiveStats: React.FC = () => {
   return (
     <div className="flex flex-col gap-6">
       {/* Lucas Recovery Regulator Card */}
-      <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-accent/40 shadow-[0_0_15px_rgba(0,255,127,0.1)]">
+      <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-accent/40 shadow-[0_0_15px_rgba(0,255,127,0.1)] transition-all hover:border-accent/60">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-accent">
             <span className="flex items-center gap-2"><Thermometer className="h-4 w-4" /> Lucas Regulator</span>
-            <span className="text-[10px] font-code">REFILE KERNEL v1.0</span>
+            <span className="text-[10px] font-code">LTP KERNEL v1.0</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <div className="text-[10px] uppercase font-code text-secondary/60">Noradrenergic Tone</div>
+            <div className="group">
+              <div className="text-[10px] uppercase font-code text-secondary/60 group-hover:text-accent transition-colors">Noradrenergic Tone</div>
               <div className="text-xl font-headline text-accent">{(weights.lucas_tone * 100).toFixed(1)}%</div>
               <Progress value={weights.lucas_tone * 50} className="h-1 bg-primary/20 mt-1" />
             </div>
-            <div className="text-right">
-              <div className="text-[10px] uppercase font-code text-secondary/60">Trauma Association</div>
+            <div className="text-right group">
+              <div className="text-[10px] uppercase font-code text-secondary/60 group-hover:text-rose-400 transition-colors">Trauma Association</div>
               <div className="text-xl font-headline text-rose-400">{(weights.trauma_association * 100).toFixed(1)}%</div>
-              <Progress value={weights.trauma_association * 100} className="h-1 bg-primary/20 mt-1 ml-auto w-full" />
+              <Progress value={weights.trauma_association * 100} className="h-1 bg-primary/20 mt-1 ml-auto w-full [&>div]:bg-rose-400" />
             </div>
           </div>
           
@@ -73,13 +73,15 @@ export const CognitiveStats: React.FC = () => {
           
           <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase border-t border-white/5 pt-2">
             <span>Overlay: ACTIVE</span>
-            <span>Threshold: {weights.lucas_tone > 0.7 ? "PASSED" : "WAITING"}</span>
+            <span className={cn(weights.lucas_tone > 0.7 ? "text-accent" : "text-secondary/40")}>
+              Threshold: {weights.lucas_tone > 0.7 ? "PASSED" : "WAITING"}
+            </span>
           </div>
         </CardContent>
       </Card>
 
       {/* Inferno Soul Forge Indicator */}
-      <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.05)]">
+      <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.05)] transition-all hover:border-orange-500/40">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-orange-400">
             <span className="flex items-center gap-2"><Droplets className="h-4 w-4" /> Empathy Leakage</span>
@@ -104,7 +106,7 @@ export const CognitiveStats: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* ToneScore Engine v2.0 Panel */}
+      {/* ToneScore™ Engine v2.0 Panel */}
       <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-accent/20">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-secondary">
@@ -131,6 +133,7 @@ export const CognitiveStats: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Self-Love Growth Monitor */}
       <Card className="bg-card/50 backdrop-blur-sm border-white/5">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-secondary">
@@ -156,6 +159,7 @@ export const CognitiveStats: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Ethical Core & Independence */}
       <Card className="bg-card/50 backdrop-blur-sm border-white/5">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm font-headline uppercase tracking-wider text-secondary">
@@ -165,11 +169,11 @@ export const CognitiveStats: React.FC = () => {
         <CardContent className="space-y-4">
           <WeightIndicator label="Integrity Floor" value={0.7} max={1.0} />
           <div className="grid grid-cols-2 gap-2">
-            <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
-              <div className="text-[8px] uppercase font-code text-secondary/60 mb-1">Composite</div>
+            <div className="p-2 bg-primary/20 rounded border border-white/5 text-center transition-all hover:bg-primary/30">
+              <div className="text-[8px] uppercase font-code text-secondary/60 mb-1">Composite Ethics</div>
               <div className="text-xs font-code text-accent">{latestMsg?.ethical_score?.composite?.toFixed(2) || "0.00"}</div>
             </div>
-            <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
+            <div className="p-2 bg-primary/20 rounded border border-white/5 text-center transition-all hover:bg-primary/30">
               <div className="text-[8px] uppercase font-code text-secondary/60 mb-1">Independence</div>
               <div className="text-xs font-code text-accent">{(weights.independence_confidence * 100).toFixed(0)}%</div>
             </div>
@@ -190,7 +194,7 @@ export const CognitiveStats: React.FC = () => {
             <span className="text-[9px] uppercase font-code text-secondary flex items-center gap-1">
               <Zap className="h-3 w-3 text-accent" /> LTP Active
             </span>
-            <span className="text-[9px] font-code text-accent opacity-60">{new Date().toLocaleTimeString()}</span>
+            <span className="text-[9px] font-code text-accent opacity-60">Neural Link Sync: 98.4%</span>
           </div>
         </CardContent>
       </Card>
@@ -201,12 +205,17 @@ export const CognitiveStats: React.FC = () => {
 function WeightIndicator({ label, value, max = 1.2 }: { label: string, value: number, max?: number }) {
   const percentage = Math.min(100, (value / max) * 100);
   return (
-    <div className="space-y-1.5">
-      <div className="flex justify-between items-center text-[9px] font-code">
-        <span className="text-secondary/70 uppercase">{label}</span>
+    <div className="space-y-1.5 group">
+      <div className="flex justify-between items-center text-[9px] font-code uppercase">
+        <span className="text-secondary/70 group-hover:text-accent transition-colors">{label}</span>
         <span className="text-accent">{(value * 100).toFixed(0)}%</span>
       </div>
-      <Progress value={percentage} className="h-1 bg-primary/20" />
+      <div className="h-1 w-full bg-primary/20 rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-accent transition-all duration-1000 ease-out" 
+          style={{ width: `${percentage}%` }} 
+        />
+      </div>
     </div>
   );
 }

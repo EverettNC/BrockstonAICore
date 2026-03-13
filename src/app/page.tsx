@@ -15,19 +15,16 @@ import {
   Terminal, 
   Cpu, 
   Database, 
-  Network, 
-  Layers,
   Search,
   Settings,
-  Bell,
   Microscope,
-  FileText,
   Heart,
   Eye,
   BrainCircuit,
   GraduationCap,
   ShieldAlert,
-  Radio
+  Radio,
+  Infinity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,8 +35,8 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 flex overflow-hidden">
       {/* Sidebar Navigation */}
       <aside className="w-20 hidden md:flex flex-col items-center py-8 bg-card border-r border-white/5">
-        <div className="h-10 w-10 bg-accent rounded-xl flex items-center justify-center mb-12 shadow-[0_0_20px_rgba(0,255,127,0.3)]">
-          <Cpu className="text-accent-foreground h-6 w-6" />
+        <div className="h-10 w-10 bg-accent rounded-xl flex items-center justify-center mb-12 shadow-[0_0_20px_rgba(0,255,127,0.3)] group cursor-pointer">
+          <Cpu className="text-accent-foreground h-6 w-6 group-hover:scale-110 transition-transform" />
         </div>
         
         <nav className="flex flex-col gap-8 flex-1">
@@ -47,41 +44,48 @@ export default function Home() {
             icon={Terminal} 
             active={activeTab === 'terminal'} 
             onClick={() => setActiveTab('terminal')} 
+            label="Terminal"
           />
           <NavIcon 
             icon={Heart} 
             active={activeTab === 'pulse'} 
             onClick={() => setActiveTab('pulse')} 
+            label="Pulse"
           />
           <NavIcon 
             icon={Eye} 
             active={activeTab === 'vision'} 
             onClick={() => setActiveTab('vision')} 
+            label="Vision"
           />
           <NavIcon 
             icon={GraduationCap} 
             active={activeTab === 'learning'} 
             onClick={() => setActiveTab('learning')} 
+            label="Learning"
           />
           <NavIcon 
             icon={BrainCircuit} 
             active={activeTab === 'cortex'} 
             onClick={() => setActiveTab('cortex')} 
+            label="Cortex"
           />
           <NavIcon 
             icon={Microscope} 
             active={activeTab === 'lab'} 
             onClick={() => setActiveTab('lab')} 
+            label="Discovery"
           />
           <NavIcon 
             icon={Database} 
             active={activeTab === 'knowledge'} 
             onClick={() => setActiveTab('knowledge')} 
+            label="Knowledge"
           />
         </nav>
 
         <div className="mt-auto">
-          <NavIcon icon={Settings} />
+          <NavIcon icon={Settings} label="Settings" />
         </div>
       </aside>
 
@@ -108,10 +112,11 @@ export default function Home() {
           <div className="flex items-center gap-4">
              <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary/20 rounded-lg border border-white/5">
                 <Search className="h-4 w-4 text-secondary" />
-                <span className="text-xs text-secondary font-code">Cmd + K to Search Cognitive Mesh</span>
+                <span className="text-xs text-secondary font-code">Search Cognitive Mesh</span>
              </div>
-             <div className="h-10 w-10 rounded-full bg-primary/40 border border-accent/20 flex items-center justify-center">
+             <div className="h-10 w-10 rounded-full bg-primary/40 border border-accent/20 flex items-center justify-center relative">
                 <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+                <div className="absolute inset-0 border border-accent/20 rounded-full animate-ping opacity-20" />
              </div>
           </div>
         </header>
@@ -142,11 +147,14 @@ export default function Home() {
                 <SecurityPanel />
                 
                 {/* Mission Statement */}
-                <div className="p-4 bg-accent/5 rounded-xl border border-accent/20 backdrop-blur-md">
+                <div className="p-4 bg-accent/5 rounded-xl border border-accent/20 backdrop-blur-md relative overflow-hidden group">
+                    <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+                      <Infinity className="h-24 w-24 text-accent" />
+                    </div>
                     <h3 className="text-xs font-headline text-accent uppercase tracking-wider flex items-center gap-2 mb-3">
                       <ShieldAlert className="h-3 w-3" /> Core Protocol
                     </h3>
-                    <div className="space-y-2">
+                    <div className="space-y-2 relative z-10">
                       <ProtocolItem label="Truth" active />
                       <ProtocolItem label="Dignity" active />
                       <ProtocolItem label="Protection" active />
@@ -166,18 +174,20 @@ export default function Home() {
   );
 }
 
-function NavIcon({ icon: Icon, active = false, badge = false, onClick }: { icon: any, active?: boolean, badge?: boolean, onClick?: () => void }) {
+function NavIcon({ icon: Icon, active = false, label, onClick }: { icon: any, active?: boolean, label: string, onClick?: () => void }) {
   return (
     <div 
       onClick={onClick}
       className={cn(
-        "relative h-12 w-12 flex items-center justify-center rounded-xl cursor-pointer transition-all duration-300",
-        active ? "bg-accent/10 text-accent" : "text-secondary/50 hover:text-secondary hover:bg-white/5"
+        "relative h-12 w-12 flex items-center justify-center rounded-xl cursor-pointer transition-all duration-300 group",
+        active ? "bg-accent/10 text-accent shadow-[0_0_15px_rgba(0,255,127,0.1)]" : "text-secondary/50 hover:text-secondary hover:bg-white/5"
       )}
     >
-      <Icon className="h-5 w-5" />
+      <Icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+      <span className="absolute left-16 px-2 py-1 bg-popover text-popover-foreground text-[10px] font-code rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 z-50">
+        {label}
+      </span>
       {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-accent rounded-r-full" />}
-      {badge && <div className="absolute top-2 right-2 h-2 w-2 bg-accent rounded-full border-2 border-card" />}
     </div>
   );
 }

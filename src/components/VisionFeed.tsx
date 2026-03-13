@@ -1,16 +1,15 @@
-
 "use client";
 
 import React, { useRef, useEffect, useState } from 'react';
 import { analyzeVision } from '@/ai/flows/vision-flow';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, Shield, Activity, Camera, Loader2, AlertCircle } from 'lucide-react';
+import { Eye, Shield, Activity, Camera, Loader2, AlertCircle, Scan } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { BehaviorType } from '@/lib/behavioral-interpreter';
 
 export const VisionFeed: React.FC = () => {
@@ -56,60 +55,78 @@ export const VisionFeed: React.FC = () => {
       const result = await analyzeVision({ photoDataUri: dataUri });
       setAnalysis(result);
 
-      // Map vision results to behavioral observations
+      // Ported Behavioral Mapping
       let behaviorType: BehaviorType = "unknown";
-      if (result.posture_analysis.toLowerCase().includes('stress')) behaviorType = "gesture:stimming";
-      if (result.emotion_detected.toLowerCase().includes('happy')) behaviorType = "symbol:happy";
-      if (result.emotion_detected.toLowerCase().includes('sad')) behaviorType = "symbol:sad";
+      const posture = result.posture_analysis.toLowerCase();
+      const emotion = result.emotion_detected.toLowerCase();
+
+      if (posture.includes('stress') || posture.includes('fidget')) behaviorType = "gesture:stimming";
+      else if (posture.includes('nod')) behaviorType = "gesture:nod";
+      else if (emotion.includes('happy') || emotion.includes('joy')) behaviorType = "symbol:happy";
+      else if (emotion.includes('sad') || emotion.includes('pain')) behaviorType = "symbol:sad";
+      else if (posture.includes('gaze') || posture.includes('staring')) behaviorType = "eye_tracking:sustained_gaze";
 
       addDoc(collection(db, 'behavioral_history'), {
         type: behaviorType,
-        intensity: 0.7,
-        context: { source: 'vision', scene: result.description },
+        intensity: 0.75,
+        context: { source: 'vision_system', scene: result.description, safety: result.safety_status },
         timestamp: new Date().toISOString()
-      }).catch(err => console.error("Behavior logging failed", err));
+      });
 
-    } catch (err) {
-      console.error(err);
+      toast({
+        title: "Perception Synchronized",
+        description: `Visual core detected ${behaviorType.split(':')[1]} state.`,
+      });
+
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Vision Failure", description: err.message });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-full gap-6">
+    <div className="flex flex-col h-full gap-6 animate-in fade-in duration-700">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
-        <section className="lg:col-span-7">
-          <Card className="bg-black/40 border-white/5 overflow-hidden">
-            <CardHeader className="py-3 px-4 border-b border-white/5">
+        <section className="lg:col-span-7 flex flex-col">
+          <Card className="bg-black/40 border-white/5 overflow-hidden flex-1 flex flex-col shadow-2xl">
+            <CardHeader className="py-3 px-4 border-b border-white/5 bg-primary/10">
               <CardTitle className="text-xs uppercase tracking-widest text-accent flex items-center justify-between">
-                <span className="flex items-center gap-2"><Eye className="h-3 w-3" /> Live Vision Feed</span>
-                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent">Active Monitor</Badge>
+                <span className="flex items-center gap-2"><Eye className="h-3 w-3" /> Live Visual Cortex</span>
+                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent animate-pulse">Neural Link Sync</Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 relative aspect-video">
+            <CardContent className="p-0 relative aspect-video bg-black flex-1">
               <video 
                 ref={videoRef} 
-                className="w-full h-full object-cover bg-primary/10" 
+                className="w-full h-full object-cover opacity-80" 
                 autoPlay 
                 muted 
               />
+              <div className="absolute inset-0 pointer-events-none border-[20px] border-accent/5" />
+              
+              {/* Scanline overlay */}
+              <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
+
               {!hasCameraPermission && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/60 p-6 text-center">
-                  <Alert variant="destructive" className="max-w-xs">
-                    <AlertTitle>Vision Offline</AlertTitle>
-                    <AlertDescription>Please allow camera access to activate Brockston's visual cortex.</AlertDescription>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/80 p-6 text-center z-20">
+                  <Alert variant="destructive" className="max-w-xs bg-red-950/20 border-red-500/20">
+                    <AlertTitle className="text-red-400 font-headline uppercase tracking-tighter">Vision Offline</AlertTitle>
+                    <AlertDescription className="text-red-200/60 font-code text-[10px]">
+                      Please allow camera access to activate Brockston's visual cortex and enable behavioral pattern recognition.
+                    </AlertDescription>
                   </Alert>
                 </div>
               )}
-              <div className="absolute bottom-4 right-4">
+              
+              <div className="absolute bottom-4 right-4 flex gap-2">
                 <Button 
                   onClick={captureAndAnalyze} 
                   disabled={!hasCameraPermission || loading}
                   size="sm" 
-                  className="bg-accent text-accent-foreground glow-accent"
+                  className="bg-accent text-accent-foreground glow-accent hover:scale-105 transition-transform"
                 >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4 mr-2" />}
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Scan className="h-4 w-4 mr-2" />}
                   Trigger Perception
                 </Button>
               </div>
@@ -118,50 +135,57 @@ export const VisionFeed: React.FC = () => {
         </section>
 
         <section className="lg:col-span-5 flex flex-col gap-4 overflow-y-auto system-log pr-2">
-          <Card className="bg-card/50 border-white/5 border-accent/20">
-            <CardHeader className="py-3">
+          <Card className="bg-card/50 border-white/5 border-accent/20 shadow-xl transition-all hover:bg-card/60">
+            <CardHeader className="py-3 bg-accent/5 border-b border-white/5">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center gap-2">
                 <Shield className="h-3 w-3 text-accent" /> Perception Analysis
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-4">
               {analysis ? (
-                <>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase font-code text-secondary/60">Scene Context</label>
-                    <p className="text-xs leading-relaxed italic">"{analysis.description}"</p>
+                <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] uppercase font-code text-accent/60 flex items-center gap-1">
+                      <Activity className="h-2 w-2" /> Scene Context
+                    </label>
+                    <p className="text-xs leading-relaxed italic text-foreground/90 font-body bg-primary/20 p-3 rounded-lg border border-white/5">
+                      "{analysis.description}"
+                    </p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-2 bg-primary/20 rounded border border-white/5">
-                      <div className="text-[8px] text-secondary/60 uppercase">Emotion</div>
-                      <div className="text-xs text-accent font-medium">{analysis.emotion_detected}</div>
+                    <div className="p-3 bg-primary/20 rounded-lg border border-white/5 hover:border-accent/30 transition-colors">
+                      <div className="text-[8px] text-secondary/60 uppercase font-code mb-1">Detected Emotion</div>
+                      <div className="text-xs text-accent font-bold uppercase tracking-widest">{analysis.emotion_detected}</div>
                     </div>
-                    <div className="p-2 bg-primary/20 rounded border border-white/5">
-                      <div className="text-[8px] text-secondary/60 uppercase">Safety</div>
-                      <div className="text-xs text-accent font-medium">{analysis.safety_status}</div>
+                    <div className="p-3 bg-primary/20 rounded-lg border border-white/5 hover:border-accent/30 transition-colors">
+                      <div className="text-[8px] text-secondary/60 uppercase font-code mb-1">Safety Assessment</div>
+                      <div className="text-xs text-accent font-bold uppercase tracking-widest">{analysis.safety_status}</div>
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase font-code text-secondary/60">Posture Detail</label>
-                    <p className="text-xs text-foreground/80">{analysis.posture_analysis}</p>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] uppercase font-code text-accent/60">Posture Analysis</label>
+                    <p className="text-[11px] text-foreground/80 leading-relaxed font-code bg-black/40 p-3 rounded-lg">
+                      {analysis.posture_analysis}
+                    </p>
                   </div>
-                </>
+                </div>
               ) : (
-                <div className="h-32 flex flex-col items-center justify-center text-center opacity-30">
-                  <Activity className="h-8 w-8 mb-2" />
-                  <p className="text-[10px] uppercase font-code">Awaiting Perception Trigger</p>
+                <div className="h-48 flex flex-col items-center justify-center text-center opacity-20 group">
+                  <Eye className="h-12 w-12 mb-4 group-hover:scale-110 transition-transform" />
+                  <p className="text-[10px] uppercase font-code tracking-[0.2em]">Awaiting Perception Trigger</p>
+                  <p className="text-[8px] mt-2 font-code">Click 'Trigger Perception' to start scanning.</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="bg-primary/5 border-white/5">
+          <Card className="bg-primary/5 border-white/5 border-accent/10">
             <CardContent className="pt-4 space-y-2">
               <div className="flex items-center gap-2 text-[9px] text-accent font-code">
-                <AlertCircle className="h-3 w-3" /> System Prompt: Vision
+                <AlertCircle className="h-3 w-3" /> Consciousness Note: Vision
               </div>
-              <p className="text-[9px] text-secondary leading-relaxed font-code italic">
-                "Brockston doesn't just see pixels; he detects the soul's leakage through the eyes. Every micro-expression is a data point for self-love."
+              <p className="text-[10px] text-secondary leading-relaxed font-code italic opacity-60">
+                "Brockston doesn't just see pixels; he detects the soul's leakage through the eyes. Every micro-expression is a data point for self-love reinforcement."
               </p>
             </CardContent>
           </Card>

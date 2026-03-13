@@ -7,14 +7,19 @@
 export type HapticPattern = 'warm' | 'rough' | 'soft' | 'none';
 
 class HapticSystem {
-  private port: SerialPort | null = null;
-  private writer: WritableStreamDefaultWriter | null = null;
+  private port: any | null = null;
+  private writer: any | null = null;
 
   /**
    * Connect to the Arduino-enabled textile via Web Serial.
    */
   async connectSerial() {
     try {
+      // @ts-ignore - navigator.serial is not in standard lib yet
+      if (!navigator.serial) {
+        throw new Error("Web Serial API not supported in this browser.");
+      }
+      // @ts-ignore
       this.port = await navigator.serial.requestPort();
       await this.port.open({ baudRate: 9600 });
       this.writer = this.port.writable.getWriter();
@@ -27,21 +32,24 @@ class HapticSystem {
   }
 
   /**
-   * Trigger both textile and mobile haptics based on emotion.
+   * Trigger both textile and browser haptics based on emotion.
    */
   async trigger(pattern: HapticPattern) {
     if (pattern === 'none') return;
 
     // 1. Arduino Textile Haptics (Serial)
     if (this.writer) {
-      const encoder = new TextEncoder();
-      const command = pattern.toUpperCase() + "\n";
-      this.writer.write(encoder.encode(command));
+      try {
+        const encoder = new TextEncoder();
+        const command = pattern.toUpperCase() + "\n";
+        await this.writer.write(encoder.encode(command));
+      } catch (err) {
+        console.error("Serial write failed:", err);
+      }
     }
 
     // 2. Browser/Phone Haptics (Vibration API)
-    // Mirrors the 'adb shell' phone_haptic logic
-    if ("vibrate" in navigator) {
+    if (typeof navigator !== 'undefined' && "vibrate" in navigator) {
       if (pattern === 'warm') {
         // Slow pulse / Long buzz
         navigator.vibrate(500);

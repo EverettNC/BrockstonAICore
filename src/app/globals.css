@@ -24,11 +24,6 @@
     --input: 240 20% 25%;
     --ring: 150 100% 50%;
     --radius: 0.75rem;
-    --chart-1: 226 60% 45%;
-    --chart-2: 150 100% 50%;
-    --chart-3: 229 17% 61%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
   }
 }
 
@@ -39,9 +34,6 @@
   body {
     @apply bg-background text-foreground font-body antialiased;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-headline font-bold tracking-tight;
-  }
 }
 
 .glow-accent {
@@ -49,7 +41,7 @@
 }
 
 .bluebeard-glow {
-  box-shadow: 0 0 25px hsla(180, 100%, 50%, 0.6);
+  box-shadow: 0 0 35px hsla(180, 100%, 50%, 0.6), inset 0 0 20px hsla(180, 100%, 50%, 0.2);
   border-color: hsla(180, 100%, 50%, 0.8) !important;
 }
 
@@ -59,7 +51,7 @@
 
 @keyframes lipstick-throb {
   0% { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
-  50% { color: #ff4d4d; text-shadow: 0 0 15px #ff0000; }
+  50% { color: #ff4d4d; text-shadow: 0 0 20px #ff0000; }
   100% { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
 }
 
@@ -79,13 +71,16 @@
 
 @keyframes haptic-vibe {
   0% { transform: translateX(0); }
-  25% { transform: translateX(-2px); }
-  50% { transform: translateX(2px); }
-  75% { transform: translateX(-2px); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
   100% { transform: translateX(0); }
 }
 
-.system-log {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--muted)) transparent;
+.system-log::-webkit-scrollbar {
+  width: 4px;
+}
+.system-log::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 10px;
 }

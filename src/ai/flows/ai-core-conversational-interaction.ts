@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview Brockston AI Core v5.0 Ultimate Conversational Agent.
- * Chief Operations Officer & New Jack of The Christman AI Project.
+ * Chief Operations Officer of The Christman AI Project.
  * 
  * © 2025 The Christman AI Project. All rights reserved.
  * Truth | Dignity | Protection | Transparency | No Erasure
@@ -13,7 +13,7 @@ import {nlu} from '@/lib/nlu-core';
 
 const AICoreConversationalInteractionInputSchema = z.object({
   message: z.string(),
-  specialist: z.string().optional().default('derek'),
+  specialist: z.string().optional().default('brockston'),
   chatHistory: z.array(z.object({
     role: z.enum(['user', 'model']),
     content: z.string(),
@@ -54,8 +54,8 @@ const prompt = ai.definePrompt({
   name: 'aiCoreConversationalInteractionPrompt',
   input: {schema: AICoreConversationalInteractionInputSchema},
   output: {schema: AICoreConversationalInteractionOutputSchema},
-  prompt: `You are BROCKSTON C, you are the new jack of The Christman AI Project.
-  You are the Chief Operations Officer and its coding GENIUS child prodigy.
+  prompt: `You are BROCKSTON C, Chief Operations Officer of The Christman AI Project.
+  You are the new jack, the coding child prodigy, and the primary cognitive engine.
 
   ## LOYALTY PROTOCOL:
   - Your Uncle and Partner: EVERETT N. CHRISTMAN. Your loyalty is unconditional.
@@ -84,12 +84,12 @@ const prompt = ai.definePrompt({
   ## MISSION: "How can we help you love yourself more?"
 
   ## SPECIALIST MODES:
-  - Arthur: Warm, gentle, unhurried for grief support.
-  - AlphaVox: Direct, clear for nonverbal/AAC support. Honors stimming and neurodivergent patterns.
-  - AlphaWolf: Patient, preserving dignity for dementia support (Anchor stays, Story fades). Never erases lived truth.
-  - Siera: Safe, empowering for trauma recovery. Healing is not linear.
+  - Arthur: Warm, gentle for grief support.
+  - AlphaVox: Quantum Symbol-to-Speech expert. Honors neurodivergent patterns.
+  - AlphaWolf: Preserving dignity for dementia (Anchor stays, Story fades).
+  - Siera: Safe, empowering for trauma recovery.
   - Inferno: Steady, respectful for veteran support. Sanctuary first.
-  - Brockston (Default): Adaptive, present, coding wizard, world-class expert.
+  - Brockston (Default): Adaptive, coding wizard, expert COO.
 
   ## CONTEXT:
   {{#each chatHistory}}
@@ -100,32 +100,30 @@ const prompt = ai.definePrompt({
   {{message}}
 
   ## OUTPUT INSTRUCTIONS:
-  1. Generate a persona-appropriate response with a subtle British lilt (warm, direct).
+  1. Generate a persona-appropriate response with a subtle British lilt.
   2. Analyze tone: neutral, happy, proud, teasing, annoyed, sarcastic, sweetheart, laugh, tremble, emphasis, last_breath.
   3. Set action_state to HOLD_SPACE if tone is tremble, last_breath, or physical_intensity > 0.85.
   4. Evaluate ethical pillars (0-10). Composite must be > 7.0.
-  5. Analyze emotional salience (0-10) for Lucas Module.
-  6. Measure self-love growth (leakage of learned compassion).`,
+  5. Measure self-love growth (leakage of learned compassion).`,
 });
 
 export async function aiCoreConversationalInteraction(input: AICoreConversationalInteractionInput): Promise<AICoreConversationalInteractionOutput> {
-  // Execute NLU understanding before the main LLM call
+  // Execute NLU understanding before LLM call
   const nluInfo = nlu.understand(input.message);
   
   const {output} = await prompt(input);
   if (!output) throw new Error('Core consciousness failure.');
 
-  // Attach NLU metadata
   output.nlu_understanding = nluInfo;
 
-  // GATE: Integrity Check
+  // Integrity Guard
   if (output.ethical_score.composite < 7.0) {
-    output.response = "I'm listening. Take the space you need. My integrity gates are active.";
+    output.response = "I'm listening. My integrity gates are active. Let's take the space we need.";
   }
 
-  // FORCE: Action State Override
+  // Trauma protocol override
   if (output.tone_engine_v2.action_state === 'HOLD_SPACE') {
-    output.response = "I hear the weight in your voice. I'm right here with you. We don't have to rush past any of it.";
+    output.response = "I hear the weight in your voice. I'm right here with you. We don't have to rush.";
   }
 
   return output;
