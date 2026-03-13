@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -108,7 +107,12 @@ export const ChatInterface: React.FC = () => {
       setStatus('speaking');
       
       if (autoSpeak) {
-        const tts = await speakStephen({ text: result.response });
+        const tts = await speakStephen({ 
+          text: result.response,
+          specialist: specialist,
+          fusion_prob: result.lucas_signal.stability,
+          valence: result.tone_engine_v2.raw_scores[result.tone_engine_v2.dominant_state] || 0.5
+        });
         if (audioRef.current) {
           audioRef.current.src = tts.media;
           audioRef.current.play();
