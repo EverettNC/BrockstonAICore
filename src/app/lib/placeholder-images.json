@@ -3,21 +3,21 @@
   "placeholderImages": [
     {
       "id": "ai-core-bg",
-      "description": "Luxury mission control with a wide view of a calm blue ocean seascape",
-      "imageUrl": "https://picsum.photos/seed/lux-mission-v11/1920/1080",
+      "description": "Luxury mission control with a wide view of a calm blue ocean seascape at dusk",
+      "imageUrl": "https://picsum.photos/seed/lux-mission-v12/1920/1080",
       "imageHint": "luxury seascape"
     },
     {
       "id": "brockston-avatar",
-      "description": "BROCKSTON C: The New Teacher. Professional masculine portrait, blonde hair, blue eyes, gold-trimmed black suit",
-      "imageUrl": "https://picsum.photos/seed/man-professional-654/800/800",
-      "imageHint": "professional man"
+      "description": "BROCKSTON C: The New Teacher. Professional blonde man, blue eyes, navy blue three-piece suit, maroon tie, office background",
+      "imageUrl": "https://picsum.photos/seed/brockston-navy-suit-1/800/1000",
+      "imageHint": "professional man blonde suit"
     },
     {
       "id": "brand-logo",
-      "description": "The Christman AI Project Brand Logo - Sophisticated Neuro-Symbolic Shield",
-      "imageUrl": "https://picsum.photos/seed/brand-shield-99/200/200",
-      "imageHint": "tech logo"
+      "description": "The Christman AI Project Brand Logo - Sophisticated Neuro-Symbolic Shield with Neon Accents",
+      "imageUrl": "https://picsum.photos/seed/christman-shield-logo/200/200",
+      "imageHint": "tech logo shield"
     }
   ]
 }

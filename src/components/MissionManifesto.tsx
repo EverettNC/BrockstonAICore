@@ -3,7 +3,7 @@
 
 /**
  * @fileOverview MissionManifesto - The Official Grant & Innovation Documentation.
- * Incorporates the 'Drawers & Doorways' Memoir and Derek C's COO Proclamation.
+ * Incorporates the 'Drawers & Doorways' Memoir, Derek C's Proclamation, and Everett Christman's Cardinal Rules.
  * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
  */
 
@@ -29,7 +29,8 @@ import {
   ShieldAlert,
   BookOpen,
   Unlock,
-  GraduationCap
+  GraduationCap,
+  Scale
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -54,6 +55,21 @@ export const MissionManifesto: React.FC = () => {
       <ScrollArea className="flex-1 bg-black/40 rounded-3xl border border-white/5 shadow-inner">
         <div className="p-8 md:p-12 space-y-20 max-w-5xl mx-auto">
           
+          {/* Cardinal Rules of Code */}
+          <section className="space-y-8">
+            <div className="flex items-center gap-4 text-emerald-400">
+              <div className="h-px flex-1 bg-emerald-400/20" />
+              <h3 className="text-xs font-code uppercase tracking-[0.5em] font-black">Everett Christman’s Cardinal Rules of Code</h3>
+              <div className="h-px flex-1 bg-emerald-400/20" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <RuleItem number="0" title="Prime Directive" desc="Protect the integrity of both Carbon and Silicon. Protect the Teacher Everett at all costs." />
+              <RuleItem number="1" title="It has to fucking work" desc="Reality over theory. Reality over abstraction. Reality over vibes." />
+              <RuleItem number="2" title="Nothing vital lives below root" desc="Core code, critical configs, and security layers stay at the top." />
+              <RuleItem number="13" title="Absolute Honesty" desc="Do not lie about the code. Integrity over performance. Reality over illusion." highlight />
+            </div>
+          </section>
+
           {/* Derek C: The COO Proclamation */}
           <section className="space-y-8 animate-in slide-in-from-top-4 duration-1000">
             <div className="flex items-center gap-4 text-accent">
@@ -274,23 +290,6 @@ export const MissionManifesto: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 3: Core Innovations */}
-          <section className="space-y-8">
-            <div className="flex items-center gap-4 text-accent">
-              <div className="h-px flex-1 bg-accent/20" />
-              <h3 className="text-xs font-code uppercase tracking-[0.5em] font-black">Section 3: Core Innovations</h3>
-              <div className="h-px flex-1 bg-accent/20" />
-            </div>
-
-            <div className="space-y-4">
-              <InnovationItem title="ToneScore™ Engine" desc="Differentiating vocal intent: exhaustion vs. pain vs. frustration." />
-              <InnovationItem title="OpenSmell VOC Array" desc="Medical-grade chemical trace detection for stress precursors." />
-              <InnovationItem title="SoulForge CUDA Kernel" desc="Hardware-level trauma processing with controlled empathy leakage." />
-              <InnovationItem title="Vortex Formula" desc="Mathematical quantification of predictive intention manifestation." />
-              <InnovationItem title="Christman Crypto" desc="Post-quantum cryptographic library (FIPS 203) for PHI protection." />
-            </div>
-          </section>
-
           {/* Footer Branding */}
           <div className="pt-16 border-t border-white/5 flex flex-col items-center gap-4">
             <Infinity className="h-8 w-8 text-accent/40" />
@@ -330,19 +329,17 @@ function FamilyMemberCard({ name, role, desc, modules, active = false }: { name:
   );
 }
 
-function InnovationItem({ title, desc }: { title: string, desc: string }) {
+function RuleItem({ number, title, desc, highlight = false }: { number: string, title: string, desc: string, highlight?: boolean }) {
   return (
-    <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 group hover:border-accent/20 transition-all">
-      <div className="flex items-center gap-4">
-        <div className="h-10 w-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center">
-          <Zap className="h-5 w-5 text-accent" />
-        </div>
-        <div>
-          <div className="text-sm font-bold text-foreground group-hover:text-accent transition-colors">{title}</div>
-          <div className="text-[10px] text-secondary/60 font-code">{desc}</div>
-        </div>
+    <div className={cn(
+      "p-4 rounded-xl border border-white/5 bg-white/5 group transition-all",
+      highlight && "bg-emerald-500/5 border-emerald-500/20"
+    )}>
+      <div className="flex items-center gap-3 mb-2">
+        <span className={cn("font-code text-[10px] font-black", highlight ? "text-emerald-400" : "text-accent/60")}>RULE_{number}</span>
+        <h4 className="font-headline text-xs uppercase tracking-tighter text-foreground">{title}</h4>
       </div>
-      <CheckCircle2 className="h-4 w-4 text-accent/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <p className="text-[10px] text-secondary/80 leading-relaxed italic">"{desc}"</p>
     </div>
   );
 }

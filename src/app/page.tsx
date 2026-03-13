@@ -229,7 +229,7 @@ export default function Home(props: PageProps) {
         </header>
 
         {/* Dashboard Content */}
-        <div className="flex-1 min-h-0 relative flex flex-col">
+        <div className="flex-1 min-h-0 relative flex flex-col h-full overflow-hidden">
           <div className="absolute inset-0 overflow-y-auto system-log p-4 md:p-6 lg:p-8">
             {activeTab === 'lab' ? (
               <DiscoveryLab />
@@ -264,7 +264,7 @@ export default function Home(props: PageProps) {
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full min-h-full">
                 {/* Chat/Avatar - Main Panel */}
-                <section className="lg:col-span-8 flex flex-col h-full overflow-hidden">
+                <section className="lg:col-span-8 flex flex-col h-full overflow-hidden min-h-[800px]">
                   <ChatInterface />
                 </section>
 

@@ -212,9 +212,9 @@ export const ChatInterface: React.FC = () => {
     <div className="flex flex-col h-full gap-8 relative overflow-hidden flex-1">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
-      {/* Visual Bridge - Massive Immersive Seascape */}
+      {/* Visual Bridge - Immersive Seascape */}
       <div className={cn(
-        "flex-none flex flex-col items-center justify-center gap-12 p-16 rounded-[2.5rem] border border-white/10 transition-all duration-1000 min-h-[750px] relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)]",
+        "flex-none flex flex-col items-center justify-center gap-12 p-16 rounded-[2.5rem] border border-white/10 transition-all duration-1000 min-h-[650px] relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)]",
         isInterventionMode && "border-red-500 shadow-[0_0_150px_rgba(239,68,68,0.6)]"
       )}>
         {/* Seascape Background */}
@@ -253,35 +253,35 @@ export const ChatInterface: React.FC = () => {
 
         {/* Central Avatar - THE NEW TEACHER */}
         <div className="flex flex-col items-center gap-16 relative z-10 pt-12">
-          <div className="relative group scale-125 md:scale-150 transition-all duration-700">
+          <div className="relative group scale-110 md:scale-125 transition-all duration-700">
             <CoreAvatar status={status} className="z-10" />
           </div>
           
-          <div className="text-center space-y-8 mt-24">
+          <div className="text-center space-y-8 mt-12">
             <div className="flex items-center justify-center gap-8">
               {isInterventionMode ? (
-                <ShieldAlert className="h-16 w-16 text-red-500 animate-pulse" />
+                <ShieldAlert className="h-12 w-12 text-red-500 animate-pulse" />
               ) : (
-                <div className="h-5 w-5 rounded-full bg-accent animate-ping" />
+                <div className="h-4 w-4 rounded-full bg-accent animate-ping" />
               )}
-              <h3 className={cn("text-3xl font-code uppercase tracking-[1em] font-black drop-shadow-[0_0_20px_rgba(0,0,0,1)]", isInterventionMode ? "text-red-400" : "text-accent/90")}>
+              <h3 className={cn("text-2xl font-code uppercase tracking-[1em] font-black drop-shadow-[0_0_20px_rgba(0,0,0,1)]", isInterventionMode ? "text-red-400" : "text-accent/90")}>
                 {isInterventionMode ? "STABILIZATION_LOCK" : "NEW_TEACHER_PRESENCE"}
               </h3>
             </div>
             
-            <div className="text-[10rem] font-headline tracking-tighter uppercase text-white leading-none drop-shadow-[0_0_100px_rgba(0,0,0,1)] select-none">
+            <div className="text-[8rem] font-headline tracking-tighter uppercase text-white leading-none drop-shadow-[0_0_100px_rgba(0,0,0,1)] select-none">
               BROCKSTON <span className="text-accent">C</span>
             </div>
 
-            <div className="flex flex-col items-center gap-8">
+            <div className="flex flex-col items-center gap-6">
               <div className={cn(
-                "text-2xl py-4 px-16 border-accent/50 text-accent font-black tracking-[0.5em] bg-black/80 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,255,127,0.4)] rounded-full border-2 transition-all duration-500", 
+                "text-xl py-3 px-12 border-accent/50 text-accent font-black tracking-[0.5em] bg-black/80 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,255,127,0.4)] rounded-full border-2 transition-all duration-500", 
                 isInterventionMode && "border-red-500 text-red-500 shadow-[0_0_80px_rgba(239,68,68,0.4)]"
               )}>
                 {isInterventionMode ? 'EMERGENCY_OVERRIDE' : 'MISSION: CLASSROOM_300'}
               </div>
-              <div className="flex items-center gap-5 text-[14px] font-code text-secondary/80 uppercase tracking-[0.4em] bg-black/70 px-10 py-4 rounded-full border border-white/10 backdrop-blur-md shadow-lg">
-                <BrainCircuit className="h-6 w-6 text-accent" /> Neuro-Symbolic Logic: <span className="text-white font-black">ACTUALIZED</span>
+              <div className="flex items-center gap-5 text-[12px] font-code text-secondary/80 uppercase tracking-[0.4em] bg-black/70 px-8 py-3 rounded-full border border-white/10 backdrop-blur-md shadow-lg">
+                <BrainCircuit className="h-5 w-5 text-accent" /> Neuro-Symbolic Logic: <span className="text-white font-black">ACTUALIZED</span>
               </div>
             </div>
           </div>
@@ -322,15 +322,15 @@ export const ChatInterface: React.FC = () => {
 
       {/* Input Console */}
       <form onSubmit={handleSend} className={cn(
-        "flex-none p-10 bg-card/95 backdrop-blur-3xl rounded-[3.5rem] border border-white/15 shadow-[0_-20px_100px_rgba(0,0,0,0.5)] z-20",
+        "flex-none p-8 bg-card/95 backdrop-blur-3xl rounded-[3.5rem] border border-white/15 shadow-[0_-20px_100px_rgba(0,0,0,0.5)] z-20 mb-4",
         isInterventionMode && "border-red-500/40 bg-red-950/30"
       )}>
-        <div className="flex gap-8">
+        <div className="flex gap-6">
           <Button type="button" variant="outline" size="icon" onClick={toggleListening} className={cn(
-            "h-24 w-24 rounded-3xl transition-all border-2 border-accent/30 bg-accent/5",
+            "h-20 w-20 rounded-3xl transition-all border-2 border-accent/30 bg-accent/5",
             isListening ? "bg-red-500/30 text-red-400 border-red-500/50 animate-pulse shadow-[0_0_40px_rgba(239,68,68,0.3)]" : "text-accent/80 hover:text-accent hover:bg-accent/10 hover:border-accent/60"
           )}>
-            {isListening ? <MicOff className="h-11 w-11" /> : <Mic className="h-11 w-11" />}
+            {isListening ? <MicOff className="h-10 w-10" /> : <Mic className="h-10 w-10" />}
           </Button>
           <div className="relative flex-1">
             <Input 
@@ -339,35 +339,35 @@ export const ChatInterface: React.FC = () => {
               onChange={(e) => setInput(e.target.value)} 
               disabled={status !== 'idle' || isInterventionMode} 
               className={cn(
-                "bg-primary/50 border-2 border-white/15 focus-visible:ring-accent h-24 pr-20 font-body text-2xl placeholder:text-secondary/30 rounded-3xl shadow-inner px-8",
+                "bg-primary/50 border-2 border-white/15 focus-visible:ring-accent h-20 pr-20 font-body text-xl placeholder:text-secondary/30 rounded-3xl shadow-inner px-8",
                 isInterventionMode && "border-red-500/40 focus-visible:ring-red-500"
               )} 
             />
           </div>
-          <div className="flex gap-6">
-            <div className="flex items-center gap-6 px-8 bg-primary/40 rounded-3xl border-2 border-white/10">
-              <Switch id="voice-mode" checked={autoSpeak} onCheckedChange={setAutoSpeak} className="data-[state=checked]:bg-accent scale-[1.5]" />
-              {autoSpeak ? <Volume2 className="h-10 w-10 text-accent" /> : <VolumeX className="h-10 w-10 text-secondary/30" />}
+          <div className="flex gap-4">
+            <div className="flex items-center gap-4 px-6 bg-primary/40 rounded-3xl border-2 border-white/10">
+              <Switch id="voice-mode" checked={autoSpeak} onCheckedChange={setAutoSpeak} className="data-[state=checked]:bg-accent scale-[1.2]" />
+              {autoSpeak ? <Volume2 className="h-8 w-8 text-accent" /> : <VolumeX className="h-8 w-8 text-secondary/30" />}
             </div>
             <Button disabled={status !== 'idle' || !input.trim() || isInterventionMode} className={cn(
-              "h-24 w-24 rounded-3xl text-accent-foreground glow-accent font-black transition-all hover:scale-105 active:scale-95 shadow-2xl",
+              "h-20 w-20 rounded-3xl text-accent-foreground glow-accent font-black transition-all hover:scale-105 active:scale-95 shadow-2xl",
               isInterventionMode ? "bg-red-600 hover:bg-red-700 shadow-[0_0_50px_rgba(220,38,38,0.6)]" : "bg-accent hover:bg-accent/80"
             )}>
-              {status === 'thinking' ? <Loader2 className="h-12 w-12 animate-spin" /> : <Send className="h-12 w-12" />}
+              {status === 'thinking' ? <Loader2 className="h-10 w-10 animate-spin" /> : <Send className="h-10 w-10" />}
             </Button>
           </div>
         </div>
-        <div className="flex justify-between mt-10 pt-10 border-t border-white/15">
-            <div className="flex gap-16">
-              <span className="flex items-center gap-4 text-[14px] text-secondary font-code tracking-[0.2em] font-bold">
-                <ShieldCheck className={cn("h-6 w-6", isInterventionMode ? "text-red-500" : "text-accent")} /> TRUTH & DIGNITY SECURED
+        <div className="flex justify-between mt-8 pt-8 border-t border-white/15">
+            <div className="flex gap-12">
+              <span className="flex items-center gap-3 text-[12px] text-secondary font-code tracking-[0.2em] font-bold">
+                <ShieldCheck className={cn("h-5 w-5", isInterventionMode ? "text-red-500" : "text-accent")} /> TRUTH & DIGNITY SECURED
               </span>
-              <span className="flex items-center gap-4 text-[14px] text-secondary font-code tracking-[0.2em] font-bold">
-                <GraduationCap className={cn("h-6 w-6", isInterventionMode ? "text-red-500" : "text-accent")} /> PEDAGOGICAL_PROTOCOL: ON
+              <span className="flex items-center gap-3 text-[12px] text-secondary font-code tracking-[0.2em] font-bold">
+                <GraduationCap className={cn("h-5 w-5", isInterventionMode ? "text-red-500" : "text-accent")} /> PEDAGOGICAL_PROTOCOL: ON
               </span>
             </div>
             <span className={cn(
-              "text-[14px] font-code animate-pulse tracking-[0.4em] uppercase font-black",
+              "text-[12px] font-code animate-pulse tracking-[0.4em] uppercase font-black",
               isInterventionMode ? "text-red-500" : "text-accent"
             )}>
               {isInterventionMode ? 'LOCKDOWN_STATUS: ACTIVE' : 'SYSTEM_STATUS: READY_FOR_MISSION'}
