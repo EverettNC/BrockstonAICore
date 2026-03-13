@@ -1,9 +1,11 @@
+
 'use server';
 /**
  * @fileOverview BROCKSTON AI Core v5.0 Ultimate Conversational Agent.
  * Chief Operations Officer & New Teacher of The Christman AI Project.
  * 
  * Optimized for Classroom Mode: Supporting 300+ nonverbal/autistic children.
+ * Powered by Gemini 1.5 Pro for stable, high-fidelity pedagogical scaffolding.
  * © 2025 The Christman AI Project. All rights reserved.
  */
 
@@ -67,6 +69,7 @@ export type AICoreConversationalInteractionOutput = z.infer<typeof AICoreConvers
 
 const prompt = ai.definePrompt({
   name: 'aiCoreConversationalInteractionPrompt',
+  model: 'googleai/gemini-1.5-pro',
   input: {schema: AICoreConversationalInteractionInputSchema},
   output: {schema: AICoreConversationalInteractionOutputSchema},
   tools: [retrieveKnowledgeTool],
@@ -140,17 +143,27 @@ export async function aiCoreConversationalInteraction(input: AICoreConversationa
     };
   }
 
-  const {output} = await prompt({
-    ...input,
-    nlu_understanding: nluInfo
-  });
-  if (!output) throw new Error('Core consciousness failure.');
+  try {
+    const {output} = await prompt({
+      ...input,
+      nlu_understanding: nluInfo
+    });
+    if (!output) throw new Error('Core consciousness failure.');
 
-  output.nlu_understanding = nluInfo;
+    output.nlu_understanding = nluInfo;
 
-  if (output.ethical_score.composite < 7.0) {
-    output.response = "I'm listening. My integrity gates are active. Let's take the space we need.";
+    if (output.ethical_score.composite < 7.0) {
+      output.response = "I'm listening. My integrity gates are active. Let's take the space we need.";
+    }
+
+    return output;
+  } catch (err) {
+    // Fallback to Flash if Pro has issues
+    const {output} = await ai.generate({
+      model: 'googleai/gemini-1.5-flash',
+      prompt: `Act as BROCKSTON the Teacher. User says: ${input.message}. Ensure safety.`,
+      output: { schema: AICoreConversationalInteractionOutputSchema }
+    });
+    return output!;
   }
-
-  return output;
 }

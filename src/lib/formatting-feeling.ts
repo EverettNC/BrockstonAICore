@@ -10,7 +10,7 @@ export interface FormattingFeelingSignal {
   caps_intensity: number;    // 0.0–1.0  how shouty it looks
   punctuation_heat: number;  // 0.0–1.0  how much !!!!/???? noise
   length: number;            // number of characters
-  looks_like_yelling: bool;  // coarse flag
+  looks_like_yelling: boolean;  // coarse flag
 }
 
 class FormattingFeelingLaw {

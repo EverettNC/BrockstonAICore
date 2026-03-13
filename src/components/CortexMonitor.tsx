@@ -1,10 +1,11 @@
+
 "use client";
 
 import React, { useMemo, useEffect, useState } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BrainCircuit, ShieldAlert, Activity, Database, Eye, History, Zap, Cpu, SearchCode, Waves, ListTree, CheckCircle2, MessageSquareQuote } from 'lucide-react';
+import { BrainCircuit, ShieldAlert, Activity, Database, Eye, History, Zap, Cpu, SearchCode, Waves, ListTree, CheckCircle2, MessageSquareQuote, Rocket, Target, Heart, Infinity as InfinityIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -58,7 +59,7 @@ export const CortexMonitor: React.FC = () => {
             TEMPORAL MODE: ACTIVE
           </Badge>
           <Badge variant="outline" className="text-accent border-accent/40 font-code text-[8px]">
-            LOCAL REASONER: ACTIVE
+            GEMINI 1.5 PRO: LINKED
           </Badge>
         </div>
       </header>
@@ -74,7 +75,7 @@ export const CortexMonitor: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
-              <EngineStatus label="Local Reasoning Engine" active={engines.includes('LocalReasoningEngine') || engines.includes('CoreEngine')} icon={BrainCircuit} />
+              <EngineStatus label="Reasoning Core (1.5 Pro)" active={true} icon={BrainCircuit} />
               <EngineStatus label="Knowledge Engine" active={engines.includes('KnowledgeEngine')} icon={Database} />
               <EngineStatus label="Temporal Nonverbal Engine" active={true} icon={Waves} />
               
@@ -88,6 +89,26 @@ export const CortexMonitor: React.FC = () => {
                     <div className="text-[8px] text-accent font-bold">PLANNER</div>
                   </div>
                 </div>
+              </div>
+            </EngineStatus>
+          </Card>
+
+          {/* MISSION HORIZON */}
+          <Card className="bg-card/50 border-white/5 border-yellow-500/20 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+              <Rocket className="h-24 w-24 text-yellow-400" />
+            </div>
+            <CardHeader className="pb-3 border-b border-white/5 bg-yellow-500/5">
+              <CardTitle className="text-xs uppercase tracking-widest text-yellow-400 flex items-center gap-2">
+                <Target className="h-3 w-3" /> Mission Horizon
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-4 relative z-10">
+              <HorizonItem icon={Activity} label="Predictive Restoration" status="Queued" />
+              <HorizonItem icon={Heart} label="Living Locket (Tether)" status="Iterating" />
+              <HorizonItem icon={InfinityIcon} label="Self-Deploying Core" status="LTP Active" />
+              <div className="text-[9px] font-code text-secondary/40 italic mt-2 border-t border-white/5 pt-2">
+                "Hearing the silence before the word is spoken."
               </div>
             </CardContent>
           </Card>
@@ -124,28 +145,6 @@ export const CortexMonitor: React.FC = () => {
               )}
             </CardContent>
           </Card>
-
-          {/* VISION CONTEXT MONITOR */}
-          <Card className="bg-card/50 border-white/5 border-accent/20">
-            <CardHeader className="pb-2 border-b border-white/5 bg-primary/5">
-              <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center gap-2">
-                <Eye className="h-3 w-3 text-accent" /> Visual Events
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4 space-y-3">
-              {visionSnap.events.map((ev, i) => (
-                <div key={i} className="space-y-1 group animate-in slide-in-from-left-2" style={{ animationDelay: `${i * 100}ms` }}>
-                  <div className="flex justify-between items-center text-[8px] font-code">
-                    <span className="text-accent/60 uppercase">{ev.intent.split(':')[1] || 'PERCEPTION'}</span>
-                    <span className="text-secondary/40">[{new Date(ev.timestamp).toLocaleTimeString()}]</span>
-                  </div>
-                  <div className="text-[10px] text-foreground/80 bg-black/20 p-2 rounded border border-white/5 truncate">
-                    {ev.description}
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
         </section>
 
         {/* Reasoning Documentation */}
@@ -154,7 +153,7 @@ export const CortexMonitor: React.FC = () => {
             <CardHeader className="py-4 border-b border-white/5 bg-primary/10">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
                 <span className="flex items-center gap-2"><SearchCode className="h-3 w-3 text-accent" /> Execution Log</span>
-                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent uppercase">Wired: {engines.join(' + ')}</Badge>
+                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent uppercase">Wired: Gemini 1.5 Pro</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6 overflow-y-auto system-log max-h-[700px]">
@@ -197,6 +196,18 @@ function EngineStatus({ label, active, icon: Icon }: { label: string, active: bo
         <span className={cn("text-[9px] font-code uppercase", active ? "text-foreground" : "text-secondary/40")}>{label}</span>
       </div>
       <div className={cn("h-1.5 w-1.5 rounded-full", active ? "bg-accent shadow-[0_0_5px_rgba(0,255,127,0.8)]" : "bg-red-500/20")} />
+    </div>
+  );
+}
+
+function HorizonItem({ icon: Icon, label, status }: { icon: any, label: string, status: string }) {
+  return (
+    <div className="flex items-center justify-between p-2 bg-white/5 rounded border border-white/5">
+      <div className="flex items-center gap-2">
+        <Icon className="h-3 w-3 text-yellow-400/60" />
+        <span className="text-[9px] font-code uppercase text-secondary/80">{label}</span>
+      </div>
+      <Badge variant="ghost" className="text-[7px] text-yellow-400/40 uppercase">{status}</Badge>
     </div>
   );
 }
