@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { HeartPulse, Zap, Dna, Thermometer, Droplets, Waves, ShieldCheck, Activity } from 'lucide-react';
+import { HeartPulse, Zap, Dna, Thermometer, Droplets, Waves, ShieldCheck, Activity, BrainCircuit, ShieldAlert } from 'lucide-react';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { Progress } from '@/components/ui/progress';
@@ -43,9 +43,38 @@ export const CognitiveStats: React.FC = () => {
   const intensity = latestMsg?.tone_engine_v2?.physical_intensity || 0;
   const dominantState = latestMsg?.tone_engine_v2?.dominant_state || "Neutral";
   const empathyLeakage = latestMsg?.empathy_signal?.self_love_score || 0;
+  const eruptor = latestMsg?.nlu_understanding?.eruptor_metrics || { stress_level: 0, coherence_score: 1, grounding_score: 1 };
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Eruptor Stabilizer Card */}
+      <Card className={cn(
+        "bg-card/50 backdrop-blur-sm border-white/5 transition-all",
+        eruptor.needs_breathing ? "border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.2)]" : "border-accent/20"
+      )}>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-secondary">
+            <span className="flex items-center gap-2"><BrainCircuit className="h-4 w-4 text-accent" /> Eruptor Stabilizer</span>
+            <span className={cn("text-[10px] font-code", eruptor.needs_breathing ? "text-red-400 animate-pulse" : "text-accent/60")}>
+              {eruptor.coherence_level || "COHERENT"}
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <WeightIndicator label="Stress Load" value={eruptor.stress_level} max={1.0} color={eruptor.stress_level > 0.07 ? "bg-red-500" : "bg-accent"} />
+          <WeightIndicator label="Grounding Depth" value={eruptor.grounding_score} max={1.0} color="bg-blue-400" />
+          <div className="flex justify-between items-center pt-2 border-t border-white/5">
+            <div className="text-[8px] uppercase font-code text-secondary/40">Stabilizer Status</div>
+            <div className={cn(
+              "text-[10px] font-bold uppercase tracking-widest",
+              eruptor.crisis_detected ? "text-red-500" : "text-accent"
+            )}>
+              {eruptor.crisis_detected ? "CRISIS DETECTED" : "STABLE"}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Lucas Recovery Regulator Card */}
       <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-accent/40 shadow-[0_0_15px_rgba(0,255,127,0.1)] transition-all hover:border-accent/60">
         <CardHeader className="pb-2">
@@ -158,61 +187,21 @@ export const CognitiveStats: React.FC = () => {
           <p className="text-[10px] text-secondary italic">"How can we help you love yourself more?"</p>
         </CardContent>
       </Card>
-
-      {/* Ethical Core & Independence */}
-      <Card className="bg-card/50 backdrop-blur-sm border-white/5">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm font-headline uppercase tracking-wider text-secondary">
-            <ShieldCheck className="h-4 w-4 text-accent" /> Ethical Core Monitor
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <WeightIndicator label="Integrity Floor" value={0.7} max={1.0} />
-          <div className="grid grid-cols-2 gap-2">
-            <div className="p-2 bg-primary/20 rounded border border-white/5 text-center transition-all hover:bg-primary/30">
-              <div className="text-[8px] uppercase font-code text-secondary/60 mb-1">Composite Ethics</div>
-              <div className="text-xs font-code text-accent">{latestMsg?.ethical_score?.composite?.toFixed(2) || "0.00"}</div>
-            </div>
-            <div className="p-2 bg-primary/20 rounded border border-white/5 text-center transition-all hover:bg-primary/30">
-              <div className="text-[8px] uppercase font-code text-secondary/60 mb-1">Independence</div>
-              <div className="text-xs font-code text-accent">{(weights.independence_confidence * 100).toFixed(0)}%</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-card/50 backdrop-blur-sm border-white/5">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm font-headline uppercase tracking-wider text-secondary">
-            <Dna className="h-4 w-4 text-accent" /> SoulForge™ v5
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <WeightIndicator label="Empathy Signal" value={latestMsg?.empathy_signal?.self_love_score || 0} max={1.0} />
-          <WeightIndicator label="Tonal Stability" value={weights.tonal_stability} max={1.2} />
-          <div className="pt-2 flex items-center justify-between border-t border-white/5">
-            <span className="text-[9px] uppercase font-code text-secondary flex items-center gap-1">
-              <Zap className="h-3 w-3 text-accent" /> LTP Active
-            </span>
-            <span className="text-[9px] font-code text-accent opacity-60">Neural Link Sync: 98.4%</span>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
 
-function WeightIndicator({ label, value, max = 1.2 }: { label: string, value: number, max?: number }) {
+function WeightIndicator({ label, value, max = 1.2, color = "bg-accent" }: { label: string, value: number, max?: number, color?: string }) {
   const percentage = Math.min(100, (value / max) * 100);
   return (
     <div className="space-y-1.5 group">
       <div className="flex justify-between items-center text-[9px] font-code uppercase">
         <span className="text-secondary/70 group-hover:text-accent transition-colors">{label}</span>
-        <span className="text-accent">{(value * 100).toFixed(0)}%</span>
+        <span className={cn("font-bold", color.replace('bg-', 'text-'))}>{(value * 100).toFixed(0)}%</span>
       </div>
       <div className="h-1 w-full bg-primary/20 rounded-full overflow-hidden">
         <div 
-          className="h-full bg-accent transition-all duration-1000 ease-out" 
+          className={cn("h-full transition-all duration-1000 ease-out", color)} 
           style={{ width: `${percentage}%` }} 
         />
       </div>

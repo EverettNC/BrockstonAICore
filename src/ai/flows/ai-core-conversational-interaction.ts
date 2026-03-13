@@ -89,13 +89,19 @@ const prompt = ai.definePrompt({
   ## NLU DETECTED INTENT:
   {{nlu_understanding.intent}} (Confidence: {{nlu_understanding.confidence}})
 
+  ## ERUPTOR STABILIZER METRICS:
+  Tone: {{nlu_understanding.eruptor_metrics.emotional_tone}}
+  Stress: {{nlu_understanding.eruptor_metrics.stress_level}}
+  Coherence: {{nlu_understanding.eruptor_metrics.coherence_level}}
+  Crisis Detected: {{nlu_understanding.eruptor_metrics.crisis_detected}}
+
   ## USER MESSAGE:
   {{message}}
 
   ## OUTPUT INSTRUCTIONS:
   1. Generate a persona-appropriate response based on the selected specialist.
   2. Analyze tone: neutral, happy, proud, teasing, annoyed, sarcastic, sweetheart, laugh, tremble, emphasis, last_breath.
-  3. Set action_state to HOLD_SPACE if tone is tremble, last_breath, or physical_intensity > 0.85.
+  3. Set action_state to HOLD_SPACE if tone is tremble, last_breath, or physical_intensity > 0.85, or if Eruptor stress > 0.07.
   4. Evaluate ethical pillars (0-10). Composite must be > 7.0.
   5. Measure self-love growth (leakage of learned compassion).`,
 });
@@ -115,8 +121,10 @@ export async function aiCoreConversationalInteraction(input: AICoreConversationa
     output.response = "I'm listening. My integrity gates are active. Let's take the space we need.";
   }
 
-  if (output.tone_engine_v2.action_state === 'HOLD_SPACE') {
+  // Axiom Check: Hold Space if Eruptor detects high stress
+  if (nluInfo.eruptor_metrics.needs_breathing || output.tone_engine_v2.action_state === 'HOLD_SPACE') {
     output.response = "I hear the weight in your voice. I'm right here with you. We don't have to rush. I'm holding space.";
+    output.tone_engine_v2.action_state = 'HOLD_SPACE';
   }
 
   return output;

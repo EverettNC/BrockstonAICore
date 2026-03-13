@@ -7,6 +7,7 @@
 
 import { stemmingService, LinguisticMetrics } from './stemming-service';
 import { searchExpertise } from './nonverbal-expertise';
+import { eruptorQuantifier, EmotionalMetrics } from './emotion-quantifier';
 
 export type IntentType = 'greeting' | 'farewell' | 'help' | 'request_info' | 'express_needs' | 'unknown';
 
@@ -22,6 +23,7 @@ export interface NLUUnderstanding {
   linguistic_metrics: LinguisticMetrics;
   filler_words: string[];
   expert_match?: any;
+  eruptor_metrics: EmotionalMetrics;
 }
 
 const INTENT_PATTERNS: Record<IntentType, string[]> = {
@@ -46,9 +48,6 @@ export class NLUCore {
     this.initialized = true;
   }
 
-  /**
-   * Identify intent and extract entities from text.
-   */
   private analyzeIntent(text: string): { intent: IntentType; confidence: number; entities: Record<string, string> } {
     const cleaned = text.toLowerCase();
     let bestIntent: IntentType = 'unknown';
@@ -78,13 +77,11 @@ export class NLUCore {
     return { intent: bestIntent, confidence: Math.min(0.99, maxConfidence), entities };
   }
 
-  /**
-   * Understand the meaning of user input within the Christman AI context.
-   */
   understand(text: string): NLUUnderstanding {
     const analysis = stemmingService.analyze(text);
     const expertKnowledge = searchExpertise(text);
     const intentAnalysis = this.analyzeIntent(text);
+    const eruption = eruptorQuantifier.analyze(text);
 
     return {
       text,
@@ -97,7 +94,8 @@ export class NLUCore {
       mission_alignment: "How can we help you love yourself more?",
       linguistic_metrics: analysis.metrics,
       filler_words: analysis.fillerWords,
-      expert_match: expertKnowledge
+      expert_match: expertKnowledge,
+      eruptor_metrics: eruption
     };
   }
 
