@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -10,6 +9,7 @@ import { PulseTerminal } from '@/components/PulseTerminal';
 import { VisionFeed } from '@/components/VisionFeed';
 import { CortexMonitor } from '@/components/CortexMonitor';
 import { LearningCenter } from '@/components/LearningCenter';
+import { HapticPanel } from '@/components/HapticPanel';
 import { Button } from '@/components/ui/button';
 import { 
   Terminal, 
@@ -26,7 +26,8 @@ import {
   Eye,
   BrainCircuit,
   GraduationCap,
-  ShieldAlert
+  ShieldAlert,
+  Radio
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -137,6 +138,7 @@ export default function Home() {
               {/* Right Monitoring Panel */}
               <aside className="lg:col-span-4 flex flex-col gap-6 overflow-y-auto pr-2 system-log">
                 <CognitiveStats />
+                <HapticPanel />
                 <SecurityPanel />
                 
                 {/* Mission Statement */}
@@ -154,25 +156,6 @@ export default function Home() {
                     <p className="text-[9px] text-secondary mt-4 font-code text-center opacity-40">
                       © 2025 THE CHRISTMAN AI PROJECT
                     </p>
-                </div>
-
-                {/* Learning Shortcut */}
-                <div className="p-4 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-headline text-secondary uppercase tracking-wider flex items-center gap-2">
-                        <GraduationCap className="h-3 w-3 text-accent" /> Learning Core
-                      </h3>
-                      <button 
-                        onClick={() => setActiveTab('learning')}
-                        className="text-[10px] font-code text-accent hover:underline"
-                      >
-                        Open Lab
-                      </button>
-                    </div>
-                    <p className="text-[10px] text-secondary mb-3 italic">"Brockston researches. Brockston grows. For Everett."</p>
-                    <Button size="sm" variant="outline" className="w-full text-[10px] h-7 border-accent/20 hover:bg-accent/10" onClick={() => setActiveTab('learning')}>
-                      Sync Knowledge
-                    </Button>
                 </div>
               </aside>
             </div>

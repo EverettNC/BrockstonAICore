@@ -73,6 +73,18 @@
   100% { transform: scale(0.95); opacity: 0.5; }
 }
 
+.haptic-pulse {
+  animation: haptic-vibe 0.5s ease-in-out;
+}
+
+@keyframes haptic-vibe {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
+
 .system-log {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--muted)) transparent;
