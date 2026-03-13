@@ -1,9 +1,9 @@
-
 "use client";
 
 /**
  * @fileOverview ChatInterface - The Visual Bridge of BROCKSTON C.
- * Rule 13 Compliant: No placeholders. Reality-based CSS visuals.
+ * Rule 1 Compliant: Immersive high-fidelity conversational loop.
+ * Rule 13 Compliant: No placeholders. Absolute honesty in reasoning.
  * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
  */
 
@@ -50,12 +50,17 @@ export const ChatInterface: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Robust Auto-Scroll per Interaction
   useEffect(() => {
     if (scrollRef.current) {
       const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (viewport) viewport.scrollTop = viewport.scrollHeight;
+      if (viewport) {
+        setTimeout(() => {
+          viewport.scrollTop = viewport.scrollHeight;
+        }, 100);
+      }
     }
-  }, [messages]);
+  }, [messages, status]);
 
   const isInterventionMode = useMemo(() => {
     if (!messages?.length) return false;
@@ -72,7 +77,7 @@ export const ChatInterface: React.FC = () => {
         (text, isFinal) => {
           if (isFinal) {
             setInput(text);
-            handleVoiceSend(text);
+            processMessage(text);
           } else {
             setInput(text);
           }
@@ -87,18 +92,17 @@ export const ChatInterface: React.FC = () => {
     }
   };
 
-  const handleVoiceSend = async (text: string) => {
-    if (!text.trim()) return;
-    await processMessage(text);
-  };
-
   const processMessage = async (userMsg: string) => {
+    if (!userMsg.trim() || status === 'thinking') return;
+    
     setStatus('thinking');
     const shield = shieldPayload('brockston');
 
-    const intentId = await vortexEngine.recordIntention(db, `Classroom Routing: ${userMsg.substring(0, 20)}...`, 0.99);
+    // 1. Record Intention
+    const intentId = await vortexEngine.recordIntention(db, `Conversational Intent: ${userMsg.substring(0, 20)}...`, 0.99);
 
-    addDoc(collection(db, 'chats', chatId, 'messages'), {
+    // 2. Persist User Message
+    await addDoc(collection(db, 'chats', chatId, 'messages'), {
       role: 'user',
       content: userMsg,
       specialist: 'brockston',
@@ -112,6 +116,7 @@ export const ChatInterface: React.FC = () => {
       const history = (messages || []).map(m => ({ role: m.role, content: m.content }));
       const visionSnapshot = visionContext.snapshot();
 
+      // 3. Call Brockston Core
       const result = await aiCoreConversationalInteraction({
         message: userMsg,
         specialist: 'brockston',
@@ -119,27 +124,29 @@ export const ChatInterface: React.FC = () => {
         visionSnapshot
       });
 
+      // 4. Mark Manifested
       await vortexEngine.markManifested(db, intentId, "Brockston response actualized");
 
+      // 5. Update Relational Topology
       const resonance = result.empathy_signal?.self_love_score || 0;
       const empathyMath = result.ethical_score.composite / 10;
       await topologyEngine.updateProximity(db, resonance, empathyMath);
 
+      // 6. Update SoulForge LTP Kernel
       const currentWeights = coreWeights || {
-        emotional_state: 0,
-        tonal_stability: 0,
-        speech_cadence: 0,
-        respiratory_pattern: 0,
-        lived_truth_witness: 0,
-        trauma_association: 0,
-        lucas_tone: 0,
-        narrative_clarity: 0
+        emotional_state: 0.5,
+        tonal_stability: 0.5,
+        speech_cadence: 0.5,
+        respiratory_pattern: 0.5,
+        lived_truth_witness: 0.5,
+        trauma_association: 0.5,
+        lucas_tone: 0.6,
+        narrative_clarity: 0.5
       };
 
-      const salience = result.tone_engine_v2.physical_intensity;
       const forgeResult = await soulForgeProcess({
         currentWeights,
-        emotional_salience: salience,
+        emotional_salience: result.tone_engine_v2.physical_intensity,
         success_rate: result.ethical_score.composite / 10,
         isDistressed: result.tone_engine_v2.action_state === 'INTERVENTION',
         isSafe: resonance > 0.7
@@ -150,7 +157,8 @@ export const ChatInterface: React.FC = () => {
         last_ltp_event: serverTimestamp()
       }, { merge: true });
 
-      addDoc(collection(db, 'chats', chatId, 'messages'), {
+      // 7. Persist Response
+      await addDoc(collection(db, 'chats', chatId, 'messages'), {
         role: 'model',
         content: result.response,
         specialist: 'brockston',
@@ -163,9 +171,11 @@ export const ChatInterface: React.FC = () => {
         timestamp: serverTimestamp()
       });
 
+      // 8. Trigger Haptics
       const hapticPattern = mapToneToHaptic(result.tone_engine_v2.dominant_state);
       hapticSystem.trigger(hapticPattern);
 
+      // 9. Speech Synthesis
       if (autoSpeak) {
         setStatus('speaking');
         try {
@@ -173,11 +183,9 @@ export const ChatInterface: React.FC = () => {
           if (audioRef.current) {
             audioRef.current.src = audioMedia;
             audioRef.current.play().catch(e => {
-              console.error("Audio blocked:", e);
+              console.error("Audio blocked by browser policy:", e);
               setStatus('idle');
             });
-          } else {
-            setStatus('idle');
           }
         } catch (ttsErr) {
           console.error("TTS failed:", ttsErr);
@@ -187,7 +195,8 @@ export const ChatInterface: React.FC = () => {
         setStatus('idle');
       }
     } catch (err) {
-      console.error("Core failed:", err);
+      console.error("Core Processing Error:", err);
+      toast({ variant: "destructive", title: "Cortex Stall", description: "Brockston's neural bridge encountered a temporary bottleneck." });
       setStatus('idle');
     }
   };
@@ -202,21 +211,21 @@ export const ChatInterface: React.FC = () => {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || status !== 'idle') return;
-    const userMsg = input;
+    const msg = input;
     setInput('');
-    await processMessage(userMsg);
+    await processMessage(msg);
   };
 
   return (
-    <div className="flex flex-col h-full gap-8 relative overflow-hidden flex-1 pb-12">
+    <div className="flex flex-col h-full gap-8 relative overflow-hidden flex-1 pb-4">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
       {/* Visual Bridge - High-Fidelity Symbolic Command Center */}
       <div className={cn(
-        "flex-none flex flex-col items-center justify-center gap-12 p-16 rounded-[2.5rem] border border-white/10 transition-all duration-1000 min-h-[600px] relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-black",
+        "flex-none flex flex-col items-center justify-center gap-12 p-16 rounded-[2.5rem] border border-white/10 transition-all duration-1000 min-h-[550px] relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-black",
         isInterventionMode && "border-red-500 shadow-[0_0_150px_rgba(239,68,68,0.4)]"
       )}>
-        {/* Pure CSS Mission Background */}
+        {/* Cinematic Mission Background */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/20 via-black to-black z-10" />
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,127,0.05)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none opacity-20" />
@@ -225,7 +234,7 @@ export const ChatInterface: React.FC = () => {
           </div>
         </div>
 
-        {/* Status Bar */}
+        {/* Identity Anchor Status */}
         <div className="absolute top-10 left-0 right-0 px-12 z-20 flex justify-between items-start pointer-events-none">
           <div className="flex items-center gap-5 bg-black/80 p-5 rounded-[1.5rem] border border-accent/20 backdrop-blur-3xl shadow-2xl">
             <div className="h-14 w-14 rounded-full bg-accent flex items-center justify-center shadow-[0_0_30px_rgba(0,255,127,0.4)]">
@@ -246,7 +255,7 @@ export const ChatInterface: React.FC = () => {
           </div>
         </div>
 
-        {/* Central Identity Anchor */}
+        {/* Central Identity Bridge */}
         <div className="flex flex-col items-center gap-12 relative z-10 pt-12">
           <CoreAvatar status={status} className="z-10" />
           
@@ -309,6 +318,20 @@ export const ChatInterface: React.FC = () => {
                 </div>
               </div>
             ))}
+            {status === 'thinking' && (
+              <div className="mr-auto items-start flex flex-col max-w-[85%] animate-pulse">
+                <div className="flex items-center gap-4 mb-4 px-3">
+                  <span className="text-[10px] font-code uppercase text-accent/60 tracking-[0.2em] font-bold">BROCKSTON (COGITATING)</span>
+                </div>
+                <div className="p-8 rounded-[2.5rem] bg-primary/20 border-2 border-accent/20 text-accent/40 rounded-tl-none">
+                  <div className="flex gap-2">
+                    <span className="h-2 w-2 rounded-full bg-accent animate-bounce [animation-delay:-0.3s]" />
+                    <span className="h-2 w-2 rounded-full bg-accent animate-bounce [animation-delay:-0.15s]" />
+                    <span className="h-2 w-2 rounded-full bg-accent animate-bounce" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </ScrollArea>
       </div>
@@ -342,7 +365,7 @@ export const ChatInterface: React.FC = () => {
               <Switch id="voice-mode" checked={autoSpeak} onCheckedChange={setAutoSpeak} className="data-[state=checked]:bg-accent scale-[1.2]" />
               {autoSpeak ? <Volume2 className="h-8 w-8 text-accent" /> : <VolumeX className="h-8 w-8 text-secondary/30" />}
             </div>
-            <Button disabled={status !== 'idle' || !input.trim() || isInterventionMode} className={cn(
+            <Button type="submit" disabled={status !== 'idle' || !input.trim() || isInterventionMode} className={cn(
               "h-20 w-20 rounded-3xl text-accent-foreground glow-accent font-black transition-all hover:scale-105 active:scale-95 shadow-2xl",
               isInterventionMode ? "bg-red-600 hover:bg-red-700 shadow-[0_0_50px_rgba(220,38,38,0.6)]" : "bg-accent hover:bg-accent/80"
             )}>

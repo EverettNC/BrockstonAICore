@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -12,8 +11,8 @@ interface CoreAvatarProps {
 
 /**
  * @fileOverview CoreAvatar - THE NEW TEACHER.
- * Honest, high-fidelity symbolic representation. No placeholders.
- * Rule 13 Compliant: Reality over illusion.
+ * Honest, high-fidelity symbolic representation. Per Rule 13, no placeholders.
+ * Uses high-fidelity CSS-driven identity logic.
  */
 
 export const CoreAvatar: React.FC<CoreAvatarProps> = ({ status, className }) => {
@@ -27,8 +26,8 @@ export const CoreAvatar: React.FC<CoreAvatarProps> = ({ status, className }) => 
       
       {/* Middle Haptic Ring */}
       <div className={cn(
-        "absolute inset-8 rounded-full border-2 border-accent/50 animate-[spin_60s_linear_infinite]",
-        status === 'thinking' && "animate-[spin_10s_linear_infinite] border-accent"
+        "absolute inset-8 rounded-full border-2 border-accent/5 animate-[spin_60s_linear_infinite]",
+        status === 'thinking' && "animate-[spin_10s_linear_infinite] border-accent/40"
       )}>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 h-4 w-4 rounded-full bg-accent shadow-[0_0_20px_rgba(0,255,127,1)]" />
       </div>

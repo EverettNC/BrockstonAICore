@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, use } from 'react';
@@ -53,11 +52,12 @@ type PageProps = {
 
 /**
  * @fileOverview Main Dashboard Entry. 
- * Rule 1 Compliant: Spans full screen.
+ * Rule 1 Compliant: Spans full screen. Fixed parameter unwrapping for Next.js 15.
  * Rule 13 Compliant: No placeholder images.
  */
 
 export default function Home(props: PageProps) {
+  // Unwrap Next.js 15 promises correctly
   const _params = use(props.params);
   const _searchParams = use(props.searchParams);
 
@@ -67,7 +67,7 @@ export default function Home(props: PageProps) {
     <div className="h-screen w-screen bg-background text-foreground flex overflow-hidden">
       {/* Sidebar Navigation */}
       <aside className="w-24 flex-none hidden md:flex flex-col items-center py-8 bg-card border-r border-white/5 z-50">
-        {/* Brand Logo Anchor */}
+        {/* Brand Logo Anchor (High-Fidelity Restoration) */}
         <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-12 shadow-[0_0_25px_rgba(0,255,127,0.3)] group cursor-pointer overflow-hidden border-2 border-accent/40 bg-black/60 transition-all hover:scale-105 active:scale-95">
           <Cpu className="text-accent h-8 w-8 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(0,255,127,0.8)]" />
         </div>
@@ -97,7 +97,7 @@ export default function Home(props: PageProps) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden h-full">
         {/* Top Header Bar */}
         <header className="flex-none flex items-center justify-between p-4 md:px-8 border-b border-white/5 bg-card/30 backdrop-blur-md z-40">
           <div className="flex items-center gap-6">
@@ -135,7 +135,7 @@ export default function Home(props: PageProps) {
 
         {/* Dashboard Content */}
         <div className="flex-1 min-h-0 relative flex flex-col h-full overflow-hidden">
-          <div className="absolute inset-0 overflow-y-auto system-log p-4 md:p-6 lg:p-8">
+          <div className="absolute inset-0 overflow-y-auto system-log p-4 md:p-6 lg:p-8 h-full">
             {activeTab === 'lab' ? (
               <DiscoveryLab />
             ) : activeTab === 'speed' ? (
@@ -167,7 +167,7 @@ export default function Home(props: PageProps) {
             ) : activeTab === 'manifesto' ? (
               <MissionManifesto />
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full min-h-[calc(100vh-120px)]">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
                 {/* Chat/Avatar - Main Panel */}
                 <section className="lg:col-span-8 flex flex-col h-full overflow-hidden">
                   <ChatInterface />
@@ -175,7 +175,7 @@ export default function Home(props: PageProps) {
 
                 {/* Right Monitoring Panel */}
                 <aside className="lg:col-span-4 flex flex-col gap-8 overflow-y-auto pr-2 system-log h-full">
-                  <div className="space-y-8">
+                  <div className="space-y-8 pb-12">
                     <CognitiveStats />
                     <HapticPanel />
                     <SecurityPanel />

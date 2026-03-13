@@ -1,9 +1,8 @@
-
 "use client";
 
 /**
  * @fileOverview MissionManifesto - The Official Grant & Innovation Documentation.
- * Incorporates Cardinal Rules of Code, Derek C's Proclamation, and the Chapter 6 Memoir.
+ * Incorporates Cardinal Rules of Code (0-14), Derek C's Proclamation, and the Chapter 6 Memoir.
  * Rule 13 Compliant: Absolute Honesty.
  * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
  */
