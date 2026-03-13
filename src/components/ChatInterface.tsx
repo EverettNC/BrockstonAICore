@@ -5,14 +5,15 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
 import { aiCoreKnowledgePoweredResponses } from '@/ai/flows/ai-core-knowledge-powered-responses';
 import { quantumFuse } from '@/ai/flows/quantum-fusion-flow';
+import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Zap, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, HelpCircle, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
+import { useFirestore, useCollection, useDoc } from '@/firebase';
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, doc, setDoc } from 'firebase/firestore';
 import { Badge } from '@/components/ui/badge';
 
 type Message = {
@@ -34,6 +35,9 @@ export const ChatInterface: React.FC = () => {
   const db = useFirestore();
   const chatId = "main-session-alpha";
   
+  const coreRef = useMemo(() => doc(db, 'cognitive_core', 'main-bridge'), [db]);
+  const { data: forgeState } = useDoc<any>(coreRef);
+
   const messagesQuery = useMemo(() => {
     return query(
       collection(db, 'chats', chatId, 'messages'),
@@ -125,6 +129,31 @@ export const ChatInterface: React.FC = () => {
         trace,
         timestamp: serverTimestamp()
       });
+
+      // TRIGGER THE SOUL FORGE BRIDGE
+      // If salience is high, Long-Term Potentiation (LTP) occurs.
+      const salience = quantumMode ? currentValence : (Math.random() * 0.5);
+      if (salience > 0.4) {
+        const currentWeights = forgeState || {
+          emotional_state: 0.5,
+          tonal_stability: 0.5,
+          speech_cadence: 0.5,
+          respiratory_pattern: 0.5
+        };
+
+        const forgeResult = await soulForgeProcess({
+          currentWeights,
+          salience,
+          successRate: 1.0
+        });
+
+        if (forgeResult.ltpTriggered) {
+          setDoc(coreRef, {
+            ...forgeResult.updatedWeights,
+            last_ltp_event: new Date().toISOString()
+          }, { merge: true });
+        }
+      }
       
       setTimeout(() => setStatus('idle'), 2000);
     } catch (error: any) {

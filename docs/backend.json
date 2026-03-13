@@ -28,16 +28,16 @@
       },
       "required": ["role", "content", "timestamp"]
     },
-    "QuantumTrace": {
-      "title": "Quantum Trace",
-      "description": "Metrics from a symbol-to-speech quantum fusion event.",
+    "SoulForgeState": {
+      "title": "Soul Forge State",
+      "description": "Biological factor weights for adaptive learning based on emotional salience.",
       "type": "object",
       "properties": {
-        "top_state": { "type": "string" },
-        "fusion_prob": { "type": "number" },
-        "qubit_count": { "type": "integer" },
-        "valence_arc": { "type": "number" },
-        "decoherence_dip": { "type": "number" }
+        "emotional_state": { "type": "number" },
+        "tonal_stability": { "type": "number" },
+        "speech_cadence": { "type": "number" },
+        "respiratory_pattern": { "type": "number" },
+        "last_ltp_event": { "type": "string", "format": "date-time" }
       }
     },
     "SystemLog": {
@@ -59,6 +59,10 @@
     "/chats/{chatId}/messages/{messageId}": {
       "schema": "#/entities/Message",
       "description": "Individual messages within a specific chat session."
+    },
+    "/cognitive_core/{coreId}": {
+      "schema": "#/entities/SoulForgeState",
+      "description": "Global cognitive weights and biological bridge state."
     },
     "/system_logs/{logId}": {
       "schema": "#/entities/SystemLog",
