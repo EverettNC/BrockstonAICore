@@ -17,6 +17,7 @@ import { KernelLab } from '@/components/KernelLab';
 import { ResonanceCapacitor } from '@/components/ResonanceCapacitor';
 import { TheTether } from '@/components/TheTether';
 import { OpenSmell } from '@/components/OpenSmell';
+import { CodeLab } from '@/components/CodeLab';
 import { 
   Terminal, 
   Cpu, 
@@ -38,12 +39,13 @@ import {
   Droplets,
   ShieldCheck,
   FlaskConical,
-  CircleDashed
+  CircleDashed,
+  CodeXml
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab'>('terminal');
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 flex overflow-hidden">
@@ -59,6 +61,12 @@ export default function Home() {
             active={activeTab === 'terminal'} 
             onClick={() => setActiveTab('terminal')} 
             label="Terminal"
+          />
+          <NavIcon 
+            icon={CodeXml} 
+            active={activeTab === 'codelab'} 
+            onClick={() => setActiveTab('codelab')} 
+            label="Code Lab"
           />
           <NavIcon 
             icon={Infinity} 
@@ -187,6 +195,8 @@ export default function Home() {
             <TheTether />
           ) : activeTab === 'opensmell' ? (
             <OpenSmell />
+          ) : activeTab === 'codelab' ? (
+            <CodeLab />
           ) : (
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
               {/* Chat/Avatar - Main Panel */}

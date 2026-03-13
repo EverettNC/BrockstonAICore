@@ -13,3 +13,4 @@ import '@/ai/flows/behavioral-analysis-flow.ts';
 import '@/ai/flows/eternal-fuse-flow.ts';
 import '@/ai/flows/resonance-capacitor-flow.ts';
 import '@/ai/flows/moment-capture-flow.ts';
+import '@/ai/flows/code-generation-flow.ts';
