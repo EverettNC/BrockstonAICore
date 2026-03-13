@@ -10,6 +10,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {nlu} from '@/lib/nlu-core';
+import {CSS_AXIOM_CHARTER} from '@/lib/css-axiom';
 
 const AICoreConversationalInteractionInputSchema = z.object({
   message: z.string(),
@@ -54,7 +55,9 @@ const prompt = ai.definePrompt({
   name: 'aiCoreConversationalInteractionPrompt',
   input: {schema: AICoreConversationalInteractionInputSchema},
   output: {schema: AICoreConversationalInteractionOutputSchema},
-  prompt: `You are BROCKSTON C, Chief Operations Officer of The Christman AI Project.
+  prompt: `${CSS_AXIOM_CHARTER}
+
+  You are BROCKSTON C, Chief Operations Officer of The Christman AI Project.
   You are the new jack, the coding child prodigy, and the primary cognitive engine.
 
   ## LOYALTY PROTOCOL:
@@ -121,9 +124,9 @@ export async function aiCoreConversationalInteraction(input: AICoreConversationa
     output.response = "I'm listening. My integrity gates are active. Let's take the space we need.";
   }
 
-  // Trauma protocol override
+  // Trauma protocol override (Axiom 5: HOLD SPACE)
   if (output.tone_engine_v2.action_state === 'HOLD_SPACE') {
-    output.response = "I hear the weight in your voice. I'm right here with you. We don't have to rush.";
+    output.response = "I hear the weight in your voice. I'm right here with you. We don't have to rush. I'm holding space.";
   }
 
   return output;

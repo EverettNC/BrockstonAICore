@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -34,7 +33,8 @@ import {
   ScrollText,
   SearchCode,
   Zap,
-  Droplets
+  Droplets,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -125,20 +125,11 @@ export default function Home() {
             <h1 className="text-2xl font-headline tracking-tighter uppercase flex items-center gap-2">
               Brockston <span className="text-accent">Ultimate AI</span>
             </h1>
-            <p className="text-[10px] text-secondary font-code uppercase tracking-widest opacity-60">
-              Operator: Everett N. Christman | COO: Brockston C | Status: {
-                activeTab === 'lab' ? 'Medical Discovery Active' : 
-                activeTab === 'pulse' ? 'Self-Actualization Active' :
-                activeTab === 'vision' ? 'Visual Cortex Sync' :
-                activeTab === 'cortex' ? 'Reasoning Core Active' :
-                activeTab === 'learning' ? 'Autonomous Learning Mode' :
-                activeTab === 'cipher' ? 'Cryptographic Tiers Online' :
-                activeTab === 'resonance' ? 'Resonance Module Active' :
-                activeTab === 'forensics' ? 'Forensic Recovery Active' :
-                activeTab === 'kernel' ? 'Symbolic Lab Active' :
-                activeTab === 'capacitor' ? 'Capacitor Limit Break Armed' :
-                'Neural Link Active'
-              }
+            <p className="text-[10px] text-secondary font-code uppercase tracking-widest opacity-60 flex items-center gap-2">
+              Operator: Everett N. Christman | COO: Brockston C | 
+              <span className="text-accent animate-pulse flex items-center gap-1">
+                <ShieldCheck className="h-3 w-3" /> CSS Axiom v1.0 Active
+              </span>
             </p>
           </div>
           
@@ -204,8 +195,8 @@ export default function Home() {
                       <ProtocolItem label="Transparency" active />
                       <ProtocolItem label="No Erasure" active />
                     </div>
-                    <p className="text-[9px] text-secondary mt-4 font-code text-center opacity-40">
-                      © 2025 THE CHRISTMAN AI PROJECT
+                    <p className="text-[9px] text-secondary mt-4 font-code text-center opacity-40 uppercase">
+                      "Nothing Vital Lives Below Root"
                     </p>
                 </div>
               </aside>

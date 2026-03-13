@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -12,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 export const SecurityPanel: React.FC = () => {
   const db = useFirestore();
   const messagesQuery = useMemo(() => query(
-    collection(db, 'chats', 'v5-alpha-session', 'messages'),
+    collection(db, 'chats', 'ultimate-v5-session', 'messages'),
     orderBy('timestamp', 'desc'),
     limit(5)
   ), [db]);
@@ -25,21 +24,24 @@ export const SecurityPanel: React.FC = () => {
   }, [recentMessages]);
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border-white/5">
+    <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-accent/20">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-secondary">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-accent" />
             Ethical Core Monitor
           </div>
-          {activeShield?.hndl_protected && (
-            <Badge variant="outline" className="text-[8px] border-accent/40 text-accent animate-pulse">
-              PQC Shield Active
-            </Badge>
-          )}
+          <Badge variant="default" className="text-[8px] bg-accent text-accent-foreground animate-pulse font-bold">
+            CSS AXIOM v1.0
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Axiom Override Confirmation */}
+        <div className="p-2 bg-accent/5 rounded border border-accent/20 text-[9px] font-code text-accent/80 italic leading-tight">
+          "Truth preservation supersedes correctness. Defense prevails. Nothing vital lives below root."
+        </div>
+
         {/* Quantum Defense Stats */}
         <div className="grid grid-cols-2 gap-3">
           <div className="p-2 bg-primary/20 rounded-lg border border-white/5">
