@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -7,6 +6,7 @@ import { SecurityPanel } from '@/components/SecurityPanel';
 import { CognitiveStats } from '@/components/CognitiveStats';
 import { DiscoveryLab } from '@/components/DiscoveryLab';
 import { PulseTerminal } from '@/components/PulseTerminal';
+import { Button } from '@/components/ui/button';
 import { 
   Terminal, 
   Cpu, 
