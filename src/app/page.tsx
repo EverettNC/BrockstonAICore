@@ -55,6 +55,7 @@ type PageProps = {
  */
 
 export default function Home(props: PageProps) {
+  // Correct Next.js 15 parameter unwrapping
   const _params = use(props.params);
   const _searchParams = use(props.searchParams);
 
@@ -64,7 +65,7 @@ export default function Home(props: PageProps) {
     <div className="h-screen w-screen bg-background text-foreground flex overflow-hidden">
       {/* Sidebar Navigation */}
       <aside className="w-24 flex-none hidden md:flex flex-col items-center py-8 bg-card border-r border-white/5 z-50">
-        {/* Brand Logo Anchor - High Fidelity Shield */}
+        {/* Christman AI Project Brand Logo Anchor */}
         <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-12 shadow-[0_0_25px_rgba(0,255,127,0.3)] group cursor-pointer overflow-hidden border-2 border-accent/40 bg-black/60 transition-all hover:scale-105 active:scale-95">
           <Cpu className="text-accent h-8 w-8 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(0,255,127,0.8)]" />
         </div>

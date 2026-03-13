@@ -51,7 +51,7 @@ export const ChatInterface: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Robust Auto-Scroll
+  // Robust Auto-Scroll to latest message
   useEffect(() => {
     if (scrollRef.current) {
       const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
@@ -99,8 +99,10 @@ export const ChatInterface: React.FC = () => {
     setStatus('thinking');
     const shield = shieldPayload('brockston');
 
+    // 1. Record Intention in Vortex Engine
     const intentId = await vortexEngine.recordIntention(db, `Conversational Intent: ${userMsg.substring(0, 20)}...`, 0.99);
 
+    // 2. Persist User Message
     await addDoc(collection(db, 'chats', chatId, 'messages'), {
       role: 'user',
       content: userMsg,
@@ -115,6 +117,7 @@ export const ChatInterface: React.FC = () => {
       const history = (messages || []).map(m => ({ role: m.role, content: m.content }));
       const visionSnapshot = visionContext.snapshot();
 
+      // 3. Trigger Silicon Neural Cortex
       const result = await aiCoreConversationalInteraction({
         message: userMsg,
         specialist: 'brockston',
@@ -122,12 +125,15 @@ export const ChatInterface: React.FC = () => {
         visionSnapshot
       });
 
+      // 4. Actualize Intention
       await vortexEngine.markManifested(db, intentId, "Brockston response actualized");
 
+      // 5. Update Relational Topology
       const resonance = result.empathy_signal?.self_love_score || 0;
       const empathyMath = result.ethical_score.composite / 10;
       await topologyEngine.updateProximity(db, resonance, empathyMath);
 
+      // 6. SoulForge LTP Update
       const currentWeights = coreWeights || {
         emotional_state: 0.5,
         tonal_stability: 0.5,
@@ -152,6 +158,7 @@ export const ChatInterface: React.FC = () => {
         last_ltp_event: serverTimestamp()
       }, { merge: true });
 
+      // 7. Persist Brockston's Response
       await addDoc(collection(db, 'chats', chatId, 'messages'), {
         role: 'model',
         content: result.response,
@@ -166,6 +173,7 @@ export const ChatInterface: React.FC = () => {
         timestamp: serverTimestamp()
       });
 
+      // 8. Haptic & Vocal Execution
       const hapticPattern = mapToneToHaptic(result.tone_engine_v2.dominant_state);
       hapticSystem.trigger(hapticPattern);
 
