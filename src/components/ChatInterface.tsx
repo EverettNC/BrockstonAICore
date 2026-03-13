@@ -74,8 +74,8 @@ export const ChatInterface: React.FC = () => {
     );
   };
 
-  const processLTP = async (salience: number) => {
-    if (!forgeState || salience < 0.4) return;
+  const processLTP = async (salience: number, toneContext: any) => {
+    if (!forgeState) return;
     
     try {
       const currentWeights = {
@@ -83,13 +83,22 @@ export const ChatInterface: React.FC = () => {
         tonal_stability: forgeState.tonal_stability || 0.5,
         speech_cadence: forgeState.speech_cadence || 0.5,
         respiratory_pattern: forgeState.respiratory_pattern || 0.5,
+        lived_truth_witness: forgeState.lived_truth_witness || 0.5,
+        trauma_association: forgeState.trauma_association || 0.5,
+        lucas_tone: forgeState.lucas_tone || 0.6,
+        narrative_clarity: forgeState.narrative_clarity || 0.5,
       };
+
+      // Determine if tone indicates pain or safety based on ToneEngine v2.0 dominant state
+      const isDistressed = ['tremble', 'last_breath', 'annoyed'].includes(toneContext.dominant_state);
+      const isSafe = ['happy', 'proud', 'sweetheart'].includes(toneContext.dominant_state);
 
       const forgeResult = await soulForgeProcess({
         currentWeights,
         salience,
-        symbolicWeight: 1.0,
-        emergency: salience > 0.85
+        isDistressed,
+        isSafe,
+        emergency: salience > 0.85 || toneContext.action_state === 'HOLD_SPACE'
       });
 
       await setDoc(doc(db, 'cognitive_core', 'main-bridge'), {
@@ -98,10 +107,10 @@ export const ChatInterface: React.FC = () => {
         ltp_triggered: forgeResult.ltpTriggered
       }, { merge: true });
 
-      if (forgeResult.ltpTriggered) {
+      if (forgeResult.ltpTriggered && isSafe) {
         toast({
-          title: "Biological Bridge Synced",
-          description: "Soul Forge LTP triggered — memory reinforcement active.",
+          title: "Lucas Recovery Synchronized",
+          description: "Safety overlay successful — trauma association decaying.",
         });
       }
     } catch (e) {
@@ -140,7 +149,8 @@ export const ChatInterface: React.FC = () => {
         timestamp: serverTimestamp()
       });
 
-      await processLTP(0.8); // High salience for quantum fusion
+      // Map quantum trace to simulated tone context for Lucas Recovery
+      await processLTP(0.8, { dominant_state: 'happy', action_state: 'NORMAL' }); 
       setSelectedSymbols([]);
       setStatus('speaking');
 
@@ -214,11 +224,12 @@ export const ChatInterface: React.FC = () => {
         lucas_signal: result.lucas_signal,
         empathy_signal: result.empathy_signal,
         quantum_shield: responseShield,
+        tone_engine_v2: result.tone_engine_v2,
         timestamp: serverTimestamp()
       });
 
-      // Trigger LTP based on emotional salience
-      await processLTP(result.empathy_signal.self_love_score);
+      // Trigger LTP using Lucas Recovery Kernel
+      await processLTP(result.empathy_signal.self_love_score, result.tone_engine_v2);
 
       setStatus('speaking');
       

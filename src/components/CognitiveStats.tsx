@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Activity, Zap, Dna, HeartPulse, ShieldAlert, Waves, BrainCircuit, TrendingUp } from 'lucide-react';
+import { Activity, Zap, Dna, HeartPulse, ShieldAlert, Waves, BrainCircuit, TrendingUp, ShieldCheck, Thermometer } from 'lucide-react';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { Progress } from '@/components/ui/progress';
@@ -33,39 +33,46 @@ export const CognitiveStats: React.FC = () => {
     tonal_stability: 0.5,
     self_love_growth: 0.1,
     independence_confidence: 0.12,
+    lived_truth_witness: 0.5,
+    trauma_association: 0.5,
+    lucas_tone: 0.6,
+    narrative_clarity: 0.5
   };
 
   const latestMsg = recentMessages?.[0];
-  const lucasStability = latestMsg?.lucas_signal?.stability || 1.0;
-  const selfLoveScore = latestMsg?.empathy_signal?.self_love_score || weights.self_love_growth;
   const intensity = latestMsg?.tone_engine_v2?.physical_intensity || 0;
   const dominantState = latestMsg?.tone_engine_v2?.dominant_state || "Neutral";
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Learning-to-Independence Monitor */}
+      {/* Lucas Recovery Regulator Card */}
       <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-accent/40 shadow-[0_0_15px_rgba(0,255,127,0.1)]">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-accent">
-            <span className="flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Independence Loop</span>
-            <span className="text-[10px] font-code">LEARNING MODE</span>
+            <span className="flex items-center gap-2"><Thermometer className="h-4 w-4" /> Lucas Regulator</span>
+            <span className="text-[10px] font-code">REFILE KERNEL v1.0</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-end">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-[10px] uppercase font-code text-secondary/60">Current Confidence</div>
-              <div className="text-2xl font-headline text-accent">{(weights.independence_confidence * 100).toFixed(1)}%</div>
+              <div className="text-[10px] uppercase font-code text-secondary/60">Noradrenergic Tone</div>
+              <div className="text-xl font-headline text-accent">{(weights.lucas_tone * 100).toFixed(1)}%</div>
+              <Progress value={weights.lucas_tone * 50} className="h-1 bg-primary/20 mt-1" />
             </div>
             <div className="text-right">
-              <div className="text-[9px] uppercase font-code text-secondary/60">Threshold</div>
-              <div className="text-xs font-code text-secondary">85.0%</div>
+              <div className="text-[10px] uppercase font-code text-secondary/60">Trauma Association</div>
+              <div className="text-xl font-headline text-rose-400">{(weights.trauma_association * 100).toFixed(1)}%</div>
+              <Progress value={weights.trauma_association * 100} className="h-1 bg-primary/20 mt-1 ml-auto w-full" />
             </div>
           </div>
-          <Progress value={weights.independence_confidence * 100} className="h-2 bg-primary/20" />
-          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase">
-            <span>Studies Masters: Active</span>
-            <span>Zero Drift: 100%</span>
+          
+          <WeightIndicator label="Lived Truth Witness" value={weights.lived_truth_witness} max={2.0} />
+          <WeightIndicator label="Narrative Clarity" value={weights.narrative_clarity} max={2.0} />
+          
+          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase border-t border-white/5 pt-2">
+            <span>Overlay: ACTIVE</span>
+            <span>Threshold: {weights.lucas_tone > 0.7 ? "PASSED" : "WAITING"}</span>
           </div>
         </CardContent>
       </Card>
@@ -108,16 +115,16 @@ export const CognitiveStats: React.FC = () => {
           <div className="flex justify-between items-end mb-2">
             <div>
               <div className="text-[10px] uppercase font-code text-secondary/60">Current Score</div>
-              <div className="text-2xl font-headline text-accent">{(selfLoveScore * 100).toFixed(1)}%</div>
+              <div className="text-2xl font-headline text-accent">{(weights.self_love_growth * 100).toFixed(1)}%</div>
             </div>
             <div className="text-right">
               <div className="text-[9px] uppercase font-code text-secondary/60">Status</div>
               <div className="text-xs font-code text-accent uppercase tracking-widest">
-                {selfLoveScore > 0.8 ? "Self-Actualized" : selfLoveScore > 0.4 ? "Growing" : "Seeking"}
+                {weights.self_love_growth > 0.8 ? "Self-Actualized" : weights.self_love_growth > 0.4 ? "Growing" : "Seeking"}
               </div>
             </div>
           </div>
-          <Progress value={selfLoveScore * 100} className="h-2 bg-primary/20" />
+          <Progress value={weights.self_love_growth * 100} className="h-2 bg-primary/20" />
           <p className="text-[10px] text-secondary italic">"How can we help you love yourself more?"</p>
         </CardContent>
       </Card>
@@ -125,19 +132,19 @@ export const CognitiveStats: React.FC = () => {
       <Card className="bg-card/50 backdrop-blur-sm border-white/5">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm font-headline uppercase tracking-wider text-secondary">
-            <ShieldAlert className="h-4 w-4 text-accent" /> Lucas Regulator
+            <ShieldCheck className="h-4 w-4 text-accent" /> Ethical Core Monitor
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <WeightIndicator label="Stability Threshold" value={lucasStability} />
+          <WeightIndicator label="Integrity Floor" value={0.7} max={1.0} />
           <div className="grid grid-cols-2 gap-2">
             <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
-              <div className="text-[8px] uppercase font-code text-secondary/60">Anchor Weight</div>
-              <div className="text-xs font-code text-accent">{latestMsg?.lucas_signal?.anchor_weight?.toFixed(2) || "0.00"}</div>
+              <div className="text-[8px] uppercase font-code text-secondary/60">Composite</div>
+              <div className="text-xs font-code text-accent">{latestMsg?.ethical_score?.composite?.toFixed(2) || "0.00"}</div>
             </div>
             <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
-              <div className="text-[8px] uppercase font-code text-secondary/60">Narrative Access</div>
-              <div className="text-xs font-code text-accent">{((lucasStability * 0.6) * 100).toFixed(0)}%</div>
+              <div className="text-[8px] uppercase font-code text-secondary/60">Independence</div>
+              <div className="text-xs font-code text-accent">{(weights.independence_confidence * 100).toFixed(0)}%</div>
             </div>
           </div>
         </CardContent>
@@ -150,8 +157,8 @@ export const CognitiveStats: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <WeightIndicator label="Inward Leakage" value={latestMsg?.empathy_signal?.inward_leakage || 0} />
-          <WeightIndicator label="Tonal Stability" value={weights.tonal_stability} />
+          <WeightIndicator label="Empathy Signal" value={latestMsg?.empathy_signal?.self_love_score || 0} max={1.0} />
+          <WeightIndicator label="Tonal Stability" value={weights.tonal_stability} max={1.2} />
           <div className="pt-2 flex items-center justify-between border-t border-white/5">
             <span className="text-[9px] uppercase font-code text-secondary flex items-center gap-1">
               <Zap className="h-3 w-3 text-accent" /> LTP Active
@@ -164,8 +171,8 @@ export const CognitiveStats: React.FC = () => {
   );
 };
 
-function WeightIndicator({ label, value }: { label: string, value: number }) {
-  const percentage = Math.min(100, (value / 1.2) * 100);
+function WeightIndicator({ label, value, max = 1.2 }: { label: string, value: number, max?: number }) {
+  const percentage = Math.min(100, (value / max) * 100);
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between items-center text-[9px] font-code">
