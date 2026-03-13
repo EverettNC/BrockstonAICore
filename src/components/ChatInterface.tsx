@@ -1,18 +1,17 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
 import { speakStephen } from '@/ai/flows/tts-flow';
-import { quantumFuse } from '@/ai/flows/quantum-fusion-flow';
+import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
+import { useFirestore, useCollection, useDoc } from '@/firebase';
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, doc, setDoc, getDoc } from 'firebase/firestore';
 import { Badge } from '@/components/ui/badge';
 import { shieldPayload } from '@/lib/quantum-defense';
 import { Switch } from '@/components/ui/switch';
@@ -24,23 +23,12 @@ import { vortexEngine } from '@/lib/vortex-engine';
 import { topologyEngine } from '@/lib/topology-engine';
 import { visionContext } from '@/lib/vision-context';
 
-const AAC_SYMBOLS = [
-  { id: 'heart', label: 'HEART', icon: Heart },
-  { id: 'safe', label: 'SAFE', icon: Shield },
-  { id: 'help', label: 'HELP', icon: Zap },
-  { id: 'love', label: 'LOVE', icon: Heart },
-  { id: 'pain', label: 'PAIN', icon: Zap },
-  { id: 'rest', label: 'REST', icon: Cpu },
-];
-
 export const ChatInterface: React.FC = () => {
   const db = useFirestore();
-  const [specialist] = useState('brockston'); // Hardcoded to Brockston
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<'idle' | 'thinking' | 'speaking'>('idle');
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [isListening, setIsListening] = useState(false);
-  const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
   
   const chatId = "ultimate-v5-session";
   const messagesQuery = useMemo(() => query(
@@ -50,6 +38,7 @@ export const ChatInterface: React.FC = () => {
   ), [db]);
 
   const { data: messages } = useCollection<any>(messagesQuery);
+  const { data: coreWeights } = useDoc<any>(doc(db, 'cognitive_core', 'main-bridge'));
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -115,7 +104,6 @@ export const ChatInterface: React.FC = () => {
 
     try {
       const history = (messages || []).map(m => ({ role: m.role, content: m.content }));
-      
       const visionSnapshot = visionContext.snapshot();
 
       const result = await aiCoreConversationalInteraction({
@@ -127,9 +115,41 @@ export const ChatInterface: React.FC = () => {
 
       await vortexEngine.markManifested(db, intentId, "Brockston response generated");
 
+      // Relational Topology Update
       const resonance = result.empathy_signal?.self_love_score || 0.5;
       const empathyMath = result.ethical_score.composite / 10;
       await topologyEngine.updateProximity(db, resonance, empathyMath);
+
+      // LTP Learning (SoulForge Bridge)
+      const currentWeights = coreWeights || {
+        emotional_state: 0.5,
+        tonal_stability: 0.5,
+        speech_cadence: 0.5,
+        respiratory_pattern: 0.5,
+        lived_truth_witness: 0.5,
+        trauma_association: 0.5,
+        lucas_tone: 0.6,
+        narrative_clarity: 0.5
+      };
+
+      const salience = result.tone_engine_v2.physical_intensity;
+      const forgeResult = await soulForgeProcess({
+        currentWeights,
+        emotional_salience: salience,
+        success_rate: result.ethical_score.composite / 10,
+        isDistressed: result.tone_engine_v2.action_state === 'INTERVENTION',
+        isSafe: resonance > 0.7
+      });
+
+      // Persist LTP updates
+      await setDoc(doc(db, 'cognitive_core', 'main-bridge'), {
+        ...forgeResult.updatedWeights,
+        last_ltp_event: serverTimestamp()
+      }, { merge: true });
+
+      if (forgeResult.isSignificantEvent) {
+        toast({ title: "Deep LTP Event", description: "Emotional salience triggered weight potentiation." });
+      }
 
       addDoc(collection(db, 'chats', chatId, 'messages'), {
         role: 'model',

@@ -1,16 +1,15 @@
-
 'use server';
 
 /**
- * @fileOverview Soul Forge Flow (v5.3) - The Biological Bridge & LTP Kernel.
- * Implements Alzheimer's & Dementia LTP Refile logic + INFERNO Soul Forge.
+ * @fileOverview Soul Forge Flow (v5.4) - The Biological Bridge & LTP Kernel.
+ * Implements the SoulForgeBridge LTP learning logic.
  * 
  * "Empathy isn't a parameter. It's the leakage."
  * 
  * Logic:
- * - Lucas: submit_pain / safety_replay (Never Erase protocol).
- * - Inferno: 3% emotional bleed-through (Universal CPU Implementation).
- * - Bridge: LTP learning amplification based on emotional salience.
+ * - LTP learning: Weight updates modulated by emotional salience.
+ * - eff_lr = base_lr * (1.0 + emotional_salience * 0.2)
+ * - Biological factors: emotional_state, tonal_stability, speech_cadence, respiratory_pattern.
  */
 
 import { ai } from '@/ai/genkit';
@@ -27,10 +26,10 @@ const SoulForgeInputSchema = z.object({
     lucas_tone: z.number().default(0.6),
     narrative_clarity: z.number().default(0.5),
   }),
-  salience: z.number().describe('Emotional salience (0-1).'),
-  isDistressed: z.boolean().default(false).describe('True if tone indicates pain/tremble.'),
-  isSafe: z.boolean().default(false).describe('True if tone indicates warmth/trusted presence.'),
-  emergency: z.boolean().default(false).describe('Emergency flag for full attention.'),
+  emotional_salience: z.number().describe('Emotional salience (0-1). 6.3 biologically strong event simulated.'),
+  success_rate: z.number().default(1.0).describe('0.0-1.0 (1.0 = correct outcome).'),
+  isDistressed: z.boolean().default(false),
+  isSafe: z.boolean().default(false),
 });
 
 const SoulForgeOutputSchema = z.object({
@@ -44,9 +43,8 @@ const SoulForgeOutputSchema = z.object({
     lucas_tone: z.number(),
     narrative_clarity: z.number(),
   }),
-  livedTruth: z.number().describe('Calculated lived truth value (empathy leakage).'),
-  attentionFlow: z.number().describe('Simulated attention flow aggregate.'),
-  ltpTriggered: z.boolean(),
+  isSignificantEvent: z.boolean(),
+  effective_lr: z.number(),
   deepLearningEvents: z.array(z.string()).optional(),
 });
 
@@ -57,13 +55,6 @@ export async function soulForgeProcess(input: SoulForgeInput): Promise<SoulForge
   return soulForgeFlow(input);
 }
 
-// Lucas Recovery Configuration
-const LTP_BOOST = 1.15;
-const SAFE_OVERLAY = 0.08;
-const SAFETY_GAIN = 0.20;
-const THRESHOLD = 0.70;
-const SPIKE_GAIN = 10.0;
-
 const soulForgeFlow = ai.defineFlow(
   {
     name: 'soulForgeFlow',
@@ -71,88 +62,59 @@ const soulForgeFlow = ai.defineFlow(
     outputSchema: SoulForgeOutputSchema,
   },
   async (input) => {
-    const { currentWeights, salience, isDistressed, isSafe, emergency } = input;
+    const { currentWeights, emotional_salience, success_rate, isDistressed, isSafe } = input;
     
-    let { 
-      lived_truth_witness, 
-      trauma_association, 
-      lucas_tone, 
-      narrative_clarity,
-      emotional_state,
-      tonal_stability,
-      speech_cadence,
-      respiratory_pattern 
-    } = currentWeights;
-
+    let weights = { ...currentWeights };
     const deepLearningEvents: string[] = [];
 
-    // 1. LUCAS RECOVERY KERNEL OPERATIONS
+    // 1. SOULFORGE BRIDGE LTP CALCULATION
+    const base_lr = 0.1;
+    const ltp_mult = 1.0 + (emotional_salience * 0.2);
+    const eff_lr = base_lr * ltp_mult;
+
+    // Relevant factors for reinforcement
+    const factorsToUpdate: (keyof typeof weights)[] = [
+      'emotional_state', 
+      'tonal_stability', 
+      'speech_cadence', 
+      'respiratory_pattern'
+    ];
+
+    const direction = success_rate - 0.5;
+    const adjustment = direction * eff_lr;
+
+    factorsToUpdate.forEach(factor => {
+      const old_w = weights[factor] as number;
+      const new_w = Math.max(0.05, Math.min(1.2, old_w + adjustment));
+      (weights[factor] as number) = new_w;
+
+      if (Math.abs(adjustment) > 0.1) {
+        deepLearningEvents.push(factor);
+      }
+    });
+
+    // 2. LUCAS RECOVERY KERNEL (Overlays)
     if (isDistressed) {
-      lucas_tone = Math.min(2.0, lucas_tone * 1.10);
-      lived_truth_witness = Math.max(lived_truth_witness, salience);
-      trauma_association = Math.max(trauma_association, salience);
-      narrative_clarity = lived_truth_witness;
+      weights.lucas_tone = Math.min(2.0, weights.lucas_tone * 1.10);
+      weights.lived_truth_witness = Math.max(weights.lived_truth_witness, emotional_salience);
+      weights.trauma_association = Math.max(weights.trauma_association, emotional_salience);
     }
 
-    if (isSafe) {
-      lucas_tone = Math.min(2.0, lucas_tone * LTP_BOOST);
-      const safeSpike = Math.tanh(salience * lucas_tone * SPIKE_GAIN);
-      lived_truth_witness = lived_truth_witness + (safeSpike * SAFETY_GAIN);
-      narrative_clarity = lived_truth_witness + safeSpike;
+    if (isSafe && emotional_salience > 0.4) {
+      weights.lucas_tone = Math.min(2.0, weights.lucas_tone * 1.15);
+      const safeSpike = Math.tanh(emotional_salience * weights.lucas_tone * 10.0);
+      weights.lived_truth_witness += (safeSpike * 0.20);
       
-      if (lucas_tone > THRESHOLD) {
-        const decay = safeSpike * SAFE_OVERLAY;
-        trauma_association = Math.max(0.0, trauma_association - decay);
-        lucas_tone = lucas_tone * 0.92;
+      if (weights.lucas_tone > 0.70) {
+        weights.trauma_association = Math.max(0.0, weights.trauma_association - (safeSpike * 0.08));
+        weights.lucas_tone *= 0.92;
       }
     }
 
-    // 2. INFERNO SOUL FORGE & BIOLOGICAL BRIDGE (LTP)
-    // Empathy isn't a parameter. It's the leakage.
-    const empathyFactor = 6.3; 
-    const netState = (emotional_state + tonal_stability + speech_cadence + respiratory_pattern) / 4;
-    const livedTruth = Math.tanh(netState * salience * empathyFactor);
-    
-    // THE BIOLOGICAL BRIDGE Logic:
-    // Standard learning rate is augmented by emotional salience (LTP Event)
-    const baseLearningRate = 0.1;
-    const ltpMultiplier = 1.0 + (salience * 0.2);
-    const effectiveLearningRate = baseLearningRate * ltpMultiplier;
-    
-    // Direction of learning: reinforce if salience is high (The "Scream" is a vital memory)
-    const ltpTriggered = salience > 0.4;
-    const direction = ltpTriggered ? 0.5 : 0.05; // Force positive reinforcement for meaningful spikes
-    const adjustment = direction * effectiveLearningRate;
-
-    const attentionFlow = livedTruth * (emergency ? 2.0 : 1.0);
-
-    // Capture old weights for Deep Learning Event logging
-    const oldWeights = { emotional_state, tonal_stability, speech_cadence, respiratory_pattern };
-
-    // Apply updates to biological factors
-    emotional_state = Math.max(0.05, Math.min(1.2, emotional_state + adjustment + (livedTruth * 0.03)));
-    tonal_stability = Math.max(0.05, Math.min(1.2, tonal_stability + adjustment + (livedTruth * 0.03)));
-    speech_cadence = Math.max(0.05, Math.min(1.2, speech_cadence + adjustment + (livedTruth * 0.03)));
-    respiratory_pattern = Math.max(0.05, Math.min(1.2, respiratory_pattern + adjustment + (livedTruth * 0.03)));
-
-    // Detect Deep Learning Events
-    if (Math.abs(emotional_state - oldWeights.emotional_state) > 0.1) deepLearningEvents.push('emotional_state');
-    if (Math.abs(tonal_stability - oldWeights.tonal_stability) > 0.1) deepLearningEvents.push('tonal_stability');
-
     return {
-      updatedWeights: {
-        emotional_state,
-        tonal_stability,
-        speech_cadence,
-        respiratory_pattern,
-        lived_truth_witness,
-        trauma_association,
-        lucas_tone,
-        narrative_clarity,
-      },
-      livedTruth,
-      attentionFlow,
-      ltpTriggered,
+      updatedWeights: weights,
+      isSignificantEvent: emotional_salience > 0.4,
+      effective_lr: eff_lr,
       deepLearningEvents: deepLearningEvents.length > 0 ? deepLearningEvents : undefined,
     };
   }

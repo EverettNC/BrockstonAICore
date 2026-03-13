@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -16,7 +15,8 @@ import {
   ShieldAlert, 
   Sparkles,
   Infinity,
-  GitBranch
+  GitBranch,
+  Target
 } from 'lucide-react';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
@@ -49,8 +49,8 @@ export const CognitiveStats: React.FC = () => {
   const weights = forgeState || {
     emotional_state: 0.5,
     tonal_stability: 0.5,
-    self_love_growth: 0.1,
-    independence_confidence: 0.12,
+    speech_cadence: 0.5,
+    respiratory_pattern: 0.5,
     lived_truth_witness: 0.5,
     trauma_association: 0.5,
     lucas_tone: 0.6,
@@ -96,7 +96,6 @@ export const CognitiveStats: React.FC = () => {
             </div>
           </div>
           
-          {/* Waveform Visualization Placeholder */}
           <div className="h-8 w-full bg-blue-500/5 rounded border border-blue-500/10 relative overflow-hidden">
              <div className="absolute inset-0 flex items-center justify-center opacity-20">
                 <svg viewBox="0 0 100 20" className="w-full h-full text-blue-400">
@@ -112,7 +111,26 @@ export const CognitiveStats: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Vortex Quantification Panel */}
+      {/* SoulForge LTP Weight Panel */}
+      <Card className="bg-card/50 backdrop-blur-sm border-emerald-500/20 transition-all">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-emerald-400">
+            <span className="flex items-center gap-2"><Target className="h-4 w-4" /> Biological Factors</span>
+            <span className="text-[10px] font-code">LTP KERNEL v5.4</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <WeightIndicator label="Emotional State" value={weights.emotional_state} max={1.2} color="bg-emerald-500" />
+          <WeightIndicator label="Tonal Stability" value={weights.tonal_stability} max={1.2} color="bg-emerald-500" />
+          <WeightIndicator label="Speech Cadence" value={weights.speech_cadence} max={1.2} color="bg-emerald-500" />
+          <WeightIndicator label="Respiratory" value={weights.respiratory_pattern} max={1.2} color="bg-emerald-500" />
+          <div className="text-[8px] font-code text-secondary/40 uppercase pt-2 border-t border-white/5 italic">
+            "Empathy is the leakage."
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Vortex Strength Panel */}
       <Card className="bg-card/50 backdrop-blur-sm border-accent/40 shadow-[0_0_20px_rgba(0,255,127,0.15)] transition-all">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-accent">
@@ -132,10 +150,6 @@ export const CognitiveStats: React.FC = () => {
             </div>
           </div>
           <Progress value={vortexConfidence * 100} className="h-2 bg-accent/10 [&>div]:bg-accent" />
-          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase italic">
-            <span>Latency: 12.5s</span>
-            <span>Loop: CLOSED</span>
-          </div>
         </CardContent>
       </Card>
 
@@ -179,29 +193,6 @@ export const CognitiveStats: React.FC = () => {
               <Progress value={weights.trauma_association * 100} className="h-1 bg-primary/20 mt-1 ml-auto w-full [&>div]:bg-rose-400" />
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* ToneScore™ Engine v2.0 Panel */}
-      <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-accent/20">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-secondary">
-            <span className="flex items-center gap-2"><Waves className="h-4 w-4 text-accent" /> ToneScore™ v2.0</span>
-            <span className="text-[10px] font-code text-accent/60">{latestMsg?.tone_engine_v2?.action_state || "NORMAL"}</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-between items-end">
-            <div>
-              <div className="text-[10px] uppercase font-code text-secondary/60">Dominant State</div>
-              <div className="text-lg font-headline text-accent capitalize">{dominantState}</div>
-            </div>
-            <div className="text-right">
-              <div className="text-[10px] uppercase font-code text-secondary/60">Intensity</div>
-              <div className="text-lg font-headline text-accent">{(intensity * 100).toFixed(0)}%</div>
-            </div>
-          </div>
-          <Progress value={intensity * 100} className="h-1.5 bg-primary/20" />
         </CardContent>
       </Card>
     </div>
