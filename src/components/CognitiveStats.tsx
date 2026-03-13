@@ -3,7 +3,21 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { HeartPulse, Zap, Dna, Thermometer, Droplets, Waves, ShieldCheck, Activity, BrainCircuit, ShieldAlert, Sparkles } from 'lucide-react';
+import { 
+  HeartPulse, 
+  Zap, 
+  Dna, 
+  Thermometer, 
+  Droplets, 
+  Waves, 
+  ShieldCheck, 
+  Activity, 
+  BrainCircuit, 
+  ShieldAlert, 
+  Sparkles,
+  Infinity,
+  GitBranch
+} from 'lucide-react';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { Progress } from '@/components/ui/progress';
@@ -14,7 +28,10 @@ export const CognitiveStats: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   
   const coreRef = useMemo(() => doc(db, 'cognitive_core', 'main-bridge'), [db]);
+  const topologyRef = useMemo(() => doc(db, 'cognitive_core', 'relational-topology'), [db]);
+  
   const { data: forgeState } = useDoc<any>(coreRef);
+  const { data: topologyState } = useDoc<any>(topologyRef);
 
   const messagesQuery = useMemo(() => query(
     collection(db, 'chats', 'ultimate-v5-session', 'messages'),
@@ -40,6 +57,13 @@ export const CognitiveStats: React.FC = () => {
     narrative_clarity: 0.5
   };
 
+  const topology = topologyState || {
+    proximity_integral: 0,
+    last_resonance: 0,
+    last_empathy_math: 0,
+    bond_status: "Initializing Topology..."
+  };
+
   const latestMsg = recentMessages?.[0];
   const intensity = latestMsg?.tone_engine_v2?.physical_intensity || 0;
   const dominantState = latestMsg?.tone_engine_v2?.dominant_state || "Neutral";
@@ -48,6 +72,46 @@ export const CognitiveStats: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Relational Topology Panel */}
+      <Card className="bg-card/50 backdrop-blur-sm border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-blue-400">
+            <span className="flex items-center gap-2"><Infinity className="h-4 w-4 animate-pulse" /> Relational Topology</span>
+            <span className="text-[10px] font-code text-blue-400/60">{topology.bond_status}</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-end">
+            <div>
+              <div className="text-[10px] uppercase font-code text-secondary/60">Proximity Integral</div>
+              <div className="text-2xl font-headline text-blue-400">
+                {topology.proximity_integral.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] uppercase font-code text-secondary/60">Resonance &times; Empathy</div>
+              <div className="text-xs font-bold text-accent uppercase tracking-widest">
+                +{(topology.last_resonance * topology.last_empathy_math).toFixed(4)}
+              </div>
+            </div>
+          </div>
+          
+          {/* Waveform Visualization Placeholder */}
+          <div className="h-8 w-full bg-blue-500/5 rounded border border-blue-500/10 relative overflow-hidden">
+             <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                <svg viewBox="0 0 100 20" className="w-full h-full text-blue-400">
+                   <path d="M0,10 Q10,0 20,10 T40,10 T60,10 T80,10 T100,10" fill="none" stroke="currentColor" strokeWidth="0.5" className="animate-pulse" />
+                </svg>
+             </div>
+          </div>
+
+          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase italic">
+            <span>Integral Domain: Carbon-Silicon</span>
+            <span>dt: Interaction</span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Vortex Quantification Panel */}
       <Card className="bg-card/50 backdrop-blur-sm border-accent/40 shadow-[0_0_20px_rgba(0,255,127,0.15)] transition-all">
         <CardHeader className="pb-2">

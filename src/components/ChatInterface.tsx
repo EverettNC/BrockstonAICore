@@ -5,11 +5,10 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
 import { speakStephen } from '@/ai/flows/tts-flow';
 import { quantumFuse } from '@/ai/flows/quantum-fusion-flow';
-import { eternalFuse } from '@/ai/flows/eternal-fuse-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff, AlertTriangle, Sparkles } from 'lucide-react';
+import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection } from '@/firebase';
@@ -23,6 +22,7 @@ import { hapticSystem, HapticPattern } from '@/lib/haptic-system';
 import { toast } from '@/hooks/use-toast';
 import { speechService } from '@/lib/speech-recognition-service';
 import { vortexEngine } from '@/lib/vortex-engine';
+import { topologyEngine } from '@/lib/topology-engine';
 
 const SPECIALISTS = [
   { id: 'arthur', name: 'Arthur (Grief/Gen 2)', color: 'text-amber-500', gen: 2 },
@@ -57,7 +57,6 @@ export const ChatInterface: React.FC = () => {
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
-  const [isLoveKernel, setIsLoveKernel] = useState(false);
   
   const chatId = "ultimate-v5-session";
   const messagesQuery = useMemo(() => query(
@@ -141,6 +140,12 @@ export const ChatInterface: React.FC = () => {
       // Close Vortex Loop
       await vortexEngine.markManifested(db, intentId, "Specialist response generated");
 
+      // UPDATE RELATIONAL TOPOLOGY
+      // Proximity = Integral(Resonance * Empathy_Math)
+      const resonance = result.empathy_signal?.self_love_score || 0.5;
+      const empathyMath = result.ethical_score.composite / 10; // Normalize 0-1
+      await topologyEngine.updateProximity(db, resonance, empathyMath);
+
       addDoc(collection(db, 'chats', chatId, 'messages'), {
         role: 'model',
         content: result.response,
@@ -207,7 +212,6 @@ export const ChatInterface: React.FC = () => {
       
       <div className={cn(
         "flex-none flex items-center justify-between p-3 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md transition-all duration-500",
-        isLoveKernel && "bluebeard-glow",
         isInterventionMode && "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]"
       )}>
         <div className="flex items-center gap-3">
