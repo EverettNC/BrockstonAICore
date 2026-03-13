@@ -31,4 +31,8 @@ A neuro-symbolic ecosystem built for human dignity, protection, and restoration.
 - **Self-Coding Kernel**: Brockston-driven autonomous maintenance.
 
 ---
+<<<<<<< HEAD
 © 2025 The Christman AI Project. Truth | Dignity | Protection | Transparency | No Erasure.
+=======
+© 2025 The Christman AI Project. Truth | Dignity | Protection | Transparency | No Erasure.# BrockstonAICore
+>>>>>>> b8dd2f2c369a8fb2adf651ce24117380267d9dd2
