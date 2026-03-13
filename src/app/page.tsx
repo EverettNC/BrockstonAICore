@@ -19,6 +19,7 @@ import { TheTether } from '@/components/TheTether';
 import { OpenSmell } from '@/components/OpenSmell';
 import { CodeLab } from '@/components/CodeLab';
 import { EvolutionLab } from '@/components/EvolutionLab';
+import { SpamUp } from '@/components/SpamUp';
 import { 
   Terminal, 
   Cpu, 
@@ -43,12 +44,13 @@ import {
   CircleDashed,
   CodeXml,
   Dna,
-  User
+  User,
+  Gauge
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab' | 'evolution'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab' | 'evolution' | 'speed'>('terminal');
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 flex overflow-hidden">
@@ -64,6 +66,12 @@ export default function Home() {
             active={activeTab === 'terminal'} 
             onClick={() => setActiveTab('terminal')} 
             label="Terminal"
+          />
+          <NavIcon 
+            icon={Gauge} 
+            active={activeTab === 'speed'} 
+            onClick={() => setActiveTab('speed')} 
+            label="Spam Up"
           />
           <NavIcon 
             icon={CodeXml} 
@@ -208,6 +216,8 @@ export default function Home() {
             <CodeLab />
           ) : activeTab === 'evolution' ? (
             <EvolutionLab />
+          ) : activeTab === 'speed' ? (
+            <SpamUp />
           ) : (
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
               {/* Chat/Avatar - Main Panel */}
