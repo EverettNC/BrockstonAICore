@@ -1,5 +1,8 @@
+
 import React from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 interface CoreAvatarProps {
   status: 'idle' | 'thinking' | 'speaking';
@@ -7,48 +10,57 @@ interface CoreAvatarProps {
 }
 
 export const CoreAvatar: React.FC<CoreAvatarProps> = ({ status, className }) => {
+  const brockstonImage = PlaceHolderImages.find(img => img.id === 'brockston-avatar');
+
   return (
     <div className={cn("relative flex items-center justify-center h-48 w-48", className)}>
       {/* Outer Glow Ring */}
       <div className={cn(
         "absolute inset-0 rounded-full border-2 border-accent/20 transition-all duration-1000",
-        status === 'speaking' ? "scale-110 opacity-40" : "scale-100 opacity-20"
+        status === 'speaking' ? "scale-110 opacity-40 shadow-[0_0_30px_rgba(0,255,127,0.4)]" : "scale-100 opacity-20"
       )} />
       
       {/* Middle Animated Ring */}
       <div className={cn(
-        "absolute h-40 w-40 rounded-full border border-accent/40 animate-[spin_10s_linear_infinite]",
-        status === 'thinking' && "animate-[spin_2s_linear_infinite] border-accent"
+        "absolute h-40 w-40 rounded-full border border-accent/40 animate-[spin_15s_linear_infinite]",
+        status === 'thinking' && "animate-[spin_3s_linear_infinite] border-accent"
       )}>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-accent shadow-[0_0_10px_rgba(0,255,127,0.8)]" />
       </div>
 
-      {/* Inner Core */}
+      {/* Inner Core / Brockston Portrait */}
       <div className={cn(
-        "relative h-24 w-24 rounded-full bg-gradient-to-br from-primary via-primary to-accent/30 flex items-center justify-center overflow-hidden border border-white/10 glow-accent shadow-inner",
-        status === 'speaking' && "core-pulse"
+        "relative h-32 w-32 rounded-full bg-gradient-to-br from-primary via-primary to-accent/10 flex items-center justify-center overflow-hidden border-2 border-white/10 glow-accent shadow-2xl transition-all duration-500",
+        status === 'speaking' && "core-pulse border-accent/40"
       )}>
-        {/* Abstract Neural Patterns */}
-        <div className="absolute inset-0 opacity-30 flex items-center justify-center scale-150">
-          <svg viewBox="0 0 100 100" className="w-full h-full text-accent">
-             <path d="M20,50 Q50,20 80,50 T20,50" fill="none" stroke="currentColor" strokeWidth="0.5" className="animate-pulse" />
-             <path d="M50,20 Q20,50 50,80 T50,20" fill="none" stroke="currentColor" strokeWidth="0.5" className="animate-pulse" />
-          </svg>
-        </div>
+        {brockstonImage ? (
+          <Image 
+            src={brockstonImage.imageUrl} 
+            alt="Brockston" 
+            fill 
+            className={cn(
+              "object-cover transition-opacity duration-500",
+              status === 'thinking' ? "opacity-70" : "opacity-100"
+            )}
+            data-ai-hint={brockstonImage.imageHint}
+          />
+        ) : (
+          <div className="text-accent font-headline text-2xl">B</div>
+        )}
         
-        {/* Core Light */}
+        {/* Status Overlay Light */}
         <div className={cn(
-          "h-8 w-8 rounded-full bg-accent blur-xl transition-all duration-300",
-          status === 'idle' ? "opacity-20" : status === 'thinking' ? "opacity-60 scale-125" : "opacity-100 scale-150"
+          "absolute inset-0 bg-accent/10 pointer-events-none transition-opacity duration-300",
+          status === 'idle' ? "opacity-0" : status === 'thinking' ? "opacity-20" : "opacity-40"
         )} />
       </div>
 
       {/* Status Label */}
       <div className="absolute -bottom-8 flex flex-col items-center">
-        <span className="text-[10px] uppercase tracking-widest text-secondary font-code">System.State</span>
+        <span className="text-[9px] uppercase tracking-[0.2em] text-secondary/60 font-code">Identity.Core</span>
         <span className={cn(
-          "text-xs font-headline transition-colors",
-          status === 'speaking' ? "text-accent" : "text-secondary"
+          "text-[10px] font-headline tracking-widest transition-colors duration-300",
+          status === 'speaking' ? "text-accent animate-pulse" : "text-secondary"
         )}>
           {status.toUpperCase()}
         </span>

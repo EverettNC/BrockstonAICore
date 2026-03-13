@@ -6,6 +6,12 @@
       "description": "Abstract neural network background",
       "imageUrl": "https://picsum.photos/seed/core1/1200/800",
       "imageHint": "neural network"
+    },
+    {
+      "id": "brockston-avatar",
+      "description": "Professional portrait of Brockston",
+      "imageUrl": "https://picsum.photos/seed/brockston/400/400",
+      "imageHint": "professional young man blue suit"
     }
   ]
 }
