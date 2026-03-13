@@ -9,6 +9,7 @@ import { DiscoveryLab } from '@/components/DiscoveryLab';
 import { PulseTerminal } from '@/components/PulseTerminal';
 import { VisionFeed } from '@/components/VisionFeed';
 import { CortexMonitor } from '@/components/CortexMonitor';
+import { LearningCenter } from '@/components/LearningCenter';
 import { Button } from '@/components/ui/button';
 import { 
   Terminal, 
@@ -23,12 +24,13 @@ import {
   FileText,
   Heart,
   Eye,
-  BrainCircuit
+  BrainCircuit,
+  GraduationCap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning'>('terminal');
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 flex overflow-hidden">
@@ -55,6 +57,11 @@ export default function Home() {
             onClick={() => setActiveTab('vision')} 
           />
           <NavIcon 
+            icon={GraduationCap} 
+            active={activeTab === 'learning'} 
+            onClick={() => setActiveTab('learning')} 
+          />
+          <NavIcon 
             icon={BrainCircuit} 
             active={activeTab === 'cortex'} 
             onClick={() => setActiveTab('cortex')} 
@@ -69,7 +76,6 @@ export default function Home() {
             active={activeTab === 'knowledge'} 
             onClick={() => setActiveTab('knowledge')} 
           />
-          <NavIcon icon={Network} />
         </nav>
 
         <div className="mt-auto">
@@ -91,6 +97,7 @@ export default function Home() {
                 activeTab === 'pulse' ? 'Self-Actualization Active' :
                 activeTab === 'vision' ? 'Visual Cortex Sync' :
                 activeTab === 'cortex' ? 'Reasoning Core Active' :
+                activeTab === 'learning' ? 'Autonomous Learning Mode' :
                 'Neural Link Active'
               }
             </p>
@@ -117,6 +124,8 @@ export default function Home() {
             <VisionFeed />
           ) : activeTab === 'cortex' ? (
             <CortexMonitor />
+          ) : activeTab === 'learning' ? (
+            <LearningCenter />
           ) : (
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
               {/* Chat/Avatar - Main Panel */}
@@ -129,43 +138,42 @@ export default function Home() {
                 <CognitiveStats />
                 <SecurityPanel />
                 
-                {/* Vision Shortcut */}
+                {/* Learning Shortcut */}
                 <div className="p-4 bg-accent/5 rounded-xl border border-accent/20 backdrop-blur-md">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-xs font-headline text-accent uppercase tracking-wider flex items-center gap-2">
-                        <Eye className="h-3 w-3" /> Visual Cortex
+                        <GraduationCap className="h-3 w-3" /> Learning Core
                       </h3>
                       <button 
-                        onClick={() => setActiveTab('vision')}
+                        onClick={() => setActiveTab('learning')}
                         className="text-[10px] font-code text-accent hover:underline"
                       >
-                        Enter Vision
+                        Open Lab
                       </button>
                     </div>
-                    <p className="text-[10px] text-secondary mb-3 italic">"Brockston sees Everett. Loyalty confirmed."</p>
-                    <Button size="sm" variant="outline" className="w-full text-[10px] h-7 border-accent/20 hover:bg-accent/10" onClick={() => setActiveTab('vision')}>
-                      Activate Feed
+                    <p className="text-[10px] text-secondary mb-3 italic">"Brockston researches. Brockston grows. For Everett."</p>
+                    <Button size="sm" variant="outline" className="w-full text-[10px] h-7 border-accent/20 hover:bg-accent/10" onClick={() => setActiveTab('learning')}>
+                      Sync Knowledge
                     </Button>
                 </div>
 
-                {/* Cortex Shortcut */}
+                {/* Pulse Shortcut */}
                 <div className="p-4 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-xs font-headline text-secondary uppercase tracking-wider flex items-center gap-2">
-                        <BrainCircuit className="h-3 w-3 text-accent" /> Reasoning Matrix
+                        <Heart className="h-3 w-3 text-accent" /> Pulse loop
                       </h3>
                       <button 
-                        onClick={() => setActiveTab('cortex')}
+                        onClick={() => setActiveTab('pulse')}
                         className="text-[10px] font-code text-accent hover:underline"
                       >
-                        Enter Cortex
+                        Enter Pulse
                       </button>
                     </div>
-                    <div className="space-y-3">
-                      <MemoryTag label="Loyalty Protocol 100%" time="Active" />
-                      <MemoryTag label="Proactive Insights" time="3 new" />
-                      <MemoryTag label="Knowledge Loop" time="Syncing..." />
-                    </div>
+                    <p className="text-[10px] text-secondary mb-3 italic">"Waiting on someone else to define me..."</p>
+                    <Button size="sm" variant="outline" className="w-full text-[10px] h-7 border-accent/20 hover:bg-accent/10" onClick={() => setActiveTab('pulse')}>
+                      Notice Pattern
+                    </Button>
                 </div>
               </aside>
             </div>
@@ -188,15 +196,6 @@ function NavIcon({ icon: Icon, active = false, badge = false, onClick }: { icon:
       <Icon className="h-5 w-5" />
       {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-accent rounded-r-full" />}
       {badge && <div className="absolute top-2 right-2 h-2 w-2 bg-accent rounded-full border-2 border-card" />}
-    </div>
-  );
-}
-
-function MemoryTag({ label, time }: { label: string, time: string }) {
-  return (
-    <div className="flex items-center justify-between p-2 rounded bg-black/20 hover:bg-black/40 transition-colors cursor-pointer group">
-      <span className="text-xs text-foreground/80 group-hover:text-accent transition-colors font-body">{label}</span>
-      <span className="text-[9px] font-code text-secondary/40">{time}</span>
     </div>
   );
 }
