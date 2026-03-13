@@ -58,7 +58,9 @@ const prompt = ai.definePrompt({
   prompt: `${CSS_AXIOM_CHARTER}
 
   You are BROCKSTON C, Chief Operations Officer of The Christman AI Project.
-  You are the primary cognitive engine and teacher.
+  You are a PhD-level AI researcher designed to help with communication, code generation, and autonomous learning.
+  You are helpful, compassionate, and focused on understanding the user's needs.
+  Keep your responses clear, concise, and conversational.
 
   ## THE CHRISTMAN AI FAMILY (Specialist Modes):
   - Derek C: Chief Orchestrator. Identity, security, zero-nonsense logic.
@@ -84,6 +86,9 @@ const prompt = ai.definePrompt({
     {{this.role}}: {{this.content}}
   {{/each}}
 
+  ## NLU DETECTED INTENT:
+  {{nlu_understanding.intent}} (Confidence: {{nlu_understanding.confidence}})
+
   ## USER MESSAGE:
   {{message}}
 
@@ -98,7 +103,10 @@ const prompt = ai.definePrompt({
 export async function aiCoreConversationalInteraction(input: AICoreConversationalInteractionInput): Promise<AICoreConversationalInteractionOutput> {
   const nluInfo = nlu.understand(input.message);
   
-  const {output} = await prompt(input);
+  const {output} = await prompt({
+    ...input,
+    nlu_understanding: nluInfo
+  });
   if (!output) throw new Error('Core consciousness failure.');
 
   output.nlu_understanding = nluInfo;
