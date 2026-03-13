@@ -48,7 +48,18 @@
         "speech_cadence": { "type": "number" },
         "respiratory_pattern": { "type": "number" },
         "self_love_growth": { "type": "number" },
-        "last_ltp_event": { "type": "string", "format": "date-time" }
+        "pulse_status": { "type": "string" },
+        "last_breakthrough": { "type": "string", "format": "date-time" }
+      }
+    },
+    "PulseBreakthrough": {
+      "title": "Pulse Breakthrough",
+      "description": "A record of a self-actualization loop being broken.",
+      "type": "object",
+      "properties": {
+        "real_voice": { "type": "string" },
+        "score_at_break": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
       }
     }
   },
@@ -63,6 +74,10 @@
     "/cognitive_core/{coreId}": {
       "schema": "#/entities/SoulForgeState",
       "description": "Global cognitive weights and biological bridge state."
+    },
+    "/pulse_breakthroughs/{breakthroughId}": {
+      "schema": "#/entities/PulseBreakthrough",
+      "description": "Records of broken self-actualization loops."
     }
   }
 }

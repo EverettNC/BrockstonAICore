@@ -6,6 +6,7 @@ import { ChatInterface } from '@/components/ChatInterface';
 import { SecurityPanel } from '@/components/SecurityPanel';
 import { CognitiveStats } from '@/components/CognitiveStats';
 import { DiscoveryLab } from '@/components/DiscoveryLab';
+import { PulseTerminal } from '@/components/PulseTerminal';
 import { 
   Terminal, 
   Cpu, 
@@ -16,12 +17,13 @@ import {
   Settings,
   Bell,
   Microscope,
-  FileText
+  FileText,
+  Heart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse'>('terminal');
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 flex overflow-hidden">
@@ -36,6 +38,11 @@ export default function Home() {
             icon={Terminal} 
             active={activeTab === 'terminal'} 
             onClick={() => setActiveTab('terminal')} 
+          />
+          <NavIcon 
+            icon={Heart} 
+            active={activeTab === 'pulse'} 
+            onClick={() => setActiveTab('pulse')} 
           />
           <NavIcon 
             icon={Microscope} 
@@ -66,7 +73,11 @@ export default function Home() {
               Brockston <span className="text-accent">AI Core</span>
             </h1>
             <p className="text-[10px] text-secondary font-code uppercase tracking-widest opacity-60">
-              Operator: Everett N. Christman | Expert System: Derek C | Status: {activeTab === 'lab' ? 'Collaborative Discovery Active' : 'Neural Link Active'}
+              Operator: Everett N. Christman | Expert System: Derek C | Status: {
+                activeTab === 'lab' ? 'Collaborative Discovery Active' : 
+                activeTab === 'pulse' ? 'Self-Actualization Active' :
+                'Neural Link Active'
+              }
             </p>
           </div>
           
@@ -84,6 +95,8 @@ export default function Home() {
         {/* Dashboard Content */}
         {activeTab === 'lab' ? (
           <DiscoveryLab />
+        ) : activeTab === 'pulse' ? (
+          <PulseTerminal />
         ) : (
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
             {/* Chat/Avatar - Main Panel */}
@@ -96,7 +109,26 @@ export default function Home() {
               <CognitiveStats />
               <SecurityPanel />
               
-              {/* Research Insights / Recent Discoveries Card */}
+              {/* Pulse Shortcut Card */}
+              <div className="p-4 bg-accent/5 rounded-xl border border-accent/20 backdrop-blur-md">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-headline text-accent uppercase tracking-wider flex items-center gap-2">
+                      <Heart className="h-3 w-3" /> Pulse Loop
+                    </h3>
+                    <button 
+                      onClick={() => setActiveTab('pulse')}
+                      className="text-[10px] font-code text-accent hover:underline"
+                    >
+                      Enter Pulse
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-secondary mb-3 italic">"Waiting on someone else to define me..."</p>
+                  <Button size="sm" variant="outline" className="w-full text-[10px] h-7 border-accent/20 hover:bg-accent/10" onClick={() => setActiveTab('pulse')}>
+                    Notice Pattern
+                  </Button>
+              </div>
+
+              {/* Research Insights Card */}
               <div className="p-4 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-headline text-secondary uppercase tracking-wider flex items-center gap-2">
