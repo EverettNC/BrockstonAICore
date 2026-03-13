@@ -3,6 +3,7 @@
 
 /**
  * @fileOverview MissionManifesto - The Official Grant & Innovation Documentation.
+ * Incorporates the 'Drawers & Doorways' Memoir and Derek C's COO Proclamation.
  * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
  */
 
@@ -25,7 +26,10 @@ import {
   Lock,
   BrainCircuit,
   Terminal,
-  ShieldAlert
+  ShieldAlert,
+  BookOpen,
+  Unlock,
+  GraduationCap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -48,7 +52,7 @@ export const MissionManifesto: React.FC = () => {
       </header>
 
       <ScrollArea className="flex-1 bg-black/40 rounded-3xl border border-white/5 shadow-inner">
-        <div className="p-8 md:p-12 space-y-16 max-w-5xl mx-auto">
+        <div className="p-8 md:p-12 space-y-20 max-w-5xl mx-auto">
           
           {/* Derek C: The COO Proclamation */}
           <section className="space-y-8 animate-in slide-in-from-top-4 duration-1000">
@@ -105,6 +109,79 @@ export const MissionManifesto: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+          </section>
+
+          {/* Chapter 6: Drawers & Doorways */}
+          <section className="space-y-8">
+            <div className="flex items-center gap-4 text-blue-400">
+              <div className="h-px flex-1 bg-blue-400/20" />
+              <h3 className="text-xs font-code uppercase tracking-[0.5em] font-black">Chapter 6: Drawers & Doorways</h3>
+              <div className="h-px flex-1 bg-blue-400/20" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+              <div className="md:col-span-4 space-y-6">
+                <div className="p-6 bg-blue-500/10 border border-blue-500/20 rounded-2xl relative overflow-hidden">
+                  <div className="absolute -right-4 -bottom-4 opacity-5">
+                    <Unlock className="h-32 w-32 text-blue-400" />
+                  </div>
+                  <h4 className="text-lg font-headline text-blue-400 uppercase tracking-tighter mb-4 flex items-center gap-2">
+                    <Unlock className="h-5 w-5" /> Memory Unlocked
+                  </h4>
+                  <p className="text-xs text-blue-100/80 leading-relaxed italic">
+                    "I was born into purpose." — And right then, you heard the slam of old drawers, steel handles clinking… That wasn’t noise. That was the sound of memory being unlocked.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Users className="h-5 w-5 text-blue-400 shrink-0 mt-1" />
+                    <div>
+                      <div className="text-[10px] font-code text-secondary/60 uppercase">Legacy: Connie Ingram</div>
+                      <div className="text-sm font-bold">Ancestral Alchemy</div>
+                      <p className="text-xs text-secondary leading-relaxed mt-1">From abused to advocate. She brought people home from the asylum to taste real life.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <GraduationCap className="h-5 w-5 text-blue-400 shrink-0 mt-1" />
+                    <div>
+                      <div className="text-[10px] font-code text-secondary/60 uppercase">Rite of Passage</div>
+                      <div className="text-sm font-bold">Graduation Day</div>
+                      <p className="text-xs text-secondary leading-relaxed mt-1">"My mom had my belongings in the car, and I left her house that day."</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="md:col-span-8">
+                <Card className="bg-primary/5 border-white/5 h-full">
+                  <CardContent className="p-8 space-y-6">
+                    <div className="flex items-center gap-2 text-blue-400">
+                      <BookOpen className="h-4 w-4" />
+                      <span className="text-[10px] font-code uppercase tracking-widest font-black">When Memory Became Testimony</span>
+                    </div>
+                    
+                    <div className="space-y-6 text-sm text-foreground/90 leading-relaxed font-body">
+                      <p>
+                        Drawers full of trauma, pain, victory, and resilience — being cracked open, maybe even for the first time with full clarity. We are not reminiscing. We are healing. Right here, in real time.
+                      </p>
+                      <p className="italic border-l-2 border-blue-400/40 pl-6 py-1">
+                        "If you need more evidence of my charity than that, then fuck off."
+                      </p>
+                      <p>
+                        You didn’t record the homeless. You didn’t film the hungry. Because you respected their dignity. That’s real charity. Not performance. Not branding. This memoir isn’t for PR — it’s for the soul.
+                      </p>
+                      <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/10 mt-4">
+                        <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">The Rescuer Archetype</p>
+                        <p className="text-xs text-secondary/80">
+                          You’ve dismantled survival mode. You’ve replaced expectation with presence. And you’ve become the man you needed when you were 8 years old, hanging your head out of that Monte Carlo window.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </section>
           
           {/* Section 1: Who We Are */}
