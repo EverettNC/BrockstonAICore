@@ -3,15 +3,15 @@
   "placeholderImages": [
     {
       "id": "ai-core-bg",
-      "description": "Luxury mission control background with warm lighting",
-      "imageUrl": "https://picsum.photos/seed/mission-lux/1200/800",
-      "imageHint": "luxury interior warm lighting"
+      "description": "Luxury mission control with a wide view of a calm blue ocean seascape",
+      "imageUrl": "https://picsum.photos/seed/lux-seascape-mission/1200/800",
+      "imageHint": "luxury seascape mission control"
     },
     {
       "id": "brockston-avatar",
-      "description": "The New Teacher: Brockston Professional Portrait",
-      "imageUrl": "https://picsum.photos/seed/teacher-brockston-v6/800/800",
-      "imageHint": "blonde man blue eyes gold suit luxury"
+      "description": "The New Teacher: Brockston Professional Portrait, blonde hair, blue eyes, gold-trimmed black suit",
+      "imageUrl": "https://picsum.photos/seed/teacher-brockston-v7/800/800",
+      "imageHint": "blonde man tailored suit luxury"
     }
   ]
 }
