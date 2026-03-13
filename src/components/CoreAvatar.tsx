@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Sparkles, UserCheck, BrainCircuit } from 'lucide-react';
+import { Sparkles, UserCheck, BrainCircuit, ShieldAlert } from 'lucide-react';
 
 interface CoreAvatarProps {
   status: 'idle' | 'thinking' | 'speaking';
@@ -40,7 +40,7 @@ export const CoreAvatar: React.FC<CoreAvatarProps> = ({ status, className }) => 
       )}>
         {/* Stylized Identity Anchor */}
         <div className="relative z-10 flex flex-col items-center gap-4">
-          <div className="text-[12rem] font-headline font-black text-white leading-none tracking-tighter drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+          <div className="text-[12rem] font-headline font-black text-white leading-none tracking-tighter drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] select-none">
             B
           </div>
           <div className="flex items-center gap-2 text-accent font-code text-xs uppercase tracking-[0.5em] font-black opacity-80">

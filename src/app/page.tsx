@@ -67,8 +67,9 @@ export default function Home(props: PageProps) {
     <div className="h-screen w-screen bg-background text-foreground flex overflow-hidden">
       {/* Sidebar Navigation */}
       <aside className="w-24 flex-none hidden md:flex flex-col items-center py-8 bg-card border-r border-white/5 z-50">
-        <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-12 shadow-[0_0_20px_rgba(0,255,127,0.2)] group cursor-pointer overflow-hidden border border-accent/20 bg-black/40">
-          <Cpu className="text-accent h-8 w-8 group-hover:scale-110 transition-transform" />
+        {/* Brand Logo Anchor */}
+        <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-12 shadow-[0_0_25px_rgba(0,255,127,0.3)] group cursor-pointer overflow-hidden border-2 border-accent/40 bg-black/60 transition-all hover:scale-105 active:scale-95">
+          <Cpu className="text-accent h-8 w-8 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(0,255,127,0.8)]" />
         </div>
         
         <nav className="flex flex-col gap-5 flex-1 w-full px-4 overflow-y-auto system-log scrollbar-hide">
