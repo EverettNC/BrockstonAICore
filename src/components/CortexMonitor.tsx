@@ -4,11 +4,12 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BrainCircuit, ShieldAlert, BookOpen, Activity, Languages, Zap, Volume2, Thermometer, ListTree, CheckCircle2, SearchCode, Cpu, Database, Eye, History } from 'lucide-react';
+import { BrainCircuit, ShieldAlert, Activity, Database, Eye, History, Zap, Cpu, SearchCode, Waves, ListTree, CheckCircle2, MessageSquareQuote } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { visionContext } from '@/lib/vision-context';
+import { BehavioralInterpreter } from '@/lib/behavioral-interpreter';
 
 export const CortexMonitor: React.FC = () => {
   const db = useFirestore();
@@ -19,13 +20,27 @@ export const CortexMonitor: React.FC = () => {
     limit(10)
   ), [db]);
 
+  const behaviorQuery = useMemo(() => query(
+    collection(db, 'behavioral_history'),
+    orderBy('timestamp', 'desc'),
+    limit(10)
+  ), [db]);
+
   const { data: messages } = useCollection<any>(messagesQuery);
+  const { data: behaviorHistory } = useCollection<any>(behaviorQuery);
 
   const lastMessage = messages?.[0];
   const reasoning = lastMessage?.reasoning_trace;
   const engines = reasoning?.engines_active || ["CoreEngine"];
   
   const visionSnap = visionContext.snapshot();
+
+  // Temporal Pattern Analysis
+  const temporalPattern = useMemo(() => {
+    if (!behaviorHistory || behaviorHistory.length < 3) return null;
+    const obsHistory = [...behaviorHistory].reverse();
+    return BehavioralInterpreter.analyzeTemporalSequence(obsHistory);
+  }, [behaviorHistory]);
 
   return (
     <div className="flex flex-col h-full gap-6 animate-in fade-in duration-500 overflow-y-auto system-log pr-2 pb-12">
@@ -35,12 +50,12 @@ export const CortexMonitor: React.FC = () => {
             <BrainCircuit className="h-5 w-5" /> Brockston Cortex v5.0
           </h2>
           <p className="text-[10px] font-code text-secondary/60 uppercase mt-1">
-            Wired Reasoning Engines | Multi-generational Orchestration
+            Enhanced Temporal Nonverbal Engine | Wired Reasoning
           </p>
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="text-accent border-accent/40 font-code text-[8px]">
-            KNOWLEDGE ENGINE: CONNECTED
+            TEMPORAL MODE: ACTIVE
           </Badge>
           <Badge variant="outline" className="text-accent border-accent/40 font-code text-[8px]">
             LOCAL REASONER: ACTIVE
@@ -61,7 +76,7 @@ export const CortexMonitor: React.FC = () => {
             <CardContent className="space-y-4 pt-4">
               <EngineStatus label="Local Reasoning Engine" active={engines.includes('LocalReasoningEngine') || engines.includes('CoreEngine')} icon={BrainCircuit} />
               <EngineStatus label="Knowledge Engine" active={engines.includes('KnowledgeEngine')} icon={Database} />
-              <EngineStatus label="Intervention Protocol" active={engines.includes('InterventionProtocol')} icon={ShieldAlert} />
+              <EngineStatus label="Temporal Nonverbal Engine" active={true} icon={Waves} />
               
               <div className="pt-4 border-t border-white/5">
                 <div className="text-[10px] uppercase font-code text-secondary/60 mb-2">Cognitive Scaffolding</div>
@@ -72,38 +87,41 @@ export const CortexMonitor: React.FC = () => {
                   <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
                     <div className="text-[8px] text-accent font-bold">PLANNER</div>
                   </div>
-                  <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
-                    <div className="text-[8px] text-accent font-bold">VERIFIER</div>
-                  </div>
-                  <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
-                    <div className="text-[8px] text-accent font-bold">ENSEMBLE</div>
-                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* TEMPORAL PATTERN MONITOR */}
           <Card className="bg-card/50 border-white/5 border-blue-500/20 shadow-xl">
-            <CardHeader className="pb-3 border-b border-white/5">
+            <CardHeader className="pb-3 border-b border-white/5 bg-blue-500/5">
               <CardTitle className="text-xs uppercase tracking-widest text-blue-400 flex items-center gap-2">
-                <Activity className="h-3 w-3" /> Higher Reasoning Trace
+                <Waves className="h-3 w-3" /> Temporal Patterns
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-[9px] uppercase font-code">
-                  <span className="text-secondary/60">Reasoning Depth</span>
-                  <span className="text-blue-400">{(reasoning?.plan?.length || 0) * 20}%</span>
+              {temporalPattern && temporalPattern.confidence > 0.3 ? (
+                <div className="space-y-3 animate-in slide-in-from-left-2">
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <div className="text-[8px] uppercase font-code text-secondary/40">Detected Pattern</div>
+                      <div className="text-sm font-headline text-blue-400 uppercase tracking-tighter">{temporalPattern.pattern}</div>
+                    </div>
+                    <Badge variant="outline" className="text-[8px] border-blue-500/30 text-blue-400">
+                      {(temporalPattern.confidence * 100).toFixed(0)}% CONFIDENCE
+                    </Badge>
+                  </div>
+                  <Progress value={temporalPattern.confidence * 100} className="h-1 bg-primary/20 [&>div]:bg-blue-500" />
+                  <div className="p-2 bg-blue-500/5 rounded border border-blue-500/10 text-[9px] text-blue-100/80 leading-relaxed italic">
+                    "{temporalPattern.meaning}"
+                  </div>
                 </div>
-                <Progress value={(reasoning?.plan?.length || 0) * 20} className="h-1 bg-primary/20 [&>div]:bg-blue-500" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-[9px] uppercase font-code">
-                  <span className="text-secondary/60">Knowledge Mesh Sync</span>
-                  <span className="text-blue-400">{engines.includes('KnowledgeEngine') ? '100%' : 'Baseline'}</span>
+              ) : (
+                <div className="h-24 flex flex-col items-center justify-center opacity-20 text-center">
+                  <Waves className="h-6 w-6 mb-2" />
+                  <p className="text-[8px] uppercase font-code">Awaiting Patterns</p>
                 </div>
-                <Progress value={engines.includes('KnowledgeEngine') ? 100 : 20} className="h-1 bg-primary/20 [&>div]:bg-blue-500" />
-              </div>
+              )}
             </CardContent>
           </Card>
 
@@ -111,7 +129,7 @@ export const CortexMonitor: React.FC = () => {
           <Card className="bg-card/50 border-white/5 border-accent/20">
             <CardHeader className="pb-2 border-b border-white/5 bg-primary/5">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center gap-2">
-                <Eye className="h-3 w-3 text-accent" /> Recent Visual Events
+                <Eye className="h-3 w-3 text-accent" /> Visual Events
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-3">
@@ -126,12 +144,6 @@ export const CortexMonitor: React.FC = () => {
                   </div>
                 </div>
               ))}
-              {visionSnap.count === 0 && (
-                <div className="h-24 flex flex-col items-center justify-center opacity-20 text-center">
-                  <History className="h-6 w-6 mb-2" />
-                  <p className="text-[8px] uppercase font-code">Awaiting Perception</p>
-                </div>
-              )}
             </CardContent>
           </Card>
         </section>
@@ -141,7 +153,7 @@ export const CortexMonitor: React.FC = () => {
           <Card className="bg-black/40 border-white/5 flex-1 overflow-hidden">
             <CardHeader className="py-4 border-b border-white/5 bg-primary/10">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
-                <span className="flex items-center gap-2"><SearchCode className="h-3 w-3 text-accent" /> Cognitive Execution Log</span>
+                <span className="flex items-center gap-2"><SearchCode className="h-3 w-3 text-accent" /> Execution Log</span>
                 <Badge variant="outline" className="text-[8px] border-accent/20 text-accent uppercase">Wired: {engines.join(' + ')}</Badge>
               </CardTitle>
             </CardHeader>
@@ -162,9 +174,6 @@ export const CortexMonitor: React.FC = () => {
                     </div>
                   </div>
                   <TraceStep icon={CheckCircle2} label="Step 3: Verifier" content={reasoning.verification} color="text-blue-400" />
-                  <div className="p-3 bg-accent/5 rounded border border-accent/20 text-[10px] font-code text-accent/80 italic text-center">
-                    "Step 4: Ensemble Synthesis Result - Confidence {(reasoning.ensemble_confidence * 100).toFixed(0)}%"
-                  </div>
                 </div>
               ) : (
                 <div className="h-64 flex flex-col items-center justify-center opacity-20 text-center space-y-4">

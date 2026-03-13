@@ -3,15 +3,16 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { analyzeVision } from '@/ai/flows/vision-flow';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, Shield, Activity, Camera, Loader2, AlertCircle, Scan, History, Sparkles } from 'lucide-react';
+import { Eye, Shield, Activity, Camera, Loader2, AlertCircle, Scan, History, Sparkles, MessageSquareQuote } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { useFirestore, useCollection } from '@/firebase';
+import { collection, addDoc, query, orderBy, limit } from 'firebase/firestore';
 import { VisionPerception } from '@/lib/vision-perception';
 import { visionContext } from '@/lib/vision-context';
+import { BehavioralInterpreter } from '@/lib/behavioral-interpreter';
 
 export const VisionFeed: React.FC = () => {
   const db = useFirestore();
@@ -20,7 +21,11 @@ export const VisionFeed: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
   const [perceptionResult, setPerceptionResult] = useState<any>(null);
+  const [enhancedResponse, setEnhancedResponse] = useState<string>('');
   const { toast } = useToast();
+
+  const historyQuery = query(collection(db, 'behavioral_history'), orderBy('timestamp', 'desc'), limit(10));
+  const { data: history } = useCollection<any>(historyQuery);
 
   useEffect(() => {
     const getCameraPermission = async () => {
@@ -62,7 +67,15 @@ export const VisionFeed: React.FC = () => {
       const perception = VisionPerception.process(result);
       setPerceptionResult(perception);
 
-      // 3. Persist Event
+      // 3. Temporal Sequence Analysis
+      if (history) {
+        const obsHistory = [...(history || [])].reverse();
+        const temporalPattern = BehavioralInterpreter.analyzeTemporalSequence(obsHistory);
+        const enhanced = BehavioralInterpreter.generateEnhancedResponse(temporalPattern);
+        setEnhancedResponse(enhanced);
+      }
+
+      // 4. Persist Event
       const behaviorType = perception.cues.intent || "perception:general";
 
       addDoc(collection(db, 'behavioral_history'), {
@@ -109,7 +122,6 @@ export const VisionFeed: React.FC = () => {
               />
               <div className="absolute inset-0 pointer-events-none border-[20px] border-accent/5" />
               
-              {/* Scanline overlay */}
               <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
 
               {!hasCameraPermission && (
@@ -117,7 +129,7 @@ export const VisionFeed: React.FC = () => {
                   <Alert variant="destructive" className="max-w-xs bg-red-950/20 border-red-500/20">
                     <AlertTitle className="text-red-400 font-headline uppercase tracking-tighter">Vision Offline</AlertTitle>
                     <AlertDescription className="text-red-200/60 font-code text-[10px]">
-                      Please allow camera access to activate Brockston's visual cortex and enable behavioral pattern recognition.
+                      Please allow camera access to activate Brockston's visual cortex.
                     </AlertDescription>
                   </Alert>
                 </div>
@@ -139,7 +151,7 @@ export const VisionFeed: React.FC = () => {
         </section>
 
         <section className="lg:col-span-5 flex flex-col gap-4">
-          <Card className="bg-card/50 border-white/5 border-accent/20 shadow-xl transition-all hover:bg-card/60">
+          <Card className="bg-card/50 border-white/5 border-accent/20 shadow-xl transition-all">
             <CardHeader className="py-3 bg-accent/5 border-b border-white/5">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
                 <span className="flex items-center gap-2"><Shield className="h-3 w-3 text-accent" /> Perception Analysis</span>
@@ -151,6 +163,15 @@ export const VisionFeed: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
+              {enhancedResponse && (
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg animate-in slide-in-from-top-2">
+                  <div className="text-[8px] text-blue-400 uppercase font-code mb-1 flex items-center gap-1">
+                    <MessageSquareQuote className="h-2 w-2" /> Enhanced Interpretation
+                  </div>
+                  <p className="text-xs italic text-blue-100/90">{enhancedResponse}</p>
+                </div>
+              )}
+
               {analysis ? (
                 <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                   <div className="space-y-1.5">
@@ -171,18 +192,11 @@ export const VisionFeed: React.FC = () => {
                       <div className="text-xs text-accent font-bold uppercase tracking-widest">{analysis.safety_status}</div>
                     </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] uppercase font-code text-accent/60">Posture Analysis</label>
-                    <p className="text-[11px] text-foreground/80 leading-relaxed font-code bg-black/40 p-3 rounded-lg">
-                      {analysis.posture_analysis}
-                    </p>
-                  </div>
                 </div>
               ) : (
                 <div className="h-48 flex flex-col items-center justify-center text-center opacity-20 group">
-                  <Eye className="h-12 w-12 mb-4 group-hover:scale-110 transition-transform" />
+                  <Eye className="h-12 w-12 mb-4" />
                   <p className="text-[10px] uppercase font-code tracking-[0.2em]">Awaiting Perception Trigger</p>
-                  <p className="text-[8px] mt-2 font-code">Click 'Trigger Perception' to start scanning.</p>
                 </div>
               )}
             </CardContent>
@@ -203,9 +217,6 @@ export const VisionFeed: React.FC = () => {
                   </span>
                 </div>
               ))}
-              {visionContext.snapshot().count === 0 && (
-                <p className="text-[8px] text-secondary/40 text-center italic">No vision events in span.</p>
-              )}
             </CardContent>
           </Card>
         </section>

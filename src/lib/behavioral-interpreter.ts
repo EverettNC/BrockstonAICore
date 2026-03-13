@@ -1,12 +1,15 @@
-
 /**
  * @fileOverview Behavioral Interpreter for BROCKSTON (TypeScript Port).
- * Ported from v3.0 Behavioral Interpreter Module.
+ * Ported from v3.0 Behavioral Interpreter Module and Enhanced Temporal Nonverbal Engine.
+ * 
+ * © 2025 The Christman AI Project. All rights reserved.
  */
 
 export type BehaviorType = 
   | "gesture:thumbs_up" | "gesture:thumbs_down" | "gesture:wave" | "gesture:nod" 
-  | "gesture:shake" | "gesture:stimming" | "gesture:rapid_blink" | "gesture:tilt_head"
+  | "gesture:shake" | "gesture:point" | "gesture:circle" | "gesture:stimming" 
+  | "gesture:rapid_blink" | "gesture:tilt_head"
+  | "eye:focused" | "eye:scanning" | "eye:avoidance" | "eye:rapid_blink"
   | "symbol:happy" | "symbol:sad" | "symbol:pain" | "symbol:tired" | "symbol:food" | "symbol:drink" | "symbol:bathroom"
   | "intent:greeting" | "intent:farewell" | "intent:affirmation" | "intent:denial" 
   | "intent:complaint" | "intent:gratitude" | "intent:urgent_request" | "intent:confusion" 
@@ -31,6 +34,36 @@ export interface EmotionalState {
   uncertainty: number;
   attention: number;
 }
+
+export interface PatternInfo {
+  pattern: string;
+  confidence: number;
+  meaning: string;
+  description: string;
+}
+
+const GESTURE_PATTERNS: Record<string, any> = {
+  wave: { description: "Side-to-side hand movement", meaning: "Greeting or seeking attention" },
+  point: { description: "Direct finger indication", meaning: "Directing attention" },
+  nod: { description: "Head moving up and down", meaning: "Agreement or acknowledgement" },
+  shake: { description: "Head moving left to right", meaning: "Disagreement or negation" },
+  circle: { description: "Circular hand motion", meaning: "Continuation or processing" },
+};
+
+const EYE_PATTERNS: Record<string, any> = {
+  focused: { description: "Sustained gaze at a single point", meaning: "Attention or interest" },
+  scanning: { description: "Regular movement between points", meaning: "Searching or gathering" },
+  avoidance: { description: "Looking away from primary subject", meaning: "Discomfort or disinterest" },
+  rapid_blink: { description: "Increased blink frequency", meaning: "Stress or processing" },
+};
+
+const MULTIMODAL_PATTERNS: Record<string, any> = {
+  agreement: { description: "Nodding + positive emotion + focused gaze", meaning: "Strong confirmation" },
+  disagreement: { description: "Head shake + negative emotion + avoidance gaze", meaning: "Strong rejection" },
+  confusion: { description: "Rapid eye movement + neutral emotion", meaning: "Processing difficulty" },
+  interest: { description: "Leaning forward + focused gaze", meaning: "Engagement or curiosity" },
+  disengagement: { description: "Leaning back + avoidance gaze", meaning: "Withdrawal or disinterest" },
+};
 
 const VALENCE_MAP: Record<string, number> = {
   "gesture:thumbs_up": 0.3,
@@ -166,7 +199,66 @@ export class BehavioralInterpreter {
       });
     }
 
+    // Ported Temporal Pattern Recognition
+    const temporalResult = this.analyzeTemporalSequence(history);
+    if (temporalResult.confidence > 0.6) {
+      patterns.push({
+        id: 'temporal_pattern',
+        ...temporalResult
+      });
+    }
+
     return patterns;
+  }
+
+  static analyzeTemporalSequence(history: BehaviorObservation[]): PatternInfo {
+    if (history.length < 3) {
+      return { pattern: "unknown", confidence: 0, meaning: "Insufficient data", description: "Waiting for sequence" };
+    }
+
+    // Ported from Python: Simple heuristic for multimodal mapping
+    const types = history.slice(-5).map(h => h.type);
+    const combinedStr = types.join('|');
+
+    if (combinedStr.includes('nod') && combinedStr.includes('happy')) {
+      return { 
+        pattern: "agreement", 
+        confidence: 0.85, 
+        meaning: MULTIMODAL_PATTERNS.agreement.meaning, 
+        description: MULTIMODAL_PATTERNS.agreement.description 
+      };
+    }
+
+    if (combinedStr.includes('shake') && combinedStr.includes('sad')) {
+      return { 
+        pattern: "disagreement", 
+        confidence: 0.82, 
+        meaning: MULTIMODAL_PATTERNS.disagreement.meaning, 
+        description: MULTIMODAL_PATTERNS.disagreement.description 
+      };
+    }
+
+    // Default to last known gesture if it matches a pattern
+    const lastType = types[types.length - 1].split(':')[1] || '';
+    if (GESTURE_PATTERNS[lastType]) {
+      return {
+        pattern: lastType,
+        confidence: 0.7,
+        meaning: GESTURE_PATTERNS[lastType].meaning,
+        description: GESTURE_PATTERNS[lastType].description
+      };
+    }
+
+    return { pattern: "unknown", confidence: 0.2, meaning: "Stable baseline", description: "Perceiving..." };
+  }
+
+  static generateEnhancedResponse(primaryResult: PatternInfo): string {
+    if (primaryResult.confidence < 0.3) {
+      return "I'm not detecting a clear pattern in your nonverbal communication.";
+    }
+
+    const confidenceLevel = primaryResult.confidence > 0.8 ? "clearly" : primaryResult.confidence > 0.6 ? "likely" : "possibly";
+    return `I ${confidenceLevel} observe ${primaryResult.description}. This suggests ${primaryResult.meaning}.`;
   }
 
   static predictNeeds(emotionalState: EmotionalState): string {

@@ -8,11 +8,11 @@ import { visionContext } from './vision-context';
 export const GESTURE_SYMBOLS: Record<string, { description: string; intent: string }> = {
   "thumbs_up": {
     "description": "Affirmation",
-    "intent": "gesture:affirmation",
+    "intent": "gesture:thumbs_up",
   },
   "hand_wave": {
     "description": "Greeting",
-    "intent": "gesture:greeting",
+    "intent": "gesture:wave",
   },
   "nod": {
     "description": "Nodding",
@@ -22,13 +22,21 @@ export const GESTURE_SYMBOLS: Record<string, { description: string; intent: stri
     "description": "Disagreement",
     "intent": "gesture:shake",
   },
+  "point": {
+    "description": "Pointing",
+    "intent": "gesture:point",
+  },
   "stimming": {
     "description": "Stimming pattern",
     "intent": "gesture:stimming",
   },
   "sustained_gaze": {
     "description": "Focus",
-    "intent": "eye_tracking:sustained_gaze",
+    "intent": "eye:focused",
+  },
+  "rapid_blinking": {
+    "description": "Rapid Blinking",
+    "intent": "eye:rapid_blink",
   }
 };
 
@@ -47,7 +55,6 @@ export class VisionPerception {
     const cues = this._inferSymbols(combinedInput);
     
     // Push results into the global VisionContext rolling window
-    // Matches the Python context.push(description=cues.description, intent=cues.intent...)
     visionContext.push(
       cues.description || description,
       cues.intent || "perception",
