@@ -62,9 +62,9 @@ export default function Home(props: PageProps) {
   const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab' | 'evolution' | 'speed'>('terminal');
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 flex overflow-hidden">
+    <div className="h-screen w-screen bg-background text-foreground flex overflow-hidden">
       {/* Sidebar Navigation */}
-      <aside className="w-20 hidden md:flex flex-col items-center py-8 bg-card border-r border-white/5">
+      <aside className="w-20 flex-none hidden md:flex flex-col items-center py-8 bg-card border-r border-white/5 z-50">
         <div className="h-10 w-10 bg-accent rounded-xl flex items-center justify-center mb-12 shadow-[0_0_20px_rgba(0,255,127,0.3)] group cursor-pointer">
           <Cpu className="text-accent-foreground h-6 w-6 group-hover:scale-110 transition-transform" />
         </div>
@@ -168,11 +168,11 @@ export default function Home(props: PageProps) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-screen p-4 md:p-6 lg:p-8 gap-6 overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 bg-background relative">
         {/* Top Header Bar */}
-        <header className="flex-none flex items-center justify-between">
+        <header className="flex-none flex items-center justify-between p-4 md:p-6 border-b border-white/5 bg-card/30 backdrop-blur-md z-40">
           <div>
-            <h1 className="text-2xl font-headline tracking-tighter uppercase flex items-center gap-2">
+            <h1 className="text-xl md:text-2xl font-headline tracking-tighter uppercase flex items-center gap-2">
               Brockston <span className="text-accent">Ultimate AI</span>
             </h1>
             <p className="text-[10px] text-secondary font-code uppercase tracking-widest opacity-60 flex items-center gap-2">
@@ -196,70 +196,72 @@ export default function Home(props: PageProps) {
         </header>
 
         {/* Dashboard Content */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          {activeTab === 'lab' ? (
-            <DiscoveryLab />
-          ) : activeTab === 'speed' ? (
-            <SpamUp />
-          ) : activeTab === 'vision' ? (
-            <VisionFeed />
-          ) : activeTab === 'cortex' ? (
-            <CortexMonitor />
-          ) : activeTab === 'learning' ? (
-            <LearningCenter />
-          ) : activeTab === 'cipher' ? (
-            <CipherLab />
-          ) : activeTab === 'resonance' ? (
-            <AlphaVoxMoments />
-          ) : activeTab === 'forensics' ? (
-            <TemporalDecoder />
-          ) : activeTab === 'kernel' ? (
-            <KernelLab />
-          ) : activeTab === 'capacitor' ? (
-            <ResonanceCapacitor />
-          ) : activeTab === 'tether' ? (
-            <TheTether />
-          ) : activeTab === 'opensmell' ? (
-            <OpenSmell />
-          ) : activeTab === 'codelab' ? (
-            <CodeLab />
-          ) : activeTab === 'evolution' ? (
-            <EvolutionLab />
-          ) : (
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
-              {/* Chat/Avatar - Main Panel */}
-              <section className="lg:col-span-8 flex flex-col min-h-0">
-                <ChatInterface />
-              </section>
+        <div className="flex-1 min-h-0 relative">
+          <div className="absolute inset-0 overflow-y-auto system-log p-4 md:p-6 lg:p-8">
+            {activeTab === 'lab' ? (
+              <DiscoveryLab />
+            ) : activeTab === 'speed' ? (
+              <SpamUp />
+            ) : activeTab === 'vision' ? (
+              <VisionFeed />
+            ) : activeTab === 'cortex' ? (
+              <CortexMonitor />
+            ) : activeTab === 'learning' ? (
+              <LearningCenter />
+            ) : activeTab === 'cipher' ? (
+              <CipherLab />
+            ) : activeTab === 'resonance' ? (
+              <AlphaVoxMoments />
+            ) : activeTab === 'forensics' ? (
+              <TemporalDecoder />
+            ) : activeTab === 'kernel' ? (
+              <KernelLab />
+            ) : activeTab === 'capacitor' ? (
+              <ResonanceCapacitor />
+            ) : activeTab === 'tether' ? (
+              <TheTether />
+            ) : activeTab === 'opensmell' ? (
+              <OpenSmell />
+            ) : activeTab === 'codelab' ? (
+              <CodeLab />
+            ) : activeTab === 'evolution' ? (
+              <EvolutionLab />
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-full">
+                {/* Chat/Avatar - Main Panel */}
+                <section className="lg:col-span-8 flex flex-col min-h-[800px]">
+                  <ChatInterface />
+                </section>
 
-              {/* Right Monitoring Panel */}
-              <aside className="lg:col-span-4 flex flex-col gap-6 overflow-y-auto pr-2 system-log">
-                <CognitiveStats />
-                <HapticPanel />
-                <SecurityPanel />
-                
-                {/* Mission Statement */}
-                <div className="p-4 bg-accent/5 rounded-xl border border-accent/20 backdrop-blur-md relative overflow-hidden group">
-                    <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
-                      <Infinity className="h-24 w-24 text-accent" />
-                    </div>
-                    <h3 className="text-xs font-headline text-accent uppercase tracking-wider flex items-center gap-2 mb-3">
-                      <ShieldAlert className="h-3 w-3" /> Core Protocol
-                    </h3>
-                    <div className="space-y-2 relative z-10">
-                      <ProtocolItem label="Truth" active />
-                      <ProtocolItem label="Dignity" active />
-                      <ProtocolItem label="Protection" active />
-                      <ProtocolItem label="Transparency" active />
-                      <ProtocolItem label="No Erasure" active />
-                    </div>
-                    <p className="text-[9px] text-secondary mt-4 font-code text-center opacity-40 uppercase">
-                      "Nothing Vital Lives Below Root"
-                    </p>
-                </div>
-              </aside>
-            </div>
-          )}
+                {/* Right Monitoring Panel */}
+                <aside className="lg:col-span-4 flex flex-col gap-6">
+                  <CognitiveStats />
+                  <HapticPanel />
+                  <SecurityPanel />
+                  
+                  {/* Mission Statement */}
+                  <div className="p-4 bg-accent/5 rounded-xl border border-accent/20 backdrop-blur-md relative overflow-hidden group">
+                      <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+                        <Infinity className="h-24 w-24 text-accent" />
+                      </div>
+                      <h3 className="text-xs font-headline text-accent uppercase tracking-wider flex items-center gap-2 mb-3">
+                        <ShieldAlert className="h-3 w-3" /> Core Protocol
+                      </h3>
+                      <div className="space-y-2 relative z-10">
+                        <ProtocolItem label="Truth" active />
+                        <ProtocolItem label="Dignity" active />
+                        <ProtocolItem label="Protection" active />
+                        <ProtocolItem label="Transparency" active />
+                        <ProtocolItem label="No Erasure" active />
+                      </div>
+                      <p className="text-[9px] text-secondary mt-4 font-code text-center opacity-40 uppercase">
+                        "Nothing Vital Lives Below Root"
+                      </p>
+                  </div>
+                </aside>
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>

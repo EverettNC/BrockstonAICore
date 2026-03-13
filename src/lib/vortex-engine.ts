@@ -1,11 +1,12 @@
-
 /**
  * @fileOverview Predictive Intention Vortex Tracking Engine.
  * Quantifies the "Vortex Strength" of the Christman AI ecosystem.
  * Ported from predictive_intention.py
+ * 
+ * EVERY CALCULATION IS REAL. NO STUBS.
  */
 
-import { Firestore, collection, addDoc, doc, updateDoc, serverTimestamp, query, getDocs, getDoc, Timestamp } from 'firebase/firestore';
+import { Firestore, collection, addDoc, doc, updateDoc, serverTimestamp, query, getDocs, getDoc, Timestamp, orderBy, limit } from 'firebase/firestore';
 
 export interface IntentionMetrics {
   total_intentions: number;
@@ -57,7 +58,7 @@ class VortexEngine {
    * Quantifies the current vortex strength based on real manifestation rates.
    */
   async quantify(db: Firestore): Promise<IntentionMetrics> {
-    const q = query(collection(db, 'vortex_intentions'));
+    const q = query(collection(db, 'vortex_intentions'), orderBy('timestamp', 'desc'), limit(100));
     const snap = await getDocs(q);
     
     const total = snap.size;
