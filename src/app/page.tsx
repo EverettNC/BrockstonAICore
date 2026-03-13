@@ -9,6 +9,7 @@ import { PulseTerminal } from '@/components/PulseTerminal';
 import { VisionFeed } from '@/components/VisionFeed';
 import { CortexMonitor } from '@/components/CortexMonitor';
 import { LearningCenter } from '@/components/LearningCenter';
+import { CipherLab } from '@/components/CipherLab';
 import { HapticPanel } from '@/components/HapticPanel';
 import { Button } from '@/components/ui/button';
 import { 
@@ -24,12 +25,13 @@ import {
   GraduationCap,
   ShieldAlert,
   Radio,
-  Infinity
+  Infinity,
+  Lock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher'>('terminal');
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 flex overflow-hidden">
@@ -59,6 +61,12 @@ export default function Home() {
             label="Vision"
           />
           <NavIcon 
+            icon={Lock} 
+            active={activeTab === 'cipher'} 
+            onClick={() => setActiveTab('cipher')} 
+            label="Cipher"
+          />
+          <NavIcon 
             icon={GraduationCap} 
             active={activeTab === 'learning'} 
             onClick={() => setActiveTab('learning')} 
@@ -75,12 +83,6 @@ export default function Home() {
             active={activeTab === 'lab'} 
             onClick={() => setActiveTab('lab')} 
             label="Discovery"
-          />
-          <NavIcon 
-            icon={Database} 
-            active={activeTab === 'knowledge'} 
-            onClick={() => setActiveTab('knowledge')} 
-            label="Knowledge"
           />
         </nav>
 
@@ -104,6 +106,7 @@ export default function Home() {
                 activeTab === 'vision' ? 'Visual Cortex Sync' :
                 activeTab === 'cortex' ? 'Reasoning Core Active' :
                 activeTab === 'learning' ? 'Autonomous Learning Mode' :
+                activeTab === 'cipher' ? 'Cryptographic Tiers Online' :
                 'Neural Link Active'
               }
             </p>
@@ -133,6 +136,8 @@ export default function Home() {
             <CortexMonitor />
           ) : activeTab === 'learning' ? (
             <LearningCenter />
+          ) : activeTab === 'cipher' ? (
+            <CipherLab />
           ) : (
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
               {/* Chat/Avatar - Main Panel */}
