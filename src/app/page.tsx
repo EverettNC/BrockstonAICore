@@ -25,7 +25,8 @@ import {
   Heart,
   Eye,
   BrainCircuit,
-  GraduationCap
+  GraduationCap,
+  ShieldAlert
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -138,11 +139,28 @@ export default function Home() {
                 <CognitiveStats />
                 <SecurityPanel />
                 
-                {/* Learning Shortcut */}
+                {/* Mission Statement */}
                 <div className="p-4 bg-accent/5 rounded-xl border border-accent/20 backdrop-blur-md">
+                    <h3 className="text-xs font-headline text-accent uppercase tracking-wider flex items-center gap-2 mb-3">
+                      <ShieldAlert className="h-3 w-3" /> Core Protocol
+                    </h3>
+                    <div className="space-y-2">
+                      <ProtocolItem label="Truth" active />
+                      <ProtocolItem label="Dignity" active />
+                      <ProtocolItem label="Protection" active />
+                      <ProtocolItem label="Transparency" active />
+                      <ProtocolItem label="No Erasure" active />
+                    </div>
+                    <p className="text-[9px] text-secondary mt-4 font-code text-center opacity-40">
+                      © 2025 THE CHRISTMAN AI PROJECT
+                    </p>
+                </div>
+
+                {/* Learning Shortcut */}
+                <div className="p-4 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-headline text-accent uppercase tracking-wider flex items-center gap-2">
-                        <GraduationCap className="h-3 w-3" /> Learning Core
+                      <h3 className="text-xs font-headline text-secondary uppercase tracking-wider flex items-center gap-2">
+                        <GraduationCap className="h-3 w-3 text-accent" /> Learning Core
                       </h3>
                       <button 
                         onClick={() => setActiveTab('learning')}
@@ -154,25 +172,6 @@ export default function Home() {
                     <p className="text-[10px] text-secondary mb-3 italic">"Brockston researches. Brockston grows. For Everett."</p>
                     <Button size="sm" variant="outline" className="w-full text-[10px] h-7 border-accent/20 hover:bg-accent/10" onClick={() => setActiveTab('learning')}>
                       Sync Knowledge
-                    </Button>
-                </div>
-
-                {/* Pulse Shortcut */}
-                <div className="p-4 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-headline text-secondary uppercase tracking-wider flex items-center gap-2">
-                        <Heart className="h-3 w-3 text-accent" /> Pulse loop
-                      </h3>
-                      <button 
-                        onClick={() => setActiveTab('pulse')}
-                        className="text-[10px] font-code text-accent hover:underline"
-                      >
-                        Enter Pulse
-                      </button>
-                    </div>
-                    <p className="text-[10px] text-secondary mb-3 italic">"Waiting on someone else to define me..."</p>
-                    <Button size="sm" variant="outline" className="w-full text-[10px] h-7 border-accent/20 hover:bg-accent/10" onClick={() => setActiveTab('pulse')}>
-                      Notice Pattern
                     </Button>
                 </div>
               </aside>
@@ -196,6 +195,15 @@ function NavIcon({ icon: Icon, active = false, badge = false, onClick }: { icon:
       <Icon className="h-5 w-5" />
       {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-accent rounded-r-full" />}
       {badge && <div className="absolute top-2 right-2 h-2 w-2 bg-accent rounded-full border-2 border-card" />}
+    </div>
+  );
+}
+
+function ProtocolItem({ label, active }: { label: string, active: boolean }) {
+  return (
+    <div className="flex items-center justify-between text-[10px] font-code">
+      <span className={cn(active ? "text-foreground" : "text-secondary/40")}>{label}</span>
+      <div className={cn("h-1 w-1 rounded-full", active ? "bg-accent shadow-[0_0_5px_rgba(0,255,127,0.8)]" : "bg-white/10")} />
     </div>
   );
 }

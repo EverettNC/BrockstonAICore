@@ -5,14 +5,15 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
 import { speakStephen } from '@/ai/flows/tts-flow';
 import { quantumFuse, QuantumTrace } from '@/ai/flows/quantum-fusion-flow';
+import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, UserCircle, Lock, Mic, Zap, Cpu } from 'lucide-react';
+import { Send, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, UserCircle, Lock, Mic, Zap, Cpu, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
+import { useFirestore, useCollection, useDoc } from '@/firebase';
+import { collection, addDoc, doc, setDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { shieldPayload } from '@/lib/quantum-defense';
@@ -55,6 +56,8 @@ export const ChatInterface: React.FC = () => {
   ), [db]);
 
   const { data: messages } = useCollection<any>(messagesQuery);
+  const { data: forgeState } = useDoc<any>(doc(db, 'cognitive_core', 'main-bridge'));
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -71,6 +74,41 @@ export const ChatInterface: React.FC = () => {
     );
   };
 
+  const processLTP = async (salience: number) => {
+    if (!forgeState || salience < 0.4) return;
+    
+    try {
+      const currentWeights = {
+        emotional_state: forgeState.emotional_state || 0.5,
+        tonal_stability: forgeState.tonal_stability || 0.5,
+        speech_cadence: forgeState.speech_cadence || 0.5,
+        respiratory_pattern: forgeState.respiratory_pattern || 0.5,
+      };
+
+      const forgeResult = await soulForgeProcess({
+        currentWeights,
+        salience,
+        symbolicWeight: 1.0,
+        emergency: salience > 0.85
+      });
+
+      await setDoc(doc(db, 'cognitive_core', 'main-bridge'), {
+        ...forgeResult.updatedWeights,
+        last_ltp_event: serverTimestamp(),
+        ltp_triggered: forgeResult.ltpTriggered
+      }, { merge: true });
+
+      if (forgeResult.ltpTriggered) {
+        toast({
+          title: "Biological Bridge Synced",
+          description: "Soul Forge LTP triggered — memory reinforcement active.",
+        });
+      }
+    } catch (e) {
+      console.error("LTP Bridge failed", e);
+    }
+  };
+
   const handleQuantumFuse = async () => {
     if (selectedSymbols.length === 0 || status !== 'idle') return;
     setStatus('thinking');
@@ -78,13 +116,12 @@ export const ChatInterface: React.FC = () => {
     try {
       const trace = await quantumFuse({
         symbols: selectedSymbols,
-        valence: 0.8, // Contextually derived in production
+        valence: 0.8,
         userId: "everett_n_christman"
       });
 
       const shield = shieldPayload('alphavox');
       
-      // Log Fusion to Memory
       await addDoc(collection(db, 'chats', chatId, 'messages'), {
         role: 'user',
         content: `[QUANTUM BURST]: ${selectedSymbols.join(' + ')}`,
@@ -103,6 +140,7 @@ export const ChatInterface: React.FC = () => {
         timestamp: serverTimestamp()
       });
 
+      await processLTP(0.8); // High salience for quantum fusion
       setSelectedSymbols([]);
       setStatus('speaking');
 
@@ -178,6 +216,9 @@ export const ChatInterface: React.FC = () => {
         quantum_shield: responseShield,
         timestamp: serverTimestamp()
       });
+
+      // Trigger LTP based on emotional salience
+      await processLTP(result.empathy_signal.self_love_score);
 
       setStatus('speaking');
       
@@ -334,13 +375,13 @@ export const ChatInterface: React.FC = () => {
         <div className="flex justify-between mt-3 pt-3 border-t border-white/5">
             <div className="flex gap-3">
               <span className="flex items-center gap-1 text-[9px] text-secondary/60 uppercase font-code">
-                <Shield className="h-3 w-3 text-accent" /> Loyalty.Lock
+                <Shield className="h-3 w-3 text-accent" /> Truth.Dignity
               </span>
               <span className="flex items-center gap-1 text-[9px] text-secondary/60 uppercase font-code">
-                <Atom className="h-3 w-3 text-accent" /> PQC.Shield
+                <Scale className="h-3 w-3 text-accent" /> Integrity.Gate
               </span>
             </div>
-            <span className="text-[9px] font-code text-accent animate-pulse tracking-widest uppercase">Stephen Voice Active</span>
+            <span className="text-[9px] font-code text-accent animate-pulse tracking-widest uppercase">No Erasure Protocol Active</span>
         </div>
       </form>
     </div>
