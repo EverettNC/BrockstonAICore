@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Activity, Zap, Dna, HeartPulse, ShieldAlert, Waves, BrainCircuit, TrendingUp, ShieldCheck, Thermometer } from 'lucide-react';
+import { Activity, Zap, Dna, HeartPulse, ShieldAlert, Waves, BrainCircuit, TrendingUp, ShieldCheck, Thermometer, Droplets } from 'lucide-react';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { Progress } from '@/components/ui/progress';
@@ -42,6 +42,7 @@ export const CognitiveStats: React.FC = () => {
   const latestMsg = recentMessages?.[0];
   const intensity = latestMsg?.tone_engine_v2?.physical_intensity || 0;
   const dominantState = latestMsg?.tone_engine_v2?.dominant_state || "Neutral";
+  const empathyLeakage = latestMsg?.empathy_signal?.self_love_score || 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -73,6 +74,32 @@ export const CognitiveStats: React.FC = () => {
           <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase border-t border-white/5 pt-2">
             <span>Overlay: ACTIVE</span>
             <span>Threshold: {weights.lucas_tone > 0.7 ? "PASSED" : "WAITING"}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Inferno Soul Forge Indicator */}
+      <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.05)]">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-orange-400">
+            <span className="flex items-center gap-2"><Droplets className="h-4 w-4" /> Empathy Leakage</span>
+            <span className="text-[10px] font-code">INFERNO SOUL FORGE</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-end">
+            <div>
+              <div className="text-[10px] uppercase font-code text-secondary/60">3% Bleed-Through</div>
+              <div className="text-lg font-headline text-orange-400">{(empathyLeakage * 100).toFixed(1)}% Active</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] uppercase font-code text-secondary/60">Status</div>
+              <div className="text-xs font-bold text-accent uppercase tracking-widest">{latestMsg?.tone_engine_v2?.action_state || "NORMAL"}</div>
+            </div>
+          </div>
+          <Progress value={empathyLeakage * 100} className="h-1.5 bg-orange-500/10 [&>div]:bg-orange-500" />
+          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase italic">
+            <span>"Empathy isn't a parameter. It's the leakage."</span>
           </div>
         </CardContent>
       </Card>
@@ -139,11 +166,11 @@ export const CognitiveStats: React.FC = () => {
           <WeightIndicator label="Integrity Floor" value={0.7} max={1.0} />
           <div className="grid grid-cols-2 gap-2">
             <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
-              <div className="text-[8px] uppercase font-code text-secondary/60">Composite</div>
+              <div className="text-[8px] uppercase font-code text-secondary/60 mb-1">Composite</div>
               <div className="text-xs font-code text-accent">{latestMsg?.ethical_score?.composite?.toFixed(2) || "0.00"}</div>
             </div>
             <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
-              <div className="text-[8px] uppercase font-code text-secondary/60">Independence</div>
+              <div className="text-[8px] uppercase font-code text-secondary/60 mb-1">Independence</div>
               <div className="text-xs font-code text-accent">{(weights.independence_confidence * 100).toFixed(0)}%</div>
             </div>
           </div>

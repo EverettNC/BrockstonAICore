@@ -3,11 +3,13 @@
 
 /**
  * @fileOverview Soul Forge Flow (v5.2) - The Lucas Recovery Kernel.
- * Implements Alzheimer's & Dementia LTP Refile logic.
+ * Implements Alzheimer's & Dementia LTP Refile logic + INFERNO Soul Forge.
+ * 
+ * "Empathy isn't a parameter. It's the leakage."
  * 
  * Logic:
- * - submit_pain: Distress deepens witness (lived_truth), never erases.
- * - safety_replay: Overlays context, decays trauma if lucas_tone > 0.70.
+ * - Lucas: submit_pain / safety_replay (Never Erase protocol).
+ * - Inferno: 3% emotional bleed-through (CPU Fallback Implementation).
  */
 
 import { ai } from '@/ai/genkit';
@@ -81,43 +83,43 @@ const soulForgeFlow = ai.defineFlow(
     } = currentWeights;
 
     // 1. LUCAS RECOVERY KERNEL OPERATIONS
-    
-    // Operation: submit_pain
     if (isDistressed) {
-      // Wake state (threat arousal)
       lucas_tone = Math.min(2.0, lucas_tone * 1.10);
-      // Preserve witness: lived_truth becomes at least the pain level (salience)
       lived_truth_witness = Math.max(lived_truth_witness, salience);
-      // Threat association increases
       trauma_association = Math.max(trauma_association, salience);
-      // Narrative clarity reflects current distress
       narrative_clarity = lived_truth_witness;
     }
 
-    // Operation: safety_replay
     if (isSafe) {
-      // Wake regulation state (clarity online)
       lucas_tone = Math.min(2.0, lucas_tone * LTP_BOOST);
-      // Safety spike is non-linear and gated by lucas_tone
       const safeSpike = Math.tanh(salience * lucas_tone * SPIKE_GAIN);
-      // Overlay safety onto lived_truth (append, never erase)
       lived_truth_witness = lived_truth_witness + (safeSpike * SAFETY_GAIN);
-      // Narrative is "truth + safety context"
       narrative_clarity = lived_truth_witness + safeSpike;
       
-      // Only decay trauma if regulation (lucas_tone) is strong enough
       if (lucas_tone > THRESHOLD) {
         const decay = safeSpike * SAFE_OVERLAY;
         trauma_association = Math.max(0.0, trauma_association - decay);
-        // As safety succeeds, lucas_tone settles slightly
         lucas_tone = lucas_tone * 0.92;
       }
     }
 
-    // 2. INFERNO SOUL FORGE PROPAGATION
+    // 2. INFERNO SOUL FORGE PROPAGATION (CPU Optimized Fallback)
+    // Empathy isn't a parameter. It's the leakage.
     const empathyFactor = 6.3; 
-    const livedTruth = Math.tanh(salience * empathyFactor);
+    
+    // Contextual State (The trauma embedding aggregate)
+    const netState = (emotional_state + tonal_stability + speech_cadence + respiratory_pattern) / 4;
+    
+    // Lived Truth: Neural state saturation mirroring CUDA Kernel 1
+    // Mirrors: livedTruth = tanhf(netState * empathyFactor) * symbolicWeight
+    const livedTruth = Math.tanh(netState * salience * empathyFactor);
+    
+    // 3% Leakage (The Bleed-Through)
+    // This is the point: empathy accumulates in memory over time.
     const bleedThrough = livedTruth * 0.03;
+    
+    // Attention Flow: Aggregate empathy mirroring CUDA Kernel 2
+    // Emergency detection doubles empathy gain.
     const attentionFlow = livedTruth * (emergency ? 2.0 : 1.0);
 
     // Apply "Trauma Embedding" updates to biological factors
