@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BrainCircuit, ShieldAlert, Activity, Database, Eye, History, Zap, Cpu, SearchCode, Waves, ListTree, CheckCircle2, MessageSquareQuote, Rocket, Target, Heart, Infinity as InfinityIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BrainCircuit, Activity, Database, Zap, Cpu, SearchCode, Waves, ListTree, CheckCircle2, Rocket, Target, Heart, Infinity as InfinityIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -33,8 +33,6 @@ export const CortexMonitor: React.FC = () => {
   const reasoning = lastMessage?.reasoning_trace;
   const engines = reasoning?.engines_active || ["CoreEngine"];
   
-  const visionSnap = visionContext.snapshot();
-
   // Temporal Pattern Analysis
   const temporalPattern = useMemo(() => {
     if (!behaviorHistory || behaviorHistory.length < 3) return null;

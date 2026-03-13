@@ -2,12 +2,11 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
-import { speakStephen } from '@/ai/flows/tts-flow';
 import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, BrainCircuit, Mic, MicOff, AlertTriangle, GraduationCap, Sparkles, UserCheck, Lock } from 'lucide-react';
+import { Send, Loader2, Volume2, VolumeX, ShieldCheck, Zap, BrainCircuit, Mic, MicOff, AlertTriangle, GraduationCap, Sparkles, UserCheck, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
@@ -15,9 +14,8 @@ import { collection, addDoc, serverTimestamp, query, orderBy, limit, doc, setDoc
 import { Badge } from '@/components/ui/badge';
 import { shieldPayload } from '@/lib/quantum-defense';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { hapticSystem, HapticPattern } from '@/lib/haptic-system';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { speechService as localSpeech } from '@/lib/speech-recognition-service';
 import { brockstonSpeech } from '@/lib/speech-service';
 import { vortexEngine } from '@/lib/vortex-engine';
@@ -31,6 +29,7 @@ export const ChatInterface: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'thinking' | 'speaking'>('idle');
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [isListening, setIsListening] = useState(false);
+  const { toast } = useToast();
   
   const chatId = "ultimate-v5-session";
   const messagesQuery = useMemo(() => query(
@@ -213,19 +212,19 @@ export const ChatInterface: React.FC = () => {
     <div className="flex flex-col h-full gap-4 relative">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
-      {/* Visual Bridge - Focused on Brockston's Identity */}
+      {/* Visual Bridge - Presentation Ready */}
       <div className={cn(
         "flex-none flex flex-col items-center justify-center gap-8 p-10 rounded-2xl border border-white/10 transition-all duration-700 min-h-[600px] relative overflow-hidden",
         isInterventionMode && "border-red-500 shadow-[0_0_100px_rgba(239,68,68,0.5)]"
       )}>
-        {/* Seascape Background */}
+        {/* Seascape Background - Prominent Presentation */}
         {seascape && (
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-black/60 z-10" />
+            <div className="absolute inset-0 bg-black/40 z-10" />
             <img 
               src={seascape.imageUrl} 
               alt="Luxury Seascape" 
-              className="w-full h-full object-cover grayscale-[0.3] opacity-40" 
+              className="w-full h-full object-cover grayscale-[0.1] opacity-60" 
               data-ai-hint={seascape.imageHint}
             />
           </div>

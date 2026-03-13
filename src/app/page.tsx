@@ -55,7 +55,7 @@ type PageProps = {
 };
 
 export default function Home(props: PageProps) {
-  // Unwrap Next.js 15 dynamic APIs to avoid enumeration errors
+  // Correctly unwrap Next.js 15 dynamic APIs using React.use()
   const _params = use(props.params);
   const _searchParams = use(props.searchParams);
 
@@ -199,8 +199,8 @@ export default function Home(props: PageProps) {
         <div className="flex-1 min-h-0 overflow-hidden">
           {activeTab === 'lab' ? (
             <DiscoveryLab />
-          ) : activeTab === 'pulse' ? (
-            <PulseTerminal />
+          ) : activeTab === 'speed' ? (
+            <SpamUp />
           ) : activeTab === 'vision' ? (
             <VisionFeed />
           ) : activeTab === 'cortex' ? (
@@ -225,8 +225,6 @@ export default function Home(props: PageProps) {
             <CodeLab />
           ) : activeTab === 'evolution' ? (
             <EvolutionLab />
-          ) : activeTab === 'speed' ? (
-            <SpamUp />
           ) : (
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
               {/* Chat/Avatar - Main Panel */}
