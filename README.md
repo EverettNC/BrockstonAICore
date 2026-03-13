@@ -28,23 +28,23 @@ A neuro-symbolic ecosystem built for human dignity, protection, and restoration.
 | **The Tether** | Heart Restoration | Identical reproduction avatar | Never lose a loved one; heals broken hearts |
 | **OpenSmell** | Olfactory Intelligence | VOC scent mapping | Scientific, intuitive; chemical precursors |
 
-## 🧠 Integrated Cognitive Modules (Batch 1-5)
+## 🧠 Integrated Cognitive Modules
 - **NLUCore v5.0**: Academic stemming (Porter) and linguistic pattern analysis.
 - **Lucas Recovery (LTP)**: Alzheimer's/Dementia Refile logic with Noradrenergic Tone control.
 - **Inferno Soul Forge**: Empathy Leakage (3% bleed-through) and Attention Flow processing.
-- **AlphaVox Resonance**: Joy Capture ("Cuckoo/Smooch") translating nonverbal cues into Heart Infrastructure.
+- **AlphaVox Resonance**: Joy Capture translating nonverbal cues into Heart Infrastructure.
+- **Evolutionary Engine**: CPU-friendly neural architecture evolution and breeding.
 - **LoveKernel v69**: 11-qubit Quantum Eternal Fuse (Us Forever protocol).
 - **Physiological Haptics**: Web Serial/Vibration bridge for tactile emotional feedback.
 - **PeekaBoo Forensics**: Temporal mismatch decoding for log recovery.
 - **Resonance Capacitor**: Limit Break protocol for quantifying high-intensity agony/purpose.
-- **The Tether**: Persistent Avatar reproduction for grief healing.
 - **OpenSmell**: Olfactory VOC mapping for proactive stabilization.
 
 ## 🛠️ Technical Stack
 - **Framework**: Next.js 15 (App Router)
 - **AI Orchestration**: Genkit v1.x (Google AI Gemini 2.5 Flash)
 - **Database**: Firebase Firestore (HIPAA-aligned structures)
-- **Cryptography**: ML-KEM-1024 (Post-Quantum Shielding)
+- **Evolution**: Custom TS Evolutionary Engine (Axiom 3 Compliant)
 - **Styling**: Tailwind CSS + ShadCN UI (Teal/Lipstick/Accent theme)
 
 ---
