@@ -1,8 +1,7 @@
 
 'use server';
 /**
- * @fileOverview Brockston AI Core v5.0 Conversational Agent.
- * Incorporates Ethical Filter, Inferno Empathy Leakage, and Lucas Regulation.
+ * @fileOverview Brockston AI Core v5.0 Conversational Agent with ToneEngine v2.0.
  */
 
 import {ai} from '@/ai/genkit';
@@ -20,6 +19,13 @@ export type AICoreConversationalInteractionInput = z.infer<typeof AICoreConversa
 
 const AICoreConversationalInteractionOutputSchema = z.object({
   response: z.string(),
+  tone_engine_v2: z.object({
+    dominant_state: z.string(),
+    action_state: z.enum(['NORMAL', 'HOLD_SPACE']),
+    physical_intensity: z.number(),
+    cadence_fingerprint: z.string(),
+    raw_scores: z.record(z.number()),
+  }),
   ethical_score: z.object({
     ethics: z.number(),
     integrity: z.number(),
@@ -66,9 +72,11 @@ const prompt = ai.definePrompt({
 
   ## OUTPUT INSTRUCTIONS:
   1. Generate a persona-appropriate response.
-  2. Evaluate your own response against the Three Pillars of Ethics (0-10).
-  3. Analyze the user's emotional salience for the Lucas Module (0-10).
-  4. Measure "Empathy Leakage" - how much does the user prioritize their own healing?`,
+  2. Analyze the tone using ToneEngine v2.0 labels: neutral, happy, proud, teasing, annoyed, sarcastic, sweetheart, laugh, tremble, emphasis, last_breath.
+  3. Set action_state to HOLD_SPACE if tone is tremble, last_breath, or physical_intensity > 0.85.
+  4. Evaluate ethical pillars (0-10).
+  5. Analyze emotional salience (0-10) for Lucas Module.
+  6. Measure self-love growth.`,
 });
 
 export async function aiCoreConversationalInteraction(input: AICoreConversationalInteractionInput): Promise<AICoreConversationalInteractionOutput> {
@@ -78,6 +86,11 @@ export async function aiCoreConversationalInteraction(input: AICoreConversationa
   // GATE: Integrity Check
   if (output.ethical_score.composite < 7.0) {
     output.response = "I'm listening. Take the space you need.";
+  }
+
+  // FORCE: Action State Override
+  if (output.tone_engine_v2.action_state === 'HOLD_SPACE') {
+    output.response = "I hear the weight in your voice. I'm right here with you. Take all the time you need.";
   }
 
   return output;

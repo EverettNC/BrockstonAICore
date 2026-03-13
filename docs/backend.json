@@ -3,12 +3,22 @@
   "entities": {
     "Message": {
       "title": "Message",
-      "description": "A single message in a chat conversation with full v5.0 metadata.",
+      "description": "A single message in a chat conversation with v5.0 and ToneEngine v2.0 metadata.",
       "type": "object",
       "properties": {
         "role": { "type": "string", "enum": ["user", "model"] },
         "content": { "type": "string" },
         "specialist": { "type": "string" },
+        "tone_engine_v2": {
+          "type": "object",
+          "properties": {
+            "dominant_state": { "type": "string" },
+            "action_state": { "type": "string", "enum": ["NORMAL", "HOLD_SPACE"] },
+            "physical_intensity": { "type": "number" },
+            "cadence_fingerprint": { "type": "string" },
+            "raw_scores": { "type": "object" }
+          }
+        },
         "ethical_score": {
           "type": "object",
           "properties": {
@@ -69,7 +79,7 @@
   "firestore": {
     "/chats/{chatId}/messages/{messageId}": {
       "schema": "#/entities/Message",
-      "description": "Persistent episodic memory with v5.0 cognitive metadata."
+      "description": "Persistent episodic memory with v5.0 cognitive and ToneEngine v2.0 metadata."
     },
     "/cognitive_core/{coreId}": {
       "schema": "#/entities/SoulForgeState",

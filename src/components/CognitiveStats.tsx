@@ -3,9 +3,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Area, AreaChart, XAxis, YAxis } from 'recharts';
-import { Activity, Zap, Dna, HeartPulse, ShieldAlert } from 'lucide-react';
+import { Activity, Zap, Dna, HeartPulse, ShieldAlert, Waves } from 'lucide-react';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { Progress } from '@/components/ui/progress';
@@ -36,11 +34,41 @@ export const CognitiveStats: React.FC = () => {
     self_love_growth: 0.1,
   };
 
-  const lucasStability = recentMessages?.[0]?.lucas_signal?.stability || 1.0;
-  const selfLoveScore = recentMessages?.[0]?.empathy_signal?.self_love_score || 0.1;
+  const latestMsg = recentMessages?.[0];
+  const lucasStability = latestMsg?.lucas_signal?.stability || 1.0;
+  const selfLoveScore = latestMsg?.empathy_signal?.self_love_score || 0.1;
+  const intensity = latestMsg?.tone_engine_v2?.physical_intensity || 0;
+  const dominantState = latestMsg?.tone_engine_v2?.dominant_state || "Neutral";
 
   return (
     <div className="flex flex-col gap-6">
+      {/* ToneScore Engine v2.0 Panel */}
+      <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-accent/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-secondary">
+            <span className="flex items-center gap-2"><Waves className="h-4 w-4 text-accent" /> ToneScore™ v2.0</span>
+            <span className="text-[10px] font-code text-accent/60">{latestMsg?.tone_engine_v2?.action_state || "NORMAL"}</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-end">
+            <div>
+              <div className="text-[10px] uppercase font-code text-secondary/60">Dominant State</div>
+              <div className="text-lg font-headline text-accent capitalize">{dominantState}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] uppercase font-code text-secondary/60">Intensity</div>
+              <div className="text-lg font-headline text-accent">{(intensity * 100).toFixed(0)}%</div>
+            </div>
+          </div>
+          <Progress value={intensity * 100} className="h-1.5 bg-primary/20" />
+          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase">
+            <span>Fingerprint: {latestMsg?.tone_engine_v2?.cadence_fingerprint || "None"}</span>
+            <span>Carbon.Sync: Active</span>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="bg-card/50 backdrop-blur-sm border-white/5">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-secondary">
@@ -77,15 +105,12 @@ export const CognitiveStats: React.FC = () => {
           <div className="grid grid-cols-2 gap-2">
             <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
               <div className="text-[8px] uppercase font-code text-secondary/60">Anchor Weight</div>
-              <div className="text-xs font-code text-accent">{recentMessages?.[0]?.lucas_signal?.anchor_weight?.toFixed(2) || "0.00"}</div>
+              <div className="text-xs font-code text-accent">{latestMsg?.lucas_signal?.anchor_weight?.toFixed(2) || "0.00"}</div>
             </div>
             <div className="p-2 bg-primary/20 rounded border border-white/5 text-center">
               <div className="text-[8px] uppercase font-code text-secondary/60">Narrative Access</div>
               <div className="text-xs font-code text-accent">{((lucasStability * 0.6) * 100).toFixed(0)}%</div>
             </div>
-          </div>
-          <div className="text-[9px] font-code text-secondary/50 text-center uppercase tracking-widest">
-            Mode: {recentMessages?.[0]?.lucas_signal?.mode || "Healthy"}
           </div>
         </CardContent>
       </Card>
@@ -97,7 +122,7 @@ export const CognitiveStats: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <WeightIndicator label="Inward Leakage" value={recentMessages?.[0]?.empathy_signal?.inward_leakage || 0} />
+          <WeightIndicator label="Inward Leakage" value={latestMsg?.empathy_signal?.inward_leakage || 0} />
           <WeightIndicator label="Tonal Stability" value={weights.tonal_stability} />
           <div className="pt-2 flex items-center justify-between border-t border-white/5">
             <span className="text-[9px] uppercase font-code text-secondary flex items-center gap-1">
