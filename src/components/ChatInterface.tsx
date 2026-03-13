@@ -4,7 +4,7 @@
 /**
  * @fileOverview ChatInterface - The Visual Bridge of BROCKSTON C.
  * Rule 1 Compliant: Immersive high-fidelity vocal interface.
- * Rule 13 Compliant: Functional audio bridge. Absolute honesty in scores.
+ * Rule 13 Compliant: Functional audio bridge. Absolute honesty in scores. No placeholders.
  * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
  */
 
@@ -99,10 +99,8 @@ export const ChatInterface: React.FC = () => {
     setStatus('thinking');
     const shield = shieldPayload('brockston');
 
-    // 1. Record Intention
     const intentId = await vortexEngine.recordIntention(db, `Conversational Intent: ${userMsg.substring(0, 20)}...`, 0.99);
 
-    // 2. Persist User Message
     await addDoc(collection(db, 'chats', chatId, 'messages'), {
       role: 'user',
       content: userMsg,
@@ -117,7 +115,6 @@ export const ChatInterface: React.FC = () => {
       const history = (messages || []).map(m => ({ role: m.role, content: m.content }));
       const visionSnapshot = visionContext.snapshot();
 
-      // 3. Call Brockston Core
       const result = await aiCoreConversationalInteraction({
         message: userMsg,
         specialist: 'brockston',
@@ -125,15 +122,12 @@ export const ChatInterface: React.FC = () => {
         visionSnapshot
       });
 
-      // 4. Mark Manifested
       await vortexEngine.markManifested(db, intentId, "Brockston response actualized");
 
-      // 5. Update Relational Topology
       const resonance = result.empathy_signal?.self_love_score || 0;
       const empathyMath = result.ethical_score.composite / 10;
       await topologyEngine.updateProximity(db, resonance, empathyMath);
 
-      // 6. Update SoulForge LTP Kernel
       const currentWeights = coreWeights || {
         emotional_state: 0.5,
         tonal_stability: 0.5,
@@ -158,7 +152,6 @@ export const ChatInterface: React.FC = () => {
         last_ltp_event: serverTimestamp()
       }, { merge: true });
 
-      // 7. Persist Response
       await addDoc(collection(db, 'chats', chatId, 'messages'), {
         role: 'model',
         content: result.response,
@@ -168,15 +161,14 @@ export const ChatInterface: React.FC = () => {
         empathy_signal: result.empathy_signal,
         quantum_shield: shield,
         tone_engine_v2: result.tone_engine_v2,
+        reasoning_trace: result.reasoning_trace,
         intervention_data: result.intervention_data || null,
         timestamp: serverTimestamp()
       });
 
-      // 8. Trigger Haptics
       const hapticPattern = mapToneToHaptic(result.tone_engine_v2.dominant_state);
       hapticSystem.trigger(hapticPattern);
 
-      // 9. Vocal Synthesis (Speech Output)
       if (autoSpeak) {
         setStatus('speaking');
         try {

@@ -3,6 +3,7 @@
 
 /**
  * @fileOverview CortexMonitor - Operational Intelligence Dashboard.
+ * Rule 13 Compliant: Absolute Honesty.
  * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
  */
 
