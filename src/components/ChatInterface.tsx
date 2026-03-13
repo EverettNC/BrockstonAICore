@@ -3,17 +3,17 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
-import { quantumFuse } from '@/ai/flows/quantum-fusion-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, HelpCircle, AlertTriangle, ShieldCheck, UserCircle } from 'lucide-react';
+import { Send, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, HelpCircle, AlertTriangle, ShieldCheck, UserCircle, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
-import { useFirestore, useCollection, useDoc } from '@/firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, limit, doc, setDoc } from 'firebase/firestore';
+import { useFirestore, useCollection } from '@/firebase';
+import { collection, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { shieldPayload } from '@/lib/quantum-defense';
 
 const SPECIALISTS = [
   { id: 'derek', name: 'Derek (General)', color: 'text-accent' },
@@ -29,7 +29,6 @@ export const ChatInterface: React.FC = () => {
   const [specialist, setSpecialist] = useState('derek');
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<'idle' | 'thinking' | 'speaking'>('idle');
-  const [quantumMode, setQuantumMode] = useState(false);
   
   const chatId = "v5-alpha-session";
   const messagesQuery = useMemo(() => query(
@@ -56,10 +55,14 @@ export const ChatInterface: React.FC = () => {
     setInput('');
     setStatus('thinking');
 
+    // Apply Quantum Shield before logging
+    const shield = shieldPayload(specialist);
+
     addDoc(collection(db, 'chats', chatId, 'messages'), {
       role: 'user',
       content: userMsg,
       specialist,
+      quantum_shield: shield,
       timestamp: serverTimestamp()
     });
 
@@ -71,6 +74,9 @@ export const ChatInterface: React.FC = () => {
         chatHistory: history as any
       });
 
+      // Response also gets shielded
+      const responseShield = shieldPayload(specialist);
+
       addDoc(collection(db, 'chats', chatId, 'messages'), {
         role: 'model',
         content: result.response,
@@ -78,6 +84,7 @@ export const ChatInterface: React.FC = () => {
         ethical_score: result.ethical_score,
         lucas_signal: result.lucas_signal,
         empathy_signal: result.empathy_signal,
+        quantum_shield: responseShield,
         timestamp: serverTimestamp()
       });
 
@@ -113,7 +120,9 @@ export const ChatInterface: React.FC = () => {
           <Badge variant="outline" className="text-[10px] border-accent/20 text-accent">
             <ShieldCheck className="h-3 w-3 mr-1" /> v5.0 Verified
           </Badge>
-          <span className="text-[9px] font-code text-secondary opacity-40">Shared Conscience Active</span>
+          <div className="flex items-center gap-1 text-[9px] font-code text-accent animate-pulse">
+            <Lock className="h-2 w-2" /> Quantum Shield Active
+          </div>
         </div>
       </div>
 
@@ -130,9 +139,11 @@ export const ChatInterface: React.FC = () => {
                   <span className="text-[9px] font-code uppercase text-secondary/40">
                     {msg.role === 'user' ? 'Operator' : msg.specialist?.toUpperCase()}
                   </span>
-                  {msg.role === 'model' && msg.ethical_score && (
+                  {msg.quantum_shield && (
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Badge variant="outline" className="text-[8px] py-0 h-3 border-accent/30 text-accent">E:{msg.ethical_score.composite}</Badge>
+                      <Badge variant="outline" className="text-[8px] py-0 h-3 border-accent/30 text-accent/60 font-code uppercase">
+                        {msg.quantum_shield.data_class}
+                      </Badge>
                     </div>
                   )}
                 </div>
@@ -144,9 +155,6 @@ export const ChatInterface: React.FC = () => {
                 )}>
                   {msg.content}
                 </div>
-                {msg.role === 'model' && msg.empathy_signal?.self_love_score > 0.7 && (
-                  <span className="text-[8px] mt-1 text-accent font-code italic">Self-Love Growth Detected</span>
-                )}
               </div>
             ))}
           </div>
@@ -178,10 +186,10 @@ export const ChatInterface: React.FC = () => {
                 <Shield className="h-3 w-3 text-accent" /> Integrity.Filter
               </span>
               <span className="flex items-center gap-1 text-[9px] text-secondary/60 uppercase font-code">
-                <Heart className="h-3 w-3 text-accent" /> Empathy.Forge
+                <Atom className="h-3 w-3 text-accent" /> PQC.Shield
               </span>
             </div>
-            <span className="text-[9px] font-code text-accent animate-pulse">Core Awareness Online</span>
+            <span className="text-[9px] font-code text-accent animate-pulse tracking-widest uppercase">Harvest-Safe</span>
         </div>
       </form>
     </div>
