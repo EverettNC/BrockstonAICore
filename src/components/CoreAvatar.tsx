@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Sparkles, UserCheck, BrainCircuit, ShieldAlert } from 'lucide-react';
+import { Sparkles, UserCheck, BrainCircuit } from 'lucide-react';
 
 interface CoreAvatarProps {
   status: 'idle' | 'thinking' | 'speaking';

@@ -1,4 +1,3 @@
-
 "use client";
 
 /**
@@ -68,7 +67,7 @@ export const MissionManifesto: React.FC = () => {
               <RuleItem number="10" title="Leave the campsite cleaner" desc="Tighten, clarify, and fix the obvious stupid anytime you touch a file. Small repairs accumulate stability." />
               <RuleItem number="11" title="Document the why" desc="Comment decisions, not syntax. Tell future minds why this approach was chosen and what dragons lurk." />
               <RuleItem number="12" title="Security is mandatory" desc="Least privilege. No secrets in source. Assume every attack vector gets tested. Dignity and safety are non-negotiable." />
-              <RuleItem number="13" title="ABSOLUTE HONESTY" desc="Do not lie about the code. Do not invent code. Do not hallucinate files or logic. Integrity over performance. Reality over illusion." highlight />
+              <RuleItem number="13" title="ABSOLUTE HONESTY" desc="Do not lie about the code. Do not invent code. Do not hallucinate files or logic. Integrity over performance. Reality over illusion. Truth over convenience." highlight />
               <RuleItem number="14" title="Empathy in, garbage out" desc="Code shapes experience. If a pattern humiliates a human, it’s cruelty. The Christman standard is dignity. Always." />
             </div>
           </section>
