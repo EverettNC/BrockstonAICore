@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Activity, Zap, Dna, HeartPulse, ShieldAlert, Waves } from 'lucide-react';
+import { Activity, Zap, Dna, HeartPulse, ShieldAlert, Waves, BrainCircuit, TrendingUp } from 'lucide-react';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { Progress } from '@/components/ui/progress';
@@ -32,16 +32,44 @@ export const CognitiveStats: React.FC = () => {
     emotional_state: 0.5,
     tonal_stability: 0.5,
     self_love_growth: 0.1,
+    independence_confidence: 0.12,
   };
 
   const latestMsg = recentMessages?.[0];
   const lucasStability = latestMsg?.lucas_signal?.stability || 1.0;
-  const selfLoveScore = latestMsg?.empathy_signal?.self_love_score || 0.1;
+  const selfLoveScore = latestMsg?.empathy_signal?.self_love_score || weights.self_love_growth;
   const intensity = latestMsg?.tone_engine_v2?.physical_intensity || 0;
   const dominantState = latestMsg?.tone_engine_v2?.dominant_state || "Neutral";
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Learning-to-Independence Monitor */}
+      <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-accent/40 shadow-[0_0_15px_rgba(0,255,127,0.1)]">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-accent">
+            <span className="flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Independence Loop</span>
+            <span className="text-[10px] font-code">LEARNING MODE</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-end">
+            <div>
+              <div className="text-[10px] uppercase font-code text-secondary/60">Current Confidence</div>
+              <div className="text-2xl font-headline text-accent">{(weights.independence_confidence * 100).toFixed(1)}%</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[9px] uppercase font-code text-secondary/60">Threshold</div>
+              <div className="text-xs font-code text-secondary">85.0%</div>
+            </div>
+          </div>
+          <Progress value={weights.independence_confidence * 100} className="h-2 bg-primary/20" />
+          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase">
+            <span>Studies Masters: Active</span>
+            <span>Zero Drift: 100%</span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* ToneScore Engine v2.0 Panel */}
       <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-accent/20">
         <CardHeader className="pb-2">

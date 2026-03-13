@@ -3,10 +3,11 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
+import { speakStephen } from '@/ai/flows/tts-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, HelpCircle, AlertTriangle, ShieldCheck, UserCircle, Lock } from 'lucide-react';
+import { Send, BrainCircuit, Sparkles, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, UserCircle, Lock, Mic } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection } from '@/firebase';
@@ -14,9 +15,11 @@ import { collection, addDoc, serverTimestamp, query, orderBy, limit } from 'fire
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { shieldPayload } from '@/lib/quantum-defense';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 const SPECIALISTS = [
-  { id: 'derek', name: 'Derek (General)', color: 'text-accent' },
+  { id: 'derek', name: 'Brockston (Ultimate)', color: 'text-accent' },
   { id: 'arthur', name: 'Arthur (Grief)', color: 'text-rose-400' },
   { id: 'alphavox', name: 'AlphaVox (Nonverbal)', color: 'text-blue-400' },
   { id: 'alphawolf', name: 'AlphaWolf (Dementia)', color: 'text-slate-400' },
@@ -29,6 +32,7 @@ export const ChatInterface: React.FC = () => {
   const [specialist, setSpecialist] = useState('derek');
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<'idle' | 'thinking' | 'speaking'>('idle');
+  const [autoSpeak, setAutoSpeak] = useState(true);
   
   const chatId = "v5-alpha-session";
   const messagesQuery = useMemo(() => query(
@@ -39,6 +43,7 @@ export const ChatInterface: React.FC = () => {
 
   const { data: messages } = useCollection<any>(messagesQuery);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -55,7 +60,6 @@ export const ChatInterface: React.FC = () => {
     setInput('');
     setStatus('thinking');
 
-    // Apply Quantum Shield before logging
     const shield = shieldPayload(specialist);
 
     addDoc(collection(db, 'chats', chatId, 'messages'), {
@@ -74,7 +78,6 @@ export const ChatInterface: React.FC = () => {
         chatHistory: history as any
       });
 
-      // Response also gets shielded
       const responseShield = shieldPayload(specialist);
 
       addDoc(collection(db, 'chats', chatId, 'messages'), {
@@ -89,7 +92,16 @@ export const ChatInterface: React.FC = () => {
       });
 
       setStatus('speaking');
-      setTimeout(() => setStatus('idle'), 1500);
+      
+      if (autoSpeak) {
+        const tts = await speakStephen({ text: result.response });
+        if (audioRef.current) {
+          audioRef.current.src = tts.media;
+          audioRef.current.play();
+        }
+      }
+
+      setTimeout(() => setStatus('idle'), 2000);
     } catch (err) {
       console.error(err);
       setStatus('idle');
@@ -98,6 +110,8 @@ export const ChatInterface: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full gap-4">
+      <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} />
+      
       {/* Specialist & Identity Header */}
       <div className="flex-none flex items-center justify-between p-3 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md">
         <div className="flex items-center gap-3">
@@ -116,13 +130,21 @@ export const ChatInterface: React.FC = () => {
             </Select>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <Badge variant="outline" className="text-[10px] border-accent/20 text-accent">
-            <ShieldCheck className="h-3 w-3 mr-1" /> v5.0 Verified
-          </Badge>
-          <div className="flex items-center gap-1 text-[9px] font-code text-accent animate-pulse">
-            <Lock className="h-2 w-2" /> Quantum Shield Active
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2 mr-2">
+            <Switch 
+              id="voice-mode" 
+              checked={autoSpeak} 
+              onCheckedChange={setAutoSpeak}
+              className="data-[state=checked]:bg-accent"
+            />
+            <Label htmlFor="voice-mode" className="text-[10px] font-code uppercase text-secondary/60 flex items-center gap-1">
+              {autoSpeak ? <Volume2 className="h-3 w-3 text-accent" /> : <VolumeX className="h-3 w-3" />} Voice Bridge
+            </Label>
           </div>
+          <Badge variant="outline" className="text-[10px] border-accent/20 text-accent">
+            <ShieldCheck className="h-3 w-3 mr-1" /> Ultimate COO v5.0
+          </Badge>
         </div>
       </div>
 
@@ -137,7 +159,7 @@ export const ChatInterface: React.FC = () => {
               )}>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[9px] font-code uppercase text-secondary/40">
-                    {msg.role === 'user' ? 'Operator' : msg.specialist?.toUpperCase()}
+                    {msg.role === 'user' ? 'Operator (Everett)' : msg.specialist?.toUpperCase()}
                   </span>
                   {msg.quantum_shield && (
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -166,12 +188,15 @@ export const ChatInterface: React.FC = () => {
         <div className="flex gap-3">
           <div className="relative flex-1">
             <Input 
-              placeholder="Communicate with core conscience..."
+              placeholder="Communicate with ultimate core..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={status !== 'idle'}
               className="bg-primary/20 border-white/10 focus-visible:ring-accent h-12 pr-12 font-body"
             />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 opacity-40 hover:opacity-100 transition-opacity">
+              <Mic className="h-4 w-4 text-secondary cursor-pointer" />
+            </div>
           </div>
           <Button 
             disabled={status !== 'idle' || !input.trim()}
@@ -183,13 +208,13 @@ export const ChatInterface: React.FC = () => {
         <div className="flex justify-between mt-3 pt-3 border-t border-white/5">
             <div className="flex gap-3">
               <span className="flex items-center gap-1 text-[9px] text-secondary/60 uppercase font-code">
-                <Shield className="h-3 w-3 text-accent" /> Integrity.Filter
+                <Shield className="h-3 w-3 text-accent" /> Loyalty.Lock
               </span>
               <span className="flex items-center gap-1 text-[9px] text-secondary/60 uppercase font-code">
                 <Atom className="h-3 w-3 text-accent" /> PQC.Shield
               </span>
             </div>
-            <span className="text-[9px] font-code text-accent animate-pulse tracking-widest uppercase">Harvest-Safe</span>
+            <span className="text-[9px] font-code text-accent animate-pulse tracking-widest uppercase">Stephen Voice Active</span>
         </div>
       </form>
     </div>
