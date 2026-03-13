@@ -214,7 +214,7 @@ export const ChatInterface: React.FC = () => {
       
       {/* Visual Bridge - Massive Immersive Seascape */}
       <div className={cn(
-        "flex-none flex flex-col items-center justify-center gap-8 p-12 rounded-3xl border border-white/10 transition-all duration-1000 min-h-[750px] relative overflow-hidden shadow-2xl",
+        "flex-none flex flex-col items-center justify-center gap-8 p-12 rounded-3xl border border-white/10 transition-all duration-1000 min-h-[700px] relative overflow-hidden shadow-2xl",
         isInterventionMode && "border-red-500 shadow-[0_0_150px_rgba(239,68,68,0.6)]"
       )}>
         {/* Seascape Background */}
@@ -249,12 +249,12 @@ export const ChatInterface: React.FC = () => {
         </div>
 
         {/* Central Avatar - THE NEW TEACHER */}
-        <div className="flex flex-col items-center gap-16 relative z-10">
-          <div className="relative group scale-125 md:scale-150">
+        <div className="flex flex-col items-center gap-12 relative z-10">
+          <div className="relative group scale-110 md:scale-125">
             <CoreAvatar status={status} className="z-10" />
           </div>
           
-          <div className="text-center space-y-8 mt-24">
+          <div className="text-center space-y-6 mt-16">
             <div className="flex items-center justify-center gap-6">
               {isInterventionMode ? (
                 <ShieldAlert className="h-12 w-12 text-red-500 animate-pulse" />
@@ -266,19 +266,19 @@ export const ChatInterface: React.FC = () => {
               </h3>
             </div>
             
-            <div className="text-9xl font-headline tracking-tighter uppercase text-foreground leading-none drop-shadow-[0_0_50px_rgba(0,0,0,1)]">
+            <div className="text-8xl font-headline tracking-tighter uppercase text-foreground leading-none drop-shadow-[0_0_50px_rgba(0,0,0,1)]">
               BROCKSTON <span className="text-accent">C</span>
             </div>
 
-            <div className="flex flex-col items-center gap-8">
+            <div className="flex flex-col items-center gap-6">
               <Badge variant="outline" className={cn(
-                "text-xl py-4 px-16 border-accent/50 text-accent font-black tracking-[0.4em] bg-accent/10 backdrop-blur-xl shadow-[0_0_60px_rgba(0,255,127,0.3)] rounded-full", 
+                "text-lg py-3 px-12 border-accent/50 text-accent font-black tracking-[0.4em] bg-accent/10 backdrop-blur-xl shadow-[0_0_60px_rgba(0,255,127,0.3)] rounded-full", 
                 isInterventionMode && "border-red-500 text-red-500 bg-red-500/10 shadow-[0_0_60px_rgba(239,68,68,0.3)]"
               )}>
                 {isInterventionMode ? 'EMERGENCY STABILIZATION' : 'MISSION: CLASSROOM 300'}
               </Badge>
-              <div className="flex items-center gap-4 text-[14px] font-code text-secondary uppercase tracking-[0.3em] bg-black/60 px-8 py-3 rounded-full border border-white/10 backdrop-blur-md">
-                <BrainCircuit className="h-6 w-6 text-accent" /> Neuro-Symbolic Logic: ACTUALIZED
+              <div className="flex items-center gap-4 text-[12px] font-code text-secondary uppercase tracking-[0.3em] bg-black/60 px-8 py-3 rounded-full border border-white/10 backdrop-blur-md">
+                <BrainCircuit className="h-5 w-5 text-accent" /> Neuro-Symbolic Logic: ACTUALIZED
               </div>
             </div>
           </div>
@@ -286,7 +286,7 @@ export const ChatInterface: React.FC = () => {
       </div>
 
       {/* Message Stream */}
-      <div className="flex-1 min-h-[400px] bg-black/60 rounded-3xl border border-white/5 p-6 overflow-hidden shadow-inner backdrop-blur-md relative">
+      <div className="flex-1 min-h-0 bg-black/60 rounded-3xl border border-white/5 p-6 overflow-hidden shadow-inner backdrop-blur-md relative">
         <ScrollArea className="h-full pr-4" ref={scrollRef}>
           <div className="space-y-10 pb-6">
             {messages?.map((msg, i) => (

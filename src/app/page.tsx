@@ -21,6 +21,7 @@ import { OpenSmell } from '@/components/OpenSmell';
 import { CodeLab } from '@/components/CodeLab';
 import { EvolutionLab } from '@/components/EvolutionLab';
 import { SpamUp } from '@/components/SpamUp';
+import { MissionManifesto } from '@/components/MissionManifesto';
 import { 
   Terminal, 
   Cpu, 
@@ -46,7 +47,8 @@ import {
   CodeXml,
   Dna,
   User,
-  Gauge
+  Gauge,
+  FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -60,7 +62,7 @@ export default function Home(props: PageProps) {
   const _params = use(props.params);
   const _searchParams = use(props.searchParams);
 
-  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab' | 'evolution' | 'speed'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab' | 'evolution' | 'speed' | 'manifesto'>('terminal');
 
   return (
     <div className="h-screen w-screen bg-background text-foreground flex overflow-hidden">
@@ -76,6 +78,12 @@ export default function Home(props: PageProps) {
             active={activeTab === 'terminal'} 
             onClick={() => setActiveTab('terminal')} 
             label="Terminal"
+          />
+          <NavIcon 
+            icon={FileText} 
+            active={activeTab === 'manifesto'} 
+            onClick={() => setActiveTab('manifesto')} 
+            label="Manifesto"
           />
           <NavIcon 
             icon={Gauge} 
@@ -227,21 +235,23 @@ export default function Home(props: PageProps) {
               <CodeLab />
             ) : activeTab === 'evolution' ? (
               <EvolutionLab />
+            ) : activeTab === 'manifesto' ? (
+              <MissionManifesto />
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-full">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-full">
                 {/* Chat/Avatar - Main Panel */}
-                <section className="lg:col-span-8 flex flex-col min-h-[800px]">
+                <section className="lg:col-span-8 flex flex-col h-full">
                   <ChatInterface />
                 </section>
 
                 {/* Right Monitoring Panel */}
-                <aside className="lg:col-span-4 flex flex-col gap-6">
+                <aside className="lg:col-span-4 flex flex-col gap-6 overflow-y-auto pr-2 system-log h-full">
                   <CognitiveStats />
                   <HapticPanel />
                   <SecurityPanel />
                   
                   {/* Mission Statement */}
-                  <div className="p-4 bg-accent/5 rounded-xl border border-accent/20 backdrop-blur-md relative overflow-hidden group">
+                  <div className="p-4 bg-accent/5 rounded-xl border border-accent/20 backdrop-blur-md relative overflow-hidden group mb-12">
                       <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
                         <Infinity className="h-24 w-24 text-accent" />
                       </div>
