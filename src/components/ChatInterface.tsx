@@ -13,7 +13,7 @@ import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Volume2, VolumeX, ShieldCheck, Zap, BrainCircuit, Mic, MicOff, GraduationCap, Sparkles, UserCheck, Lock, ShieldAlert } from 'lucide-react';
+import { Send, Loader2, Volume2, VolumeX, ShieldCheck, Zap, BrainCircuit, Mic, MicOff, GraduationCap, Sparkles, UserCheck, Lock, ShieldAlert, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
@@ -303,6 +303,11 @@ export const ChatInterface: React.FC = () => {
                   <span className={cn("text-[10px] font-code uppercase text-secondary/60 tracking-[0.2em] font-bold")}>
                     {msg.role === 'user' ? 'LEAD ARCHITECT' : 'BROCKSTON (NEW TEACHER)'}
                   </span>
+                  {msg.role === 'model' && msg.ethical_score && (
+                    <Badge variant="outline" className="text-[9px] h-5 border-accent/30 text-accent/80 bg-accent/5 px-2 rounded-full uppercase flex items-center gap-1">
+                      <Scale className="h-2.5 w-2.5" /> Integrity: {msg.ethical_score.composite.toFixed(1)}
+                    </Badge>
+                  )}
                   {msg.vortex_data && (
                     <Badge variant="ghost" className="text-[9px] h-5 text-accent/80 animate-pulse border border-accent/30 px-3 bg-accent/5 rounded-full uppercase">VORTEX: SYNCED</Badge>
                   )}
