@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -11,7 +12,9 @@ import { CortexMonitor } from '@/components/CortexMonitor';
 import { LearningCenter } from '@/components/LearningCenter';
 import { CipherLab } from '@/components/CipherLab';
 import { HapticPanel } from '@/components/HapticPanel';
-import { Button } from '@/components/ui/button';
+import { AlphaVoxMoments } from '@/components/AlphaVoxMoments';
+import { TemporalDecoder } from '@/components/TemporalDecoder';
+import { KernelLab } from '@/components/KernelLab';
 import { 
   Terminal, 
   Cpu, 
@@ -26,12 +29,15 @@ import {
   ShieldAlert,
   Radio,
   Infinity,
-  Lock
+  Lock,
+  ScrollText,
+  SearchCode,
+  Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel'>('terminal');
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 flex overflow-hidden">
@@ -41,7 +47,7 @@ export default function Home() {
           <Cpu className="text-accent-foreground h-6 w-6 group-hover:scale-110 transition-transform" />
         </div>
         
-        <nav className="flex flex-col gap-8 flex-1">
+        <nav className="flex flex-col gap-6 flex-1">
           <NavIcon 
             icon={Terminal} 
             active={activeTab === 'terminal'} 
@@ -50,9 +56,21 @@ export default function Home() {
           />
           <NavIcon 
             icon={Heart} 
-            active={activeTab === 'pulse'} 
-            onClick={() => setActiveTab('pulse')} 
-            label="Pulse"
+            active={activeTab === 'resonance'} 
+            onClick={() => setActiveTab('resonance')} 
+            label="Resonance"
+          />
+          <NavIcon 
+            icon={SearchCode} 
+            active={activeTab === 'forensics'} 
+            onClick={() => setActiveTab('forensics')} 
+            label="Forensics"
+          />
+          <NavIcon 
+            icon={Zap} 
+            active={activeTab === 'kernel'} 
+            onClick={() => setActiveTab('kernel')} 
+            label="Kernel"
           />
           <NavIcon 
             icon={Eye} 
@@ -107,6 +125,9 @@ export default function Home() {
                 activeTab === 'cortex' ? 'Reasoning Core Active' :
                 activeTab === 'learning' ? 'Autonomous Learning Mode' :
                 activeTab === 'cipher' ? 'Cryptographic Tiers Online' :
+                activeTab === 'resonance' ? 'Resonance Module Active' :
+                activeTab === 'forensics' ? 'Forensic Recovery Active' :
+                activeTab === 'kernel' ? 'Symbolic Lab Active' :
                 'Neural Link Active'
               }
             </p>
@@ -138,6 +159,12 @@ export default function Home() {
             <LearningCenter />
           ) : activeTab === 'cipher' ? (
             <CipherLab />
+          ) : activeTab === 'resonance' ? (
+            <AlphaVoxMoments />
+          ) : activeTab === 'forensics' ? (
+            <TemporalDecoder />
+          ) : activeTab === 'kernel' ? (
+            <KernelLab />
           ) : (
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
               {/* Chat/Avatar - Main Panel */}
