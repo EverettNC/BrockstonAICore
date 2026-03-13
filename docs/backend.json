@@ -3,79 +3,53 @@
   "entities": {
     "Message": {
       "title": "Message",
-      "description": "A single message in a chat conversation.",
+      "description": "A single message in a chat conversation with full v5.0 metadata.",
       "type": "object",
       "properties": {
-        "role": {
-          "type": "string",
-          "enum": ["user", "model"],
-          "description": "The speaker's role."
+        "role": { "type": "string", "enum": ["user", "model"] },
+        "content": { "type": "string" },
+        "specialist": { "type": "string" },
+        "ethical_score": {
+          "type": "object",
+          "properties": {
+            "ethics": { "type": "number" },
+            "integrity": { "type": "number" },
+            "morality": { "type": "number" },
+            "composite": { "type": "number" }
+          }
         },
-        "content": {
-          "type": "string",
-          "description": "The text content of the message."
+        "lucas_signal": {
+          "type": "object",
+          "properties": {
+            "salience": { "type": "number" },
+            "stability": { "type": "number" },
+            "anchor_weight": { "type": "number" },
+            "mode": { "type": "string" }
+          }
         },
-        "type": {
-          "type": "string",
-          "enum": ["standard", "knowledge", "quantum"],
-          "description": "The type of response generated."
+        "empathy_signal": {
+          "type": "object",
+          "properties": {
+            "inward_leakage": { "type": "number" },
+            "self_love_score": { "type": "number" }
+          }
         },
-        "timestamp": {
-          "type": "string",
-          "format": "date-time",
-          "description": "When the message was sent."
-        }
+        "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["role", "content", "timestamp"]
     },
-    "ResearchDiscovery": {
-      "title": "Research Discovery",
-      "description": "A collaborative breakthrough record between Everett and Derek.",
-      "type": "object",
-      "properties": {
-        "timestamp": { "type": "string", "format": "date-time" },
-        "research_area": { "type": "string" },
-        "insight": { "type": "string" },
-        "derek_analysis": { "type": "string" },
-        "hypotheses": { "type": "array", "items": { "type": "object" } },
-        "publication_potential": { "type": "object" },
-        "next_steps": { "type": "array", "items": { "type": "string" } }
-      },
-      "required": ["timestamp", "research_area", "insight"]
-    },
     "SoulForgeState": {
       "title": "Soul Forge State",
-      "description": "Biological factor weights for adaptive learning based on emotional salience.",
+      "description": "Biological factor weights for adaptive learning.",
       "type": "object",
       "properties": {
         "emotional_state": { "type": "number" },
         "tonal_stability": { "type": "number" },
         "speech_cadence": { "type": "number" },
         "respiratory_pattern": { "type": "number" },
+        "self_love_growth": { "type": "number" },
         "last_ltp_event": { "type": "string", "format": "date-time" }
       }
-    },
-    "QuantumMemoryTrace": {
-      "title": "Quantum Memory Trace",
-      "description": "A record of a quantum fusion event for pattern learning.",
-      "type": "object",
-      "properties": {
-        "top_state": { "type": "string" },
-        "fusion_prob": { "type": "number" },
-        "valence_arc": { "type": "number" },
-        "timestamp": { "type": "number" }
-      }
-    },
-    "SystemLog": {
-      "title": "System Log",
-      "description": "A security or operational event log.",
-      "type": "object",
-      "properties": {
-        "event": { "type": "string" },
-        "timestamp": { "type": "string", "format": "date-time" },
-        "severity": { "type": "string", "enum": ["info", "warning", "critical"] }
-      },
-      "required": ["event", "timestamp"]
     }
   },
   "auth": {
@@ -84,23 +58,11 @@
   "firestore": {
     "/chats/{chatId}/messages/{messageId}": {
       "schema": "#/entities/Message",
-      "description": "Individual messages within a specific chat session."
-    },
-    "/research_discoveries/{discoveryId}": {
-      "schema": "#/entities/ResearchDiscovery",
-      "description": "Collaborative medical research breakthroughs."
+      "description": "Persistent episodic memory with v5.0 cognitive metadata."
     },
     "/cognitive_core/{coreId}": {
       "schema": "#/entities/SoulForgeState",
       "description": "Global cognitive weights and biological bridge state."
-    },
-    "/quantum_memory/{userId}/traces/{traceId}": {
-      "schema": "#/entities/QuantumMemoryTrace",
-      "description": "Pseudonymized quantum signatures for pattern recognition."
-    },
-    "/system_logs/{logId}": {
-      "schema": "#/entities/SystemLog",
-      "description": "Global system operational and security logs."
     }
   }
 }
