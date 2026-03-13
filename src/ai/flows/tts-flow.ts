@@ -2,7 +2,7 @@
 /**
  * @fileOverview Brockston Quantum-Aware TTS (Stephen Voice & Family).
  * Implements prosody control influenced by regional accents and personality characteristics.
- * Ported from Advanced TTS Service (gTTS TLD logic) by Everett N. Christman.
+ * Integrated with ElevenLabs for Brockston's specific identity.
  * 
  * © 2025 The Christman AI Project. All rights reserved.
  */
@@ -28,10 +28,17 @@ interface VoiceProfile {
   accent: string;
   speedFactor: number;
   pitch: string;
+  elevenLabsId?: string;
 }
 
 const FAMILY_VOICE_PROFILES: Record<string, VoiceProfile> = {
-  brockston: { voiceName: 'Algenib', accent: 'US', speedFactor: 0.95, pitch: 'steady' },
+  brockston: { 
+    voiceName: 'Algenib', 
+    accent: 'US', 
+    speedFactor: 0.95, 
+    pitch: 'steady',
+    elevenLabsId: 'KIrq93B44zgEu6RzGY3m' 
+  },
   derek: { voiceName: 'Algenib', accent: 'US', speedFactor: 1.0, pitch: 'authoritative' },
   arthur: { voiceName: 'Algenib', accent: 'UK', speedFactor: 0.9, pitch: 'warm' },
   alphavox: { voiceName: 'Algenib', accent: 'Irish', speedFactor: 0.85, pitch: 'expressive' },
@@ -61,11 +68,41 @@ const ttsFlow = ai.defineFlow(
     const { text, specialist, fusion_prob, valence } = input;
     const profile = FAMILY_VOICE_PROFILES[specialist.toLowerCase()] || FAMILY_VOICE_PROFILES.brockston;
     
-    // Advanced Prosody Logic (Ported from gTTS speed logic)
+    // 1. Try ElevenLabs Primary Bridge if available for Brockston
+    if (profile.elevenLabsId && process.env.ELEVENLABS_API_KEY) {
+      try {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${profile.elevenLabsId}`, {
+          method: 'POST',
+          headers: {
+            'xi-api-key': process.env.ELEVENLABS_API_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: text,
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+            }
+          }),
+        });
+
+        if (response.ok) {
+          const arrayBuffer = await response.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          return {
+            media: `data:audio/mpeg;base64,${buffer.toString('base64')}`,
+          };
+        }
+        console.warn('ElevenLabs API returned an error, falling back to Gemini TTS.');
+      } catch (e) {
+        console.error('ElevenLabs Bridge failed:', e);
+      }
+    }
+
+    // 2. Fallback to Gemini High-Fidelity Bridge
     const rate = profile.speedFactor < 0.92 || fusion_prob < 0.6 ? "slow" : "medium";
     const pitch = valence > 0.7 ? "happy" : valence < 0.3 ? "serious" : profile.pitch;
-    
-    // Dynamic Accent Descriptor (Simulating TLDs)
     const accentNote = `Speak with a ${profile.accent} accent.`;
 
     const { media } = await ai.generate({
