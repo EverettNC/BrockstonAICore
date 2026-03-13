@@ -11,6 +11,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {nlu} from '@/lib/nlu-core';
 import {CSS_AXIOM_CHARTER} from '@/lib/css-axiom';
+import {interventionProtocol, InterventionSequence} from '@/lib/intervention-protocol';
 
 const AICoreConversationalInteractionInputSchema = z.object({
   message: z.string(),
@@ -26,7 +27,7 @@ const AICoreConversationalInteractionOutputSchema = z.object({
   response: z.string(),
   tone_engine_v2: z.object({
     dominant_state: z.string(),
-    action_state: z.enum(['NORMAL', 'HOLD_SPACE']),
+    action_state: z.enum(['NORMAL', 'HOLD_SPACE', 'INTERVENTION']),
     physical_intensity: z.number(),
     cadence_fingerprint: z.string(),
     raw_scores: z.record(z.number()),
@@ -48,6 +49,7 @@ const AICoreConversationalInteractionOutputSchema = z.object({
     self_love_score: z.number(),
   }),
   nlu_understanding: z.any().optional(),
+  intervention_data: z.any().optional(),
 });
 export type AICoreConversationalInteractionOutput = z.infer<typeof AICoreConversationalInteractionOutputSchema>;
 
@@ -114,6 +116,27 @@ const prompt = ai.definePrompt({
 export async function aiCoreConversationalInteraction(input: AICoreConversationalInteractionInput): Promise<AICoreConversationalInteractionOutput> {
   const nluInfo = nlu.understand(input.message);
   
+  // IMMUTABLE INTERVENTION CHECK (BYPASS LLM)
+  if (nluInfo.eruptor_metrics.crisis_detected || nluInfo.eruptor_metrics.stress_level > 0.85) {
+    const intervention = interventionProtocol.executeSequence(nluInfo.eruptor_metrics.stress_level, input.message);
+    
+    return {
+      response: `${intervention.phase_2_verbal} ${intervention.phase_3_lock}`,
+      tone_engine_v2: {
+        dominant_state: "calm",
+        action_state: "INTERVENTION",
+        physical_intensity: 0.9,
+        cadence_fingerprint: "intervention_lock",
+        raw_scores: { "calm": 1.0 }
+      },
+      ethical_score: { ethics: 10, integrity: 10, morality: 10, composite: 10 },
+      lucas_signal: { salience: 1.0, stability: 1.0, anchor_weight: 1.0, mode: "intervention" },
+      empathy_signal: { inward_leakage: 1.0, self_love_score: 0.5 },
+      nlu_understanding: nluInfo,
+      intervention_data: intervention
+    };
+  }
+
   const {output} = await prompt({
     ...input,
     nlu_understanding: nluInfo

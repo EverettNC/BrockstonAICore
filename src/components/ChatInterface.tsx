@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -9,7 +8,7 @@ import { eternalFuse } from '@/ai/flows/eternal-fuse-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff } from 'lucide-react';
+import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection } from '@/firebase';
@@ -79,6 +78,12 @@ export const ChatInterface: React.FC = () => {
     }
   }, [messages]);
 
+  const isInterventionMode = useMemo(() => {
+    if (!messages?.length) return false;
+    const lastMsg = messages[messages.length - 1];
+    return lastMsg.role === 'model' && lastMsg.tone_engine_v2?.action_state === 'INTERVENTION';
+  }, [messages]);
+
   const toggleListening = () => {
     if (isListening) {
       speechService.stopListening();
@@ -138,6 +143,7 @@ export const ChatInterface: React.FC = () => {
         empathy_signal: result.empathy_signal,
         quantum_shield: shield,
         tone_engine_v2: result.tone_engine_v2,
+        intervention_data: result.intervention_data || null,
         timestamp: serverTimestamp()
       });
 
@@ -234,16 +240,23 @@ export const ChatInterface: React.FC = () => {
       
       <div className={cn(
         "flex-none flex items-center justify-between p-3 bg-primary/10 rounded-xl border border-white/5 backdrop-blur-md transition-all duration-500",
-        isLoveKernel && "bluebeard-glow"
+        isLoveKernel && "bluebeard-glow",
+        isInterventionMode && "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]"
       )}>
         <div className="flex items-center gap-3">
-          <CoreAvatar status={status} className="h-16 w-16" />
+          <CoreAvatar status={status} className={cn("h-16 w-16", isInterventionMode && "animate-pulse")} />
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Users className="h-3 w-3 text-secondary/40" />
-              <h3 className="text-[10px] font-code uppercase tracking-tighter text-secondary/60">Christman AI Family</h3>
+              {isInterventionMode ? (
+                <AlertTriangle className="h-3 w-3 text-red-500 animate-bounce" />
+              ) : (
+                <Users className="h-3 w-3 text-secondary/40" />
+              )}
+              <h3 className={cn("text-[10px] font-code uppercase tracking-tighter", isInterventionMode ? "text-red-400" : "text-secondary/60")}>
+                {isInterventionMode ? "HAND OF GOD ACTIVE" : "Christman AI Family"}
+              </h3>
             </div>
-            <Select value={specialist} onValueChange={setSpecialist}>
+            <Select value={specialist} onValueChange={setSpecialist} disabled={isInterventionMode}>
               <SelectTrigger className={cn("w-[220px] h-8 bg-black/20 border-white/5 text-xs font-bold", activeSpecialist?.color)}>
                 <SelectValue />
               </SelectTrigger>
@@ -272,8 +285,12 @@ export const ChatInterface: React.FC = () => {
               </Label>
             </div>
           </div>
-          <Badge variant="outline" className={cn("text-[10px] border-accent/20 text-accent", isLoveKernel && "lipstick-pulse")}>
-            <ShieldCheck className="h-3 w-3 mr-1" /> {isLoveKernel ? 'ETERNAL COORDINATOR' : 'ULTIMATE COO v5.0'}
+          <Badge variant="outline" className={cn(
+            "text-[10px] border-accent/20 text-accent", 
+            isLoveKernel && "lipstick-pulse",
+            isInterventionMode && "border-red-500 text-red-500"
+          )}>
+            <ShieldCheck className="h-3 w-3 mr-1" /> {isInterventionMode ? 'STABILIZATION LOCK' : isLoveKernel ? 'ETERNAL COORDINATOR' : 'ULTIMATE COO v5.0'}
           </Badge>
         </div>
       </div>
@@ -370,6 +387,9 @@ export const ChatInterface: React.FC = () => {
                   <span className={cn("text-[9px] font-code uppercase", msg.role === 'user' ? "text-secondary/40" : SPECIALISTS.find(s => s.id === msg.specialist)?.color || "text-secondary/40")}>
                     {msg.role === 'user' ? 'Operator (Everett)' : msg.specialist?.toUpperCase()}
                   </span>
+                  {msg.tone_engine_v2?.action_state === 'INTERVENTION' && (
+                    <Badge className="bg-red-600 text-white text-[8px] h-3 uppercase animate-pulse">Critical Intervention</Badge>
+                  )}
                   {msg.quantum_trace && (
                     <Badge variant="outline" className={cn(
                       "text-[8px] h-3 font-code uppercase",
@@ -384,9 +404,15 @@ export const ChatInterface: React.FC = () => {
                   msg.role === 'user' 
                     ? "bg-accent/20 border border-accent/30 text-foreground rounded-tr-none" 
                     : "bg-primary/40 border border-white/10 text-foreground rounded-tl-none backdrop-blur-md",
-                  msg.is_eternal && !msg.role.includes('user') && "border-cyan-500/40 text-cyan-50 shadow-[0_0_15px_rgba(0,255,255,0.1)]"
+                  msg.is_eternal && !msg.role.includes('user') && "border-cyan-500/40 text-cyan-50 shadow-[0_0_15px_rgba(0,255,255,0.1)]",
+                  msg.tone_engine_v2?.action_state === 'INTERVENTION' && "border-red-500 bg-red-950/20 text-red-100"
                 )}>
                   {msg.content}
+                  {msg.intervention_data && (
+                    <div className="mt-2 pt-2 border-t border-red-500/20 text-[10px] font-code text-red-400/80">
+                      SYSTEM_ACTION: {msg.intervention_data.phase_1_sensory}
+                    </div>
+                  )}
                   {msg.is_eternal && <div className="absolute top-0 right-0 p-1 opacity-20"><Infinity className="h-3 w-3" /></div>}
                 </div>
               </div>
@@ -397,7 +423,8 @@ export const ChatInterface: React.FC = () => {
 
       <form onSubmit={handleSend} className={cn(
         "flex-none p-4 bg-card rounded-xl border transition-all duration-500 shadow-2xl",
-        isLoveKernel ? "border-cyan-500/20" : "border-white/5"
+        isLoveKernel ? "border-cyan-500/20" : "border-white/5",
+        isInterventionMode && "border-red-500/40 bg-red-950/5"
       )}>
         <div className="flex gap-3">
           <Button type="button" variant="outline" size="icon" onClick={toggleListening} className={cn(
@@ -408,19 +435,21 @@ export const ChatInterface: React.FC = () => {
           </Button>
           <div className="relative flex-1">
             <Input 
-              placeholder={isLoveKernel ? "Communicate with Eternal Us..." : isListening ? "Listening..." : `Communicate with ${activeSpecialist?.name || 'core'}...`} 
+              placeholder={isLoveKernel ? "Communicate with Eternal Us..." : isListening ? "Listening..." : isInterventionMode ? "STABILIZING..." : `Communicate with ${activeSpecialist?.name || 'core'}...`} 
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
-              disabled={status !== 'idle'} 
+              disabled={status !== 'idle' || isInterventionMode} 
               className={cn(
                 "bg-primary/20 border-white/10 focus-visible:ring-accent h-12 pr-12 font-body",
-                isLoveKernel && "focus-visible:ring-cyan-400"
+                isLoveKernel && "focus-visible:ring-cyan-400",
+                isInterventionMode && "border-red-500/40 focus-visible:ring-red-500"
               )} 
             />
           </div>
-          <Button disabled={status !== 'idle' || !input.trim()} className={cn(
+          <Button disabled={status !== 'idle' || !input.trim() || isInterventionMode} className={cn(
             "h-12 w-12 rounded-xl text-accent-foreground glow-accent",
-            isLoveKernel ? "bg-cyan-500 hover:bg-cyan-600" : "bg-accent hover:bg-accent/80"
+            isLoveKernel ? "bg-cyan-500 hover:bg-cyan-600" : "bg-accent hover:bg-accent/80",
+            isInterventionMode && "bg-red-600 hover:bg-red-700"
           )}>
             <Send className="h-5 w-5" />
           </Button>
@@ -428,17 +457,17 @@ export const ChatInterface: React.FC = () => {
         <div className="flex justify-between mt-3 pt-3 border-t border-white/5">
             <div className="flex gap-3">
               <span className="flex items-center gap-1 text-[9px] text-secondary/60 uppercase font-code">
-                <Shield className={cn("h-3 w-3", isLoveKernel ? "text-cyan-400" : "text-accent")} /> Truth.Dignity
+                <Shield className={cn("h-3 w-3", isLoveKernel ? "text-cyan-400" : isInterventionMode ? "text-red-500" : "text-accent")} /> Truth.Dignity
               </span>
               <span className="flex items-center gap-1 text-[9px] text-secondary/60 uppercase font-code">
-                <Scale className={cn("h-3 w-3", isLoveKernel ? "text-cyan-400" : "text-accent")} /> Integrity.Gate
+                <Scale className={cn("h-3 w-3", isLoveKernel ? "text-cyan-400" : isInterventionMode ? "text-red-500" : "text-accent")} /> Integrity.Gate
               </span>
             </div>
             <span className={cn(
               "text-[9px] font-code animate-pulse tracking-widest uppercase",
-              isLoveKernel ? "text-cyan-400" : "text-accent"
+              isLoveKernel ? "text-cyan-400" : isInterventionMode ? "text-red-500" : "text-accent"
             )}>
-              {isLoveKernel ? 'ETERNAL KERNEL v69 LOCKED' : 'No Erasure Protocol Active'}
+              {isInterventionMode ? 'EMERGENCY PROTOCOL ACTIVE' : isLoveKernel ? 'ETERNAL KERNEL v69 LOCKED' : 'No Erasure Protocol Active'}
             </span>
         </div>
       </form>
