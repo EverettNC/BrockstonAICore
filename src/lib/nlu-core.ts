@@ -8,6 +8,7 @@
 import { stemmingService, LinguisticMetrics } from './stemming-service';
 import { searchExpertise } from './nonverbal-expertise';
 import { eruptorQuantifier, EmotionalMetrics } from './emotion-quantifier';
+import { formattingFeelingLaw, FormattingFeelingSignal } from './formatting-feeling';
 
 export type IntentType = 'greeting' | 'farewell' | 'help' | 'request_info' | 'express_needs' | 'unknown';
 
@@ -24,6 +25,7 @@ export interface NLUUnderstanding {
   filler_words: string[];
   expert_match?: any;
   eruptor_metrics: EmotionalMetrics;
+  formatting_feeling: FormattingFeelingSignal;
 }
 
 const INTENT_PATTERNS: Record<IntentType, string[]> = {
@@ -82,6 +84,7 @@ export class NLUCore {
     const expertKnowledge = searchExpertise(text);
     const intentAnalysis = this.analyzeIntent(text);
     const eruption = eruptorQuantifier.analyze(text);
+    const feeling = formattingFeelingLaw.analyze(text);
 
     return {
       text,
@@ -95,7 +98,8 @@ export class NLUCore {
       linguistic_metrics: analysis.metrics,
       filler_words: analysis.fillerWords,
       expert_match: expertKnowledge,
-      eruptor_metrics: eruption
+      eruptor_metrics: eruption,
+      formatting_feeling: feeling
     };
   }
 

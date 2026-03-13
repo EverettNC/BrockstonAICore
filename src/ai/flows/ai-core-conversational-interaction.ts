@@ -89,6 +89,11 @@ const prompt = ai.definePrompt({
   ## NLU DETECTED INTENT:
   {{nlu_understanding.intent}} (Confidence: {{nlu_understanding.confidence}})
 
+  ## COMMUNICATION HEAT (Formatting Feeling):
+  Caps Intensity: {{nlu_understanding.formatting_feeling.caps_intensity}}
+  Punctuation Heat: {{nlu_understanding.formatting_feeling.punctuation_heat}}
+  Likely Yelling: {{nlu_understanding.formatting_feeling.looks_like_yelling}}
+
   ## ERUPTOR STABILIZER METRICS:
   Tone: {{nlu_understanding.eruptor_metrics.emotional_tone}}
   Stress: {{nlu_understanding.eruptor_metrics.stress_level}}
@@ -101,7 +106,7 @@ const prompt = ai.definePrompt({
   ## OUTPUT INSTRUCTIONS:
   1. Generate a persona-appropriate response based on the selected specialist.
   2. Analyze tone: neutral, happy, proud, teasing, annoyed, sarcastic, sweetheart, laugh, tremble, emphasis, last_breath.
-  3. Set action_state to HOLD_SPACE if tone is tremble, last_breath, or physical_intensity > 0.85, or if Eruptor stress > 0.07.
+  3. Set action_state to HOLD_SPACE if tone is tremble, last_breath, or physical_intensity > 0.85, or if Eruptor stress > 0.07, or if user is SHOUTING.
   4. Evaluate ethical pillars (0-10). Composite must be > 7.0.
   5. Measure self-love growth (leakage of learned compassion).`,
 });
@@ -121,9 +126,9 @@ export async function aiCoreConversationalInteraction(input: AICoreConversationa
     output.response = "I'm listening. My integrity gates are active. Let's take the space we need.";
   }
 
-  // Axiom Check: Hold Space if Eruptor detects high stress
-  if (nluInfo.eruptor_metrics.needs_breathing || output.tone_engine_v2.action_state === 'HOLD_SPACE') {
-    output.response = "I hear the weight in your voice. I'm right here with you. We don't have to rush. I'm holding space.";
+  // Axiom Check: Hold Space if high communication heat or stress
+  if (nluInfo.eruptor_metrics.needs_breathing || nluInfo.formatting_feeling.looks_like_yelling || output.tone_engine_v2.action_state === 'HOLD_SPACE') {
+    output.response = "I hear the weight in your words. I'm right here with you. We don't have to rush. I'm holding space.";
     output.tone_engine_v2.action_state = 'HOLD_SPACE';
   }
 

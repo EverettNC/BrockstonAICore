@@ -4,7 +4,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BrainCircuit, ShieldAlert, BookOpen, Activity, Languages, Zap } from 'lucide-react';
+import { BrainCircuit, ShieldAlert, BookOpen, Activity, Languages, Zap, Volume2, Thermometer } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -33,6 +33,7 @@ export const CortexMonitor: React.FC = () => {
 
   const lastMessage = messages?.[0];
   const linguisticMetrics = lastMessage?.nlu_understanding?.linguistic_metrics;
+  const formattingFeeling = lastMessage?.nlu_understanding?.formatting_feeling;
 
   useEffect(() => {
     if (behaviorHistory && behaviorHistory.length > 0) {
@@ -93,21 +94,32 @@ export const CortexMonitor: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-primary/5 border-white/5 border-blue-500/10">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-[10px] text-accent font-code mb-2">
-                <ShieldAlert className="h-3 w-3" /> Linguistic Profile
-              </div>
-              <div className="space-y-3">
-                <MeshMetric label="Stem Reduction" value={linguisticMetrics?.stemReductionRatio || 0} color="bg-blue-400" />
-                <MeshMetric label="Lexical Diversity" value={linguisticMetrics?.typeTokenRatio || 0} color="bg-emerald-400" />
-                <div className="pt-2">
-                   <div className="text-[8px] uppercase font-code text-secondary/40 mb-1">Filler Word Impact</div>
-                   <div className="text-[10px] font-bold text-secondary">
-                     {(linguisticMetrics?.fillerWordRatio * 100 || 0).toFixed(1)}% Frequency
-                   </div>
+          {/* NEW: Formatting Feeling (Visual Volume) */}
+          <Card className="bg-card/50 border-white/5 border-orange-500/20 shadow-xl">
+            <CardHeader className="pb-3 border-b border-white/5">
+              <CardTitle className="text-xs uppercase tracking-widest text-orange-400 flex items-center justify-between">
+                <span className="flex items-center gap-2"><Volume2 className="h-3 w-3" /> Communication Heat</span>
+                {formattingFeeling?.looks_like_yelling && <Badge className="bg-red-600 text-[8px] animate-pulse">SHOUTING DETECTED</Badge>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-[9px] uppercase font-code">
+                  <span className="text-secondary/60">Caps Intensity</span>
+                  <span className="text-orange-400">{(formattingFeeling?.caps_intensity * 100 || 0).toFixed(0)}%</span>
                 </div>
+                <Progress value={(formattingFeeling?.caps_intensity * 100 || 0)} className="h-1 bg-primary/20 [&>div]:bg-orange-500" />
               </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-[9px] uppercase font-code">
+                  <span className="text-secondary/60">Punctuation Heat</span>
+                  <span className="text-orange-400">{(formattingFeeling?.punctuation_heat * 100 || 0).toFixed(0)}%</span>
+                </div>
+                <Progress value={(formattingFeeling?.punctuation_heat * 100 || 0)} className="h-1 bg-primary/20 [&>div]:bg-orange-500" />
+              </div>
+              <p className="text-[8px] text-secondary/40 font-code uppercase text-center italic mt-2">
+                "Humans read formatting as feeling."
+              </p>
             </CardContent>
           </Card>
         </section>
