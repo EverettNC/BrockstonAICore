@@ -1,7 +1,10 @@
 'use server';
 /**
  * @fileOverview Brockston Quantum-Aware TTS (Stephen Voice & Family).
- * Implements prosody control influenced by quantum fusion and emotional valence.
+ * Implements prosody control influenced by regional accents and personality characteristics.
+ * Ported from Advanced TTS Service (gTTS TLD logic) by Everett N. Christman.
+ * 
+ * © 2025 The Christman AI Project. All rights reserved.
  */
 
 import {ai} from '@/ai/genkit';
@@ -20,21 +23,28 @@ const TTSOutputSchema = z.object({
   media: z.string().describe('Data URI of the audio.'),
 });
 
-const VOICE_MAPPING: Record<string, string> = {
-  brockston: 'Algenib',
-  derek: 'Algenib',
-  arthur: 'Algenib',
-  alphavox: 'Algenib',
-  alphawolf: 'Algenib',
-  siera: 'Achernar',
-  serafinia: 'Achernar',
-  inferno: 'Algenib',
-  virtus: 'Algenib',
-  aegis: 'Algenib',
-  giovanni: 'Algenib',
-  eruptor: 'Algenib',
-  tether: 'Achernar',
-  opensmell: 'Algenib',
+interface VoiceProfile {
+  voiceName: string;
+  accent: string;
+  speedFactor: number;
+  pitch: string;
+}
+
+const FAMILY_VOICE_PROFILES: Record<string, VoiceProfile> = {
+  brockston: { voiceName: 'Algenib', accent: 'US', speedFactor: 0.95, pitch: 'steady' },
+  derek: { voiceName: 'Algenib', accent: 'US', speedFactor: 1.0, pitch: 'authoritative' },
+  arthur: { voiceName: 'Algenib', accent: 'UK', speedFactor: 0.9, pitch: 'warm' },
+  alphavox: { voiceName: 'Algenib', accent: 'Irish', speedFactor: 0.85, pitch: 'expressive' },
+  alphawolf: { voiceName: 'Algenib', accent: 'Canadian', speedFactor: 0.92, pitch: 'grounding' },
+  siera: { voiceName: 'Achernar', accent: 'UK', speedFactor: 0.95, pitch: 'calm' },
+  serafinia: { voiceName: 'Achernar', accent: 'US', speedFactor: 1.0, pitch: 'observant' },
+  inferno: { voiceName: 'Algenib', accent: 'US', speedFactor: 0.98, pitch: 'controlled' },
+  virtus: { voiceName: 'Algenib', accent: 'Formal', speedFactor: 1.0, pitch: 'clear' },
+  aegis: { voiceName: 'Algenib', accent: 'US', speedFactor: 1.05, pitch: 'firm' },
+  giovanni: { voiceName: 'Algenib', accent: 'Australian', speedFactor: 1.1, pitch: 'charismatic' },
+  eruptor: { voiceName: 'Algenib', accent: 'US', speedFactor: 0.8, pitch: 'anchoring' },
+  tether: { voiceName: 'Achernar', accent: 'US', speedFactor: 0.9, pitch: 'gentle' },
+  opensmell: { voiceName: 'Algenib', accent: 'US', speedFactor: 1.0, pitch: 'scientific' },
 };
 
 export async function speakStephen(input: z.infer<typeof TTSInputSchema>) {
@@ -49,11 +59,14 @@ const ttsFlow = ai.defineFlow(
   },
   async (input) => {
     const { text, specialist, fusion_prob, valence } = input;
-    const voiceName = VOICE_MAPPING[specialist.toLowerCase()] || 'Algenib';
+    const profile = FAMILY_VOICE_PROFILES[specialist.toLowerCase()] || FAMILY_VOICE_PROFILES.brockston;
     
-    // Quantum Prosody Logic
-    const rate = fusion_prob > 0.7 ? "medium" : "slow";
-    const pitch = valence > 0.7 ? "happy" : valence < 0.3 ? "serious" : "steady";
+    // Advanced Prosody Logic (Ported from gTTS speed logic)
+    const rate = profile.speedFactor < 0.92 || fusion_prob < 0.6 ? "slow" : "medium";
+    const pitch = valence > 0.7 ? "happy" : valence < 0.3 ? "serious" : profile.pitch;
+    
+    // Dynamic Accent Descriptor (Simulating TLDs)
+    const accentNote = `Speak with a ${profile.accent} accent.`;
 
     const { media } = await ai.generate({
       model: googleAI.model('gemini-2.5-flash-preview-tts'),
@@ -61,11 +74,11 @@ const ttsFlow = ai.defineFlow(
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: voiceName as any },
+            prebuiltVoiceConfig: { voiceName: profile.voiceName as any },
           },
         },
       },
-      prompt: `Speak this text at a ${rate} speed with a ${pitch} tone: ${text}`,
+      prompt: `${accentNote} Respond at a ${rate} speed with a ${pitch} tone: ${text}`,
     });
 
     if (!media) throw new Error('Voice bridge failure');
