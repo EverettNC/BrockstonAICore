@@ -3,15 +3,15 @@
   "placeholderImages": [
     {
       "id": "ai-core-bg",
-      "description": "Abstract neural network background",
-      "imageUrl": "https://picsum.photos/seed/core1/1200/800",
-      "imageHint": "neural network"
+      "description": "Luxury mission control background with warm lighting",
+      "imageUrl": "https://picsum.photos/seed/mission-lux/1200/800",
+      "imageHint": "luxury interior warm lighting"
     },
     {
       "id": "brockston-avatar",
-      "description": "Professional portrait of Brockston",
-      "imageUrl": "https://picsum.photos/seed/brockston-teacher-v5/800/800",
-      "imageHint": "portrait blonde hair blue eyes tuxedo"
+      "description": "The New Teacher: Brockston Professional Portrait",
+      "imageUrl": "https://picsum.photos/seed/teacher-brockston-v6/800/800",
+      "imageHint": "blonde man blue eyes gold suit luxury"
     }
   ]
 }
