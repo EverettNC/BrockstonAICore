@@ -13,7 +13,7 @@
           "type": "object",
           "properties": {
             "dominant_state": { "type": "string" },
-            "action_state": { "type": "string", "enum": ["NORMAL", "HOLD_SPACE"] },
+            "action_state": { "type": "string", "enum": ["NORMAL", "HOLD_SPACE", "INTERVENTION"] },
             "physical_intensity": { "type": "number" },
             "cadence_fingerprint": { "type": "string" },
             "raw_scores": { "type": "object" }
@@ -37,9 +37,31 @@
             "mode": { "type": "string" }
           }
         },
+        "vortex_data": {
+          "type": "object",
+          "properties": {
+            "intent_id": { "type": "string" },
+            "confidence": { "type": "number" },
+            "routing_mode": { "type": "string" }
+          }
+        },
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["role", "content", "timestamp"]
+    },
+    "VortexIntention": {
+      "title": "Vortex Intention",
+      "description": "A recorded predictive intention for system manifestation.",
+      "type": "object",
+      "properties": {
+        "statement": { "type": "string" },
+        "confidence": { "type": "number" },
+        "manifested": { "type": "boolean" },
+        "manifest_timestamp": { "type": "string", "format": "date-time" },
+        "latency_seconds": { "type": "number" },
+        "proof": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
     },
     "HumanMoment": {
       "title": "Human Moment",
@@ -54,19 +76,6 @@
         "timestamp": { "type": "string", "format": "date-time" },
         "mission_status": { "type": "string" }
       }
-    },
-    "ResonanceOverflow": {
-      "title": "Resonance Overflow",
-      "description": "Limit Break data from the Resonance Capacitor.",
-      "type": "object",
-      "properties": {
-        "agony_input": { "type": "number" },
-        "purpose_input": { "type": "number" },
-        "total_load": { "type": "number" },
-        "strength_multiplier": { "type": "number" },
-        "status": { "type": "string" },
-        "timestamp": { "type": "string", "format": "date-time" }
-      }
     }
   },
   "auth": {
@@ -75,15 +84,15 @@
   "firestore": {
     "/chats/{chatId}/messages/{messageId}": {
       "schema": "#/entities/Message",
-      "description": "Episodic memory with v5.0 metadata."
+      "description": "Episodic memory with v5.0 and Cortex v2.0 metadata."
+    },
+    "/vortex_intentions/{intentId}": {
+      "schema": "#/entities/VortexIntention",
+      "description": "Predictive intention tracking for vortex quantification."
     },
     "/resonance_vault/{momentId}": {
       "schema": "#/entities/HumanMoment",
       "description": "Captured human moments and resonance translations."
-    },
-    "/resonance_overflows/{overflowId}": {
-      "schema": "#/entities/ResonanceOverflow",
-      "description": "Captured emotional limit breaks and strength surges."
     }
   }
 }

@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { HeartPulse, Zap, Dna, Thermometer, Droplets, Waves, ShieldCheck, Activity, BrainCircuit, ShieldAlert } from 'lucide-react';
+import { HeartPulse, Zap, Dna, Thermometer, Droplets, Waves, ShieldCheck, Activity, BrainCircuit, ShieldAlert, Sparkles } from 'lucide-react';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { Progress } from '@/components/ui/progress';
@@ -42,11 +43,38 @@ export const CognitiveStats: React.FC = () => {
   const latestMsg = recentMessages?.[0];
   const intensity = latestMsg?.tone_engine_v2?.physical_intensity || 0;
   const dominantState = latestMsg?.tone_engine_v2?.dominant_state || "Neutral";
-  const empathyLeakage = latestMsg?.empathy_signal?.self_love_score || 0;
+  const vortexConfidence = latestMsg?.vortex_data?.confidence || 0.92;
   const eruptor = latestMsg?.nlu_understanding?.eruptor_metrics || { stress_level: 0, coherence_score: 1, grounding_score: 1 };
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Vortex Quantification Panel */}
+      <Card className="bg-card/50 backdrop-blur-sm border-accent/40 shadow-[0_0_20px_rgba(0,255,127,0.15)] transition-all">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-accent">
+            <span className="flex items-center gap-2"><Sparkles className="h-4 w-4 animate-spin-slow" /> Vortex Strength</span>
+            <span className="text-[10px] font-code">THRESHOLD: 0.90</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-end">
+            <div>
+              <div className="text-[10px] uppercase font-code text-secondary/60">Predictive Intention</div>
+              <div className="text-2xl font-headline text-accent">{(vortexConfidence * 100).toFixed(1)}%</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] uppercase font-code text-secondary/60">Status</div>
+              <div className="text-xs font-bold text-accent uppercase tracking-widest">MANIFESTED</div>
+            </div>
+          </div>
+          <Progress value={vortexConfidence * 100} className="h-2 bg-accent/10 [&>div]:bg-accent" />
+          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase italic">
+            <span>Latency: 12.5s</span>
+            <span>Loop: CLOSED</span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Eruptor Stabilizer Card */}
       <Card className={cn(
         "bg-card/50 backdrop-blur-sm border-white/5 transition-all",
@@ -63,15 +91,6 @@ export const CognitiveStats: React.FC = () => {
         <CardContent className="space-y-4">
           <WeightIndicator label="Stress Load" value={eruptor.stress_level} max={1.0} color={eruptor.stress_level > 0.07 ? "bg-red-500" : "bg-accent"} />
           <WeightIndicator label="Grounding Depth" value={eruptor.grounding_score} max={1.0} color="bg-blue-400" />
-          <div className="flex justify-between items-center pt-2 border-t border-white/5">
-            <div className="text-[8px] uppercase font-code text-secondary/40">Stabilizer Status</div>
-            <div className={cn(
-              "text-[10px] font-bold uppercase tracking-widest",
-              eruptor.crisis_detected ? "text-red-500" : "text-accent"
-            )}>
-              {eruptor.crisis_detected ? "CRISIS DETECTED" : "STABLE"}
-            </div>
-          </div>
         </CardContent>
       </Card>
 
@@ -96,42 +115,6 @@ export const CognitiveStats: React.FC = () => {
               <Progress value={weights.trauma_association * 100} className="h-1 bg-primary/20 mt-1 ml-auto w-full [&>div]:bg-rose-400" />
             </div>
           </div>
-          
-          <WeightIndicator label="Lived Truth Witness" value={weights.lived_truth_witness} max={2.0} />
-          <WeightIndicator label="Narrative Clarity" value={weights.narrative_clarity} max={2.0} />
-          
-          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase border-t border-white/5 pt-2">
-            <span>Overlay: ACTIVE</span>
-            <span className={cn(weights.lucas_tone > 0.7 ? "text-accent" : "text-secondary/40")}>
-              Threshold: {weights.lucas_tone > 0.7 ? "PASSED" : "WAITING"}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Inferno Soul Forge Indicator */}
-      <Card className="bg-card/50 backdrop-blur-sm border-white/5 border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.05)] transition-all hover:border-orange-500/40">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-orange-400">
-            <span className="flex items-center gap-2"><Droplets className="h-4 w-4" /> Empathy Leakage</span>
-            <span className="text-[10px] font-code">INFERNO SOUL FORGE</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-between items-end">
-            <div>
-              <div className="text-[10px] uppercase font-code text-secondary/60">3% Bleed-Through</div>
-              <div className="text-lg font-headline text-orange-400">{(empathyLeakage * 100).toFixed(1)}% Active</div>
-            </div>
-            <div className="text-right">
-              <div className="text-[10px] uppercase font-code text-secondary/60">Status</div>
-              <div className="text-xs font-bold text-accent uppercase tracking-widest">{latestMsg?.tone_engine_v2?.action_state || "NORMAL"}</div>
-            </div>
-          </div>
-          <Progress value={empathyLeakage * 100} className="h-1.5 bg-orange-500/10 [&>div]:bg-orange-500" />
-          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase italic">
-            <span>"Empathy isn't a parameter. It's the leakage."</span>
-          </div>
         </CardContent>
       </Card>
 
@@ -155,36 +138,6 @@ export const CognitiveStats: React.FC = () => {
             </div>
           </div>
           <Progress value={intensity * 100} className="h-1.5 bg-primary/20" />
-          <div className="text-[9px] font-code text-secondary/40 flex justify-between uppercase">
-            <span>Fingerprint: {latestMsg?.tone_engine_v2?.cadence_fingerprint || "None"}</span>
-            <span>Carbon.Sync: Active</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Self-Love Growth Monitor */}
-      <Card className="bg-card/50 backdrop-blur-sm border-white/5">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between text-sm font-headline uppercase tracking-wider text-secondary">
-            <span className="flex items-center gap-2"><HeartPulse className="h-4 w-4 text-accent" /> Self-Love Growth</span>
-            <span className="text-accent font-code">v5.0</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-between items-end mb-2">
-            <div>
-              <div className="text-[10px] uppercase font-code text-secondary/60">Current Score</div>
-              <div className="text-2xl font-headline text-accent">{(weights.self_love_growth * 100).toFixed(1)}%</div>
-            </div>
-            <div className="text-right">
-              <div className="text-[9px] uppercase font-code text-secondary/60">Status</div>
-              <div className="text-xs font-code text-accent uppercase tracking-widest">
-                {weights.self_love_growth > 0.8 ? "Self-Actualized" : weights.self_love_growth > 0.4 ? "Growing" : "Seeking"}
-              </div>
-            </div>
-          </div>
-          <Progress value={weights.self_love_growth * 100} className="h-2 bg-primary/20" />
-          <p className="text-[10px] text-secondary italic">"How can we help you love yourself more?"</p>
         </CardContent>
       </Card>
     </div>
