@@ -1,0 +1,66 @@
+
+{
+  "entities": {
+    "Message": {
+      "title": "Message",
+      "description": "A single message in a chat conversation.",
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["user", "model"],
+          "description": "The speaker's role."
+        },
+        "content": {
+          "type": "string",
+          "description": "The text content of the message."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["standard", "knowledge"],
+          "description": "The type of response generated."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the message was sent."
+        }
+      },
+      "required": ["role", "content", "timestamp"]
+    },
+    "SystemLog": {
+      "title": "System Log",
+      "description": "A security or operational event log.",
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "description": "The description of the event."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the event occurred."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["info", "warning", "critical"]
+        }
+      },
+      "required": ["event", "timestamp"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com"]
+  },
+  "firestore": {
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "#/entities/Message",
+      "description": "Individual messages within a specific chat session."
+    },
+    "/system_logs/{logId}": {
+      "schema": "#/entities/SystemLog",
+      "description": "Global system operational and security logs."
+    }
+  }
+}

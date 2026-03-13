@@ -1,0 +1,11 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "ai-core-bg",
+      "description": "Abstract neural network background",
+      "imageUrl": "https://picsum.photos/seed/core1/1200/800",
+      "imageHint": "neural network"
+    }
+  ]
+}
