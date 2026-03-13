@@ -3,14 +3,14 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { analyzeVision } from '@/ai/flows/vision-flow';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, Shield, Activity, Camera, Loader2, AlertCircle, Scan, History } from 'lucide-react';
+import { Eye, Shield, Activity, Camera, Loader2, AlertCircle, Scan, History, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
 import { collection, addDoc } from 'firebase/firestore';
-import { BehaviorType } from '@/lib/behavioral-interpreter';
+import { VisionPerception } from '@/lib/vision-perception';
 import { visionContext } from '@/lib/vision-context';
 
 export const VisionFeed: React.FC = () => {
@@ -19,6 +19,7 @@ export const VisionFeed: React.FC = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState(false);
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
+  const [perceptionResult, setPerceptionResult] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,33 +54,32 @@ export const VisionFeed: React.FC = () => {
       ctx?.drawImage(videoRef.current, 0, 0);
       const dataUri = canvas.toDataURL('image/jpeg');
 
+      // 1. Raw Neural Perception
       const result = await analyzeVision({ photoDataUri: dataUri });
       setAnalysis(result);
 
-      // Ported Behavioral Mapping
-      let behaviorType: BehaviorType = "unknown";
-      const posture = result.posture_analysis.toLowerCase();
-      const emotion = result.emotion_detected.toLowerCase();
+      // 2. Symbolic Interpretation (Vision Tier)
+      const perception = VisionPerception.process(result);
+      setPerceptionResult(perception);
 
-      if (posture.includes('stress') || posture.includes('fidget')) behaviorType = "gesture:stimming";
-      else if (posture.includes('nod')) behaviorType = "gesture:nod";
-      else if (emotion.includes('happy') || emotion.includes('joy')) behaviorType = "symbol:happy";
-      else if (emotion.includes('sad') || emotion.includes('pain')) behaviorType = "symbol:sad";
-      else if (posture.includes('gaze') || posture.includes('staring')) behaviorType = "eye_tracking:sustained_gaze";
-
-      // PUSH TO VISION CONTEXT (Rolling Window)
-      visionContext.push(result.description, behaviorType, 0.92);
+      // 3. Persist Event
+      const behaviorType = perception.cues.intent || "perception:general";
 
       addDoc(collection(db, 'behavioral_history'), {
         type: behaviorType,
-        intensity: 0.75,
-        context: { source: 'vision_system', scene: result.description, safety: result.safety_status },
+        intensity: perception.cues.intent ? 0.8 : 0.4,
+        context: { 
+          source: 'vision_system', 
+          scene: result.description, 
+          safety: result.safety_status,
+          cues: perception.cues
+        },
         timestamp: new Date().toISOString()
       });
 
       toast({
-        title: "Perception Synchronized",
-        description: `Visual core detected ${behaviorType.split(':')[1]} state.`,
+        title: perception.cues.intent ? "Symbol Identified" : "Perception Logged",
+        description: perception.cues.description || "Scene analysis synchronized with cortex.",
       });
 
     } catch (err: any) {
@@ -141,8 +141,13 @@ export const VisionFeed: React.FC = () => {
         <section className="lg:col-span-5 flex flex-col gap-4">
           <Card className="bg-card/50 border-white/5 border-accent/20 shadow-xl transition-all hover:bg-card/60">
             <CardHeader className="py-3 bg-accent/5 border-b border-white/5">
-              <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center gap-2">
-                <Shield className="h-3 w-3 text-accent" /> Perception Analysis
+              <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
+                <span className="flex items-center gap-2"><Shield className="h-3 w-3 text-accent" /> Perception Analysis</span>
+                {perceptionResult?.cues.intent && (
+                  <Badge className="bg-accent text-accent-foreground text-[8px] animate-bounce">
+                    <Sparkles className="h-2 w-2 mr-1" /> SYMBOL: {perceptionResult.cues.description.toUpperCase()}
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
@@ -193,7 +198,9 @@ export const VisionFeed: React.FC = () => {
               {visionContext.snapshot().events.map((ev, i) => (
                 <div key={i} className="flex justify-between items-center text-[8px] font-code text-secondary/60 border-b border-white/5 pb-1 last:border-0">
                   <span className="truncate max-w-[150px]">{ev.description}</span>
-                  <span className="text-accent">{(ev.confidence * 100).toFixed(0)}%</span>
+                  <span className={ev.intent !== "perception" ? "text-accent font-bold" : "text-secondary/40"}>
+                    {(ev.confidence * 100).toFixed(0)}%
+                  </span>
                 </div>
               ))}
               {visionContext.snapshot().count === 0 && (
