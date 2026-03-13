@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -23,6 +22,7 @@ import { toast } from '@/hooks/use-toast';
 import { speechService } from '@/lib/speech-recognition-service';
 import { vortexEngine } from '@/lib/vortex-engine';
 import { topologyEngine } from '@/lib/topology-engine';
+import { visionContext } from '@/lib/vision-context';
 
 const SPECIALISTS = [
   { id: 'arthur', name: 'Arthur (Grief/Gen 2)', color: 'text-amber-500', gen: 2 },
@@ -131,19 +131,23 @@ export const ChatInterface: React.FC = () => {
 
     try {
       const history = (messages || []).map(m => ({ role: m.role, content: m.content }));
+      
+      // GET VISION CONTEXT SNAPSHOT
+      const visionSnapshot = visionContext.snapshot();
+
       const result = await aiCoreConversationalInteraction({
         message: userMsg,
         specialist,
-        chatHistory: history as any
+        chatHistory: history as any,
+        visionSnapshot
       });
 
       // Close Vortex Loop
       await vortexEngine.markManifested(db, intentId, "Specialist response generated");
 
       // UPDATE RELATIONAL TOPOLOGY
-      // Proximity = Integral(Resonance * Empathy_Math)
       const resonance = result.empathy_signal?.self_love_score || 0.5;
-      const empathyMath = result.ethical_score.composite / 10; // Normalize 0-1
+      const empathyMath = result.ethical_score.composite / 10;
       await topologyEngine.updateProximity(db, resonance, empathyMath);
 
       addDoc(collection(db, 'chats', chatId, 'messages'), {

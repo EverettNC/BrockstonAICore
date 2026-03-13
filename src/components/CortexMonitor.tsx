@@ -4,18 +4,15 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BrainCircuit, ShieldAlert, BookOpen, Activity, Languages, Zap, Volume2, Thermometer, ListTree, CheckCircle2, SearchCode, Cpu, Database } from 'lucide-react';
+import { BrainCircuit, ShieldAlert, BookOpen, Activity, Languages, Zap, Volume2, Thermometer, ListTree, CheckCircle2, SearchCode, Cpu, Database, Eye, History } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { BehavioralInterpreter, EmotionalState, BehaviorObservation } from '@/lib/behavioral-interpreter';
+import { visionContext } from '@/lib/vision-context';
 
 export const CortexMonitor: React.FC = () => {
   const db = useFirestore();
-  const [behavioralState, setBehavioralState] = useState<EmotionalState>({
-    valence: 0, arousal: 0.5, dominance: 0.5, frustration: 0, satisfaction: 0, uncertainty: 0.5, attention: 0.5
-  });
-
+  
   const messagesQuery = useMemo(() => query(
     collection(db, 'chats', 'ultimate-v5-session', 'messages'),
     orderBy('timestamp', 'desc'),
@@ -27,6 +24,8 @@ export const CortexMonitor: React.FC = () => {
   const lastMessage = messages?.[0];
   const reasoning = lastMessage?.reasoning_trace;
   const engines = reasoning?.engines_active || ["CoreEngine"];
+  
+  const visionSnap = visionContext.snapshot();
 
   return (
     <div className="flex flex-col h-full gap-6 animate-in fade-in duration-500 overflow-y-auto system-log pr-2 pb-12">
@@ -107,6 +106,34 @@ export const CortexMonitor: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* VISION CONTEXT MONITOR */}
+          <Card className="bg-card/50 border-white/5 border-accent/20">
+            <CardHeader className="pb-2 border-b border-white/5 bg-primary/5">
+              <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center gap-2">
+                <Eye className="h-3 w-3 text-accent" /> Recent Visual Events
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-3">
+              {visionSnap.events.map((ev, i) => (
+                <div key={i} className="space-y-1 group animate-in slide-in-from-left-2" style={{ animationDelay: `${i * 100}ms` }}>
+                  <div className="flex justify-between items-center text-[8px] font-code">
+                    <span className="text-accent/60 uppercase">{ev.intent.split(':')[1] || 'PERCEPTION'}</span>
+                    <span className="text-secondary/40">[{new Date(ev.timestamp).toLocaleTimeString()}]</span>
+                  </div>
+                  <div className="text-[10px] text-foreground/80 bg-black/20 p-2 rounded border border-white/5 truncate">
+                    {ev.description}
+                  </div>
+                </div>
+              ))}
+              {visionSnap.count === 0 && (
+                <div className="h-24 flex flex-col items-center justify-center opacity-20 text-center">
+                  <History className="h-6 w-6 mb-2" />
+                  <p className="text-[8px] uppercase font-code">Awaiting Perception</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </section>
 
         {/* Reasoning Documentation */}
@@ -118,7 +145,7 @@ export const CortexMonitor: React.FC = () => {
                 <Badge variant="outline" className="text-[8px] border-accent/20 text-accent uppercase">Wired: {engines.join(' + ')}</Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-6 overflow-y-auto system-log max-h-[500px]">
+            <CardContent className="p-6 space-y-6 overflow-y-auto system-log max-h-[700px]">
               {reasoning ? (
                 <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-700">
                   <TraceStep icon={Activity} label="Step 1: Classifier" content={reasoning.classification} />

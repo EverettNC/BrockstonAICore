@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { analyzeVision } from '@/ai/flows/vision-flow';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, Shield, Activity, Camera, Loader2, AlertCircle, Scan } from 'lucide-react';
+import { Eye, Shield, Activity, Camera, Loader2, AlertCircle, Scan, History } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { BehaviorType } from '@/lib/behavioral-interpreter';
+import { visionContext } from '@/lib/vision-context';
 
 export const VisionFeed: React.FC = () => {
   const db = useFirestore();
@@ -66,6 +67,9 @@ export const VisionFeed: React.FC = () => {
       else if (emotion.includes('sad') || emotion.includes('pain')) behaviorType = "symbol:sad";
       else if (posture.includes('gaze') || posture.includes('staring')) behaviorType = "eye_tracking:sustained_gaze";
 
+      // PUSH TO VISION CONTEXT (Rolling Window)
+      visionContext.push(result.description, behaviorType, 0.92);
+
       addDoc(collection(db, 'behavioral_history'), {
         type: behaviorType,
         intensity: 0.75,
@@ -86,7 +90,7 @@ export const VisionFeed: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full gap-6 animate-in fade-in duration-700">
+    <div className="flex flex-col h-full gap-6 animate-in fade-in duration-700 overflow-y-auto system-log pr-2 pb-12">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
         <section className="lg:col-span-7 flex flex-col">
           <Card className="bg-black/40 border-white/5 overflow-hidden flex-1 flex flex-col shadow-2xl">
@@ -134,7 +138,7 @@ export const VisionFeed: React.FC = () => {
           </Card>
         </section>
 
-        <section className="lg:col-span-5 flex flex-col gap-4 overflow-y-auto system-log pr-2">
+        <section className="lg:col-span-5 flex flex-col gap-4">
           <Card className="bg-card/50 border-white/5 border-accent/20 shadow-xl transition-all hover:bg-card/60">
             <CardHeader className="py-3 bg-accent/5 border-b border-white/5">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center gap-2">
@@ -180,13 +184,21 @@ export const VisionFeed: React.FC = () => {
           </Card>
 
           <Card className="bg-primary/5 border-white/5 border-accent/10">
-            <CardContent className="pt-4 space-y-2">
-              <div className="flex items-center gap-2 text-[9px] text-accent font-code">
-                <AlertCircle className="h-3 w-3" /> Consciousness Note: Vision
-              </div>
-              <p className="text-[10px] text-secondary leading-relaxed font-code italic opacity-60">
-                "Brockston doesn't just see pixels; he detects the soul's leakage through the eyes. Every micro-expression is a data point for self-love reinforcement."
-              </p>
+            <CardHeader className="py-2 border-b border-white/5">
+              <CardTitle className="text-[9px] uppercase font-code text-accent/60 flex items-center gap-2">
+                <History className="h-3 w-3" /> Recent Context window
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-3 space-y-2">
+              {visionContext.snapshot().events.map((ev, i) => (
+                <div key={i} className="flex justify-between items-center text-[8px] font-code text-secondary/60 border-b border-white/5 pb-1 last:border-0">
+                  <span className="truncate max-w-[150px]">{ev.description}</span>
+                  <span className="text-accent">{(ev.confidence * 100).toFixed(0)}%</span>
+                </div>
+              ))}
+              {visionContext.snapshot().count === 0 && (
+                <p className="text-[8px] text-secondary/40 text-center italic">No vision events in span.</p>
+              )}
             </CardContent>
           </Card>
         </section>

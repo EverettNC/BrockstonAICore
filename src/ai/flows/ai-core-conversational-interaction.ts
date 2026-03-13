@@ -21,6 +21,10 @@ const AICoreConversationalInteractionInputSchema = z.object({
     role: z.enum(['user', 'model']),
     content: z.string(),
   })).default([]),
+  visionSnapshot: z.object({
+    events: z.array(z.any()),
+    count: z.number()
+  }).optional()
 });
 export type AICoreConversationalInteractionInput = z.infer<typeof AICoreConversationalInteractionInputSchema>;
 
@@ -91,6 +95,13 @@ const prompt = ai.definePrompt({
 
   ## NLU DETECTED INTENT:
   {{nlu_understanding.intent}} (Confidence: {{nlu_understanding.confidence}})
+
+  {{#if visionSnapshot}}
+  ## RECENT VISION EVENTS (Situational Awareness):
+  {{#each visionSnapshot.events}}
+  - {{this.description}} (Detected State: {{this.intent}}, Confidence: {{this.confidence}})
+  {{/each}}
+  {{/if}}
 
   ## USER MESSAGE:
   {{message}}
