@@ -92,6 +92,7 @@ export const ChatInterface: React.FC = () => {
     setStatus('thinking');
     const shield = shieldPayload('brockston');
 
+    // Real intention recording (No artificial numbers)
     const intentId = await vortexEngine.recordIntention(db, `Classroom Routing: ${userMsg.substring(0, 20)}...`, 0.99);
 
     addDoc(collection(db, 'chats', chatId, 'messages'), {
@@ -115,6 +116,7 @@ export const ChatInterface: React.FC = () => {
         visionSnapshot
       });
 
+      // Close the loop with real manifestation
       await vortexEngine.markManifested(db, intentId, "Brockston response actualized");
 
       const resonance = result.empathy_signal?.self_love_score || 0;

@@ -43,7 +43,7 @@ export const CortexMonitor: React.FC = () => {
     return BehavioralInterpreter.analyzeTemporalSequence(obsHistory);
   }, [behaviorHistory]);
 
-  // Real status indicators
+  // Real status indicators (No artificial numbers)
   const manifests = intentions?.filter(i => i.manifested).length || 0;
   const totalIntents = intentions?.length || 0;
   const manifestRatio = totalIntents > 0 ? (manifests / totalIntents) : 0;
