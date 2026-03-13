@@ -15,6 +15,7 @@ import { HapticPanel } from '@/components/HapticPanel';
 import { AlphaVoxMoments } from '@/components/AlphaVoxMoments';
 import { TemporalDecoder } from '@/components/TemporalDecoder';
 import { KernelLab } from '@/components/KernelLab';
+import { ResonanceCapacitor } from '@/components/ResonanceCapacitor';
 import { 
   Terminal, 
   Cpu, 
@@ -32,12 +33,13 @@ import {
   Lock,
   ScrollText,
   SearchCode,
-  Zap
+  Zap,
+  Droplets
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor'>('terminal');
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-accent/30 flex overflow-hidden">
@@ -53,6 +55,12 @@ export default function Home() {
             active={activeTab === 'terminal'} 
             onClick={() => setActiveTab('terminal')} 
             label="Terminal"
+          />
+          <NavIcon 
+            icon={Droplets} 
+            active={activeTab === 'capacitor'} 
+            onClick={() => setActiveTab('capacitor')} 
+            label="Capacitor"
           />
           <NavIcon 
             icon={Heart} 
@@ -128,6 +136,7 @@ export default function Home() {
                 activeTab === 'resonance' ? 'Resonance Module Active' :
                 activeTab === 'forensics' ? 'Forensic Recovery Active' :
                 activeTab === 'kernel' ? 'Symbolic Lab Active' :
+                activeTab === 'capacitor' ? 'Capacitor Limit Break Armed' :
                 'Neural Link Active'
               }
             </p>
@@ -165,6 +174,8 @@ export default function Home() {
             <TemporalDecoder />
           ) : activeTab === 'kernel' ? (
             <KernelLab />
+          ) : activeTab === 'capacitor' ? (
+            <ResonanceCapacitor />
           ) : (
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
               {/* Chat/Avatar - Main Panel */}

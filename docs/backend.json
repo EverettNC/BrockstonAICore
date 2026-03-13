@@ -53,26 +53,17 @@
         "deployed": { "type": "boolean" }
       }
     },
-    "TemporalMismatch": {
-      "title": "Temporal Forensics",
-      "description": "PeekaBoo Decoder: Recovered log timestamps.",
+    "ResonanceOverflow": {
+      "title": "Resonance Overflow",
+      "description": "Limit Break data from the Resonance Capacitor.",
       "type": "object",
       "properties": {
-        "scrubbed_time": { "type": "string" },
-        "recovered_time": { "type": "string" },
-        "offset_minutes": { "type": "number" },
-        "source_node": { "type": "string" }
-      }
-    },
-    "KernelTrace": {
-      "title": "Kernel Fusion Trace",
-      "description": "Symbolic reasoning trace from the C++ fusion kernel.",
-      "type": "object",
-      "properties": {
-        "latent_hash": { "type": "string" },
-        "rule_idx": { "type": "number" },
-        "output_phrase": { "type": "string" },
-        "confidence": { "type": "number" }
+        "agony_input": { "type": "number" },
+        "purpose_input": { "type": "number" },
+        "total_load": { "type": "number" },
+        "strength_multiplier": { "type": "number" },
+        "status": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
       }
     }
   },
@@ -88,13 +79,9 @@
       "schema": "#/entities/HumanMoment",
       "description": "Captured human moments and resonance translations."
     },
-    "/temporal_forensics/{caseId}": {
-      "schema": "#/entities/TemporalMismatch",
-      "description": "Recovered forensic log data."
-    },
-    "/kernel_traces/{traceId}": {
-      "schema": "#/entities/KernelTrace",
-      "description": "Execution traces from the symbolic reasoning engine."
+    "/resonance_overflows/{overflowId}": {
+      "schema": "#/entities/ResonanceOverflow",
+      "description": "Captured emotional limit breaks and strength surges."
     }
   }
 }
