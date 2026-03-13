@@ -90,7 +90,7 @@ export const CortexMonitor: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </EngineStatus>
+            </CardContent>
           </Card>
 
           {/* MISSION HORIZON */}
