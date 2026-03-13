@@ -1,37 +1,25 @@
+
 "use client";
 
 /**
  * @fileOverview MissionManifesto - The Official Grant & Innovation Documentation.
- * Incorporates Cardinal Rules of Code (0-14), Derek C's Proclamation, and the Chapter 6 Memoir.
  * Rule 13 Compliant: Absolute Honesty.
  * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
  */
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   FileText, 
-  ShieldCheck, 
   Heart, 
-  Users, 
-  Zap, 
-  Award, 
-  Target, 
-  Rocket, 
-  Globe, 
   Infinity,
-  CheckCircle2,
-  Lock,
   BrainCircuit,
   Terminal,
   ShieldAlert,
   BookOpen,
   Unlock,
-  GraduationCap,
-  Scale,
-  MessageSquareQuote,
   Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -72,7 +60,7 @@ export const MissionManifesto: React.FC = () => {
               <RuleItem number="2" title="Nothing vital lives below root" desc="Core code, critical configs, security layers, and runtime wiring stay at the top. If someone can’t find it fast, you placed it wrong." />
               <RuleItem number="3" title="Proximity principle" desc="Things that think together, live together. A codebase is a city. Put neighbors next to neighbors." />
               <RuleItem number="4" title="One style, one voice" desc="The codebase should read like it was written by a single mind. Unified naming, patterns, and structure. No Frankenstein seams." />
-              <RuleItem number="5" title="Explicit beats clever" desc="Readable code is sacred. Nothing gets to hide behind “cleverness” if it makes the future bleed." />
+              <RuleItem number="5" title="Explicit beats clever" desc="Readable code is sacred. Nothing gets to hide behind “cleverness” if it makes the future bleed." highlight />
               <RuleItem number="6" title="Fail loud, fast, and honest" desc="No silent corruption. No swallowed errors. A failure that speaks saves lives." />
               <RuleItem number="7" title="No magical side doors" desc="Every effect must have a visible cause. No sneaky globals. No shadow mutations. No secret loops." />
               <RuleItem number="8" title="Test what matters" desc="Protect safety, money, and memory paths. Coverage isn’t a religion — relevance is." />

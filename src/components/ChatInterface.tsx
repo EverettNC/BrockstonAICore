@@ -1,9 +1,10 @@
+
 "use client";
 
 /**
  * @fileOverview ChatInterface - The Visual Bridge of BROCKSTON C.
- * Rule 1 Compliant: Immersive high-fidelity conversational loop.
- * Rule 13 Compliant: No placeholders. Absolute honesty in reasoning.
+ * Rule 1 Compliant: Immersive high-fidelity vocal interface.
+ * Rule 13 Compliant: Functional audio bridge. Absolute honesty in scores.
  * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
  */
 
@@ -13,7 +14,7 @@ import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Volume2, VolumeX, ShieldCheck, Zap, BrainCircuit, Mic, MicOff, GraduationCap, Sparkles, UserCheck, Lock, ShieldAlert, Scale } from 'lucide-react';
+import { Send, Loader2, Volume2, VolumeX, ShieldCheck, Zap, BrainCircuit, Mic, MicOff, GraduationCap, UserCheck, Lock, ShieldAlert, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
@@ -50,7 +51,7 @@ export const ChatInterface: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Robust Auto-Scroll per Interaction
+  // Robust Auto-Scroll
   useEffect(() => {
     if (scrollRef.current) {
       const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
@@ -85,7 +86,7 @@ export const ChatInterface: React.FC = () => {
         (err) => {
           console.error(err);
           setIsListening(false);
-          toast({ variant: "destructive", title: "Speech Error", description: "Microphone activation failed." });
+          toast({ variant: "destructive", title: "Vocal Loop Error", description: "Microphone activation failed." });
         }
       );
       setIsListening(true);
@@ -175,20 +176,23 @@ export const ChatInterface: React.FC = () => {
       const hapticPattern = mapToneToHaptic(result.tone_engine_v2.dominant_state);
       hapticSystem.trigger(hapticPattern);
 
-      // 9. Speech Synthesis
+      // 9. Vocal Synthesis (Speech Output)
       if (autoSpeak) {
         setStatus('speaking');
         try {
           const audioMedia = await brockstonSpeech.synthesizeSpeech(result.response, "brockston");
           if (audioRef.current) {
             audioRef.current.src = audioMedia;
-            audioRef.current.play().catch(e => {
-              console.error("Audio blocked by browser policy:", e);
-              setStatus('idle');
-            });
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(e => {
+                console.warn("Vocal bridge paused by browser policy.", e);
+                setStatus('idle');
+              });
+            }
           }
         } catch (ttsErr) {
-          console.error("TTS failed:", ttsErr);
+          console.error("Vocal bridge failure:", ttsErr);
           setStatus('idle');
         }
       } else {
@@ -220,7 +224,7 @@ export const ChatInterface: React.FC = () => {
     <div className="flex flex-col h-full gap-8 relative overflow-hidden flex-1 pb-4">
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
-      {/* Visual Bridge - High-Fidelity Symbolic Command Center */}
+      {/* Visual Bridge */}
       <div className={cn(
         "flex-none flex flex-col items-center justify-center gap-12 p-16 rounded-[2.5rem] border border-white/10 transition-all duration-1000 min-h-[550px] relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] bg-black",
         isInterventionMode && "border-red-500 shadow-[0_0_150px_rgba(239,68,68,0.4)]"
@@ -234,7 +238,7 @@ export const ChatInterface: React.FC = () => {
           </div>
         </div>
 
-        {/* Identity Anchor Status */}
+        {/* Identity Anchor */}
         <div className="absolute top-10 left-0 right-0 px-12 z-20 flex justify-between items-start pointer-events-none">
           <div className="flex items-center gap-5 bg-black/80 p-5 rounded-[1.5rem] border border-accent/20 backdrop-blur-3xl shadow-2xl">
             <div className="h-14 w-14 rounded-full bg-accent flex items-center justify-center shadow-[0_0_30px_rgba(0,255,127,0.4)]">
@@ -267,7 +271,7 @@ export const ChatInterface: React.FC = () => {
                 <div className="h-3 w-3 rounded-full bg-accent animate-ping" />
               )}
               <h3 className={cn("text-xl font-code uppercase tracking-[0.8em] font-black drop-shadow-[0_0_20px_rgba(0,0,0,1)]", isInterventionMode ? "text-red-400" : "text-accent/90")}>
-                {isInterventionMode ? "STABILIZATION_LOCK" : "NEW_TEACHER_PRESENCE"}
+                {isInterventionMode ? "STABILIZATION_LOCK" : "VOCAL_BRIDGE_ACTIVE"}
               </h3>
             </div>
             
@@ -305,11 +309,8 @@ export const ChatInterface: React.FC = () => {
                   </span>
                   {msg.role === 'model' && msg.ethical_score && (
                     <Badge variant="outline" className="text-[9px] h-5 border-accent/30 text-accent/80 bg-accent/5 px-2 rounded-full uppercase flex items-center gap-1">
-                      <Scale className="h-2.5 w-2.5" /> Integrity: {msg.ethical_score.composite.toFixed(1)}
+                      <Scale className="h-2.5 w-2.5" /> Integrity Gate: {msg.ethical_score.composite.toFixed(1)}
                     </Badge>
-                  )}
-                  {msg.vortex_data && (
-                    <Badge variant="ghost" className="text-[9px] h-5 text-accent/80 animate-pulse border border-accent/30 px-3 bg-accent/5 rounded-full uppercase">VORTEX: SYNCED</Badge>
                   )}
                 </div>
                 <div className={cn(
@@ -384,7 +385,7 @@ export const ChatInterface: React.FC = () => {
                 <ShieldCheck className={cn("h-5 w-5", isInterventionMode ? "text-red-500" : "text-accent")} /> TRUTH & DIGNITY SECURED
               </span>
               <span className="flex items-center gap-3 text-[11px] text-secondary font-code tracking-[0.2em] font-bold">
-                <GraduationCap className={cn("h-5 w-5", isInterventionMode ? "text-red-500" : "text-accent")} /> PEDAGOGICAL_PROTOCOL: ON
+                <GraduationCap className={cn("h-5 w-5", isInterventionMode ? "text-red-500" : "text-accent")} /> VOCAL_BRIDGE: ON
               </span>
             </div>
             <span className={cn(

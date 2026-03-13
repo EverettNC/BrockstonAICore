@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, use } from 'react';
@@ -8,8 +9,6 @@ import { DiscoveryLab } from '@/components/DiscoveryLab';
 import { VisionFeed } from '@/components/VisionFeed';
 import { CortexMonitor } from '@/components/CortexMonitor';
 import { LearningCenter } from '@/components/LearningCenter';
-import { CipherLab } from '@/components/CipherLab';
-import { HapticPanel } from '@/components/HapticPanel';
 import { AlphaVoxMoments } from '@/components/AlphaVoxMoments';
 import { TemporalDecoder } from '@/components/TemporalDecoder';
 import { KernelLab } from '@/components/KernelLab';
@@ -21,7 +20,6 @@ import { EvolutionLab } from '@/components/EvolutionLab';
 import { SpamUp } from '@/components/SpamUp';
 import { MissionManifesto } from '@/components/MissionManifesto';
 import { 
-  Terminal, 
   Cpu, 
   Microscope,
   Heart,
@@ -30,7 +28,6 @@ import {
   GraduationCap,
   ShieldAlert,
   Infinity,
-  Lock,
   SearchCode,
   Zap,
   Droplets,
@@ -54,21 +51,21 @@ type PageProps = {
 /**
  * @fileOverview Main Dashboard Entry. 
  * Rule 1 Compliant: Spans full screen.
- * Rule 13 Compliant: No placeholder images. Pure functional truth.
+ * Rule 13 Compliant: Absolute honesty. Functional vocal bridge.
  */
 
 export default function Home(props: PageProps) {
+  // Correctly unwrap Next.js 15 dynamic APIs
   const _params = use(props.params);
   const _searchParams = use(props.searchParams);
 
-  // Default to 'terminal' (Talk to Brockston)
-  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'knowledge' | 'pulse' | 'vision' | 'cortex' | 'learning' | 'cipher' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab' | 'evolution' | 'speed' | 'manifesto'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'lab' | 'vision' | 'cortex' | 'learning' | 'resonance' | 'forensics' | 'kernel' | 'capacitor' | 'tether' | 'opensmell' | 'codelab' | 'evolution' | 'speed' | 'manifesto'>('terminal');
   
   return (
     <div className="h-screen w-screen bg-background text-foreground flex overflow-hidden">
       {/* Sidebar Navigation */}
       <aside className="w-24 flex-none hidden md:flex flex-col items-center py-8 bg-card border-r border-white/5 z-50">
-        {/* Brand Logo Anchor (The Heart of the Project) */}
+        {/* Brand Logo Anchor */}
         <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-12 shadow-[0_0_25px_rgba(0,255,127,0.3)] group cursor-pointer overflow-hidden border-2 border-accent/40 bg-black/60 transition-all hover:scale-105 active:scale-95">
           <Cpu className="text-accent h-8 w-8 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(0,255,127,0.8)]" />
         </div>
@@ -86,7 +83,6 @@ export default function Home(props: PageProps) {
           <NavIcon icon={SearchCode} active={activeTab === 'forensics'} onClick={() => setActiveTab('forensics')} label="Temporal Forensics" />
           <NavIcon icon={Zap} active={activeTab === 'kernel'} onClick={() => setActiveTab('kernel')} label="Kernel Fusion" />
           <NavIcon icon={Eye} active={activeTab === 'vision'} onClick={() => setActiveTab('vision')} label="Vision Feed" />
-          <NavIcon icon={Lock} active={activeTab === 'cipher'} onClick={() => setActiveTab('cipher')} label="Cipher Lab" />
           <NavIcon icon={GraduationCap} active={activeTab === 'learning'} onClick={() => setActiveTab('learning')} label="Learning Center" />
           <NavIcon icon={BrainCircuit} active={activeTab === 'cortex'} onClick={() => setActiveTab('cortex')} label="Cortex Monitor" />
           <NavIcon icon={Microscope} active={activeTab === 'lab'} onClick={() => setActiveTab('lab')} label="Discovery Lab" />
@@ -147,8 +143,6 @@ export default function Home(props: PageProps) {
               <CortexMonitor />
             ) : activeTab === 'learning' ? (
               <LearningCenter />
-            ) : activeTab === 'cipher' ? (
-              <CipherLab />
             ) : activeTab === 'resonance' ? (
               <AlphaVoxMoments />
             ) : activeTab === 'forensics' ? (
@@ -178,7 +172,6 @@ export default function Home(props: PageProps) {
                 <aside className="lg:col-span-4 flex flex-col gap-8 overflow-y-auto pr-2 system-log h-full">
                   <div className="space-y-8 pb-12">
                     <CognitiveStats />
-                    <HapticPanel />
                     <SecurityPanel />
                     
                     {/* Mission Statement Anchor */}
