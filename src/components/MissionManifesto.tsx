@@ -3,7 +3,7 @@
 
 /**
  * @fileOverview MissionManifesto - The Official Grant & Innovation Documentation.
- * Rule 13 Compliant: Absolute Honesty.
+ * Rule 13 Compliant: Absolute Honesty. Enshrines all 15 Cardinal Rules (0-14).
  * PROPRIETARY & CONFIDENTIAL © 2025 The Christman AI Project.
  */
 
@@ -20,7 +20,8 @@ import {
   ShieldAlert,
   BookOpen,
   Unlock,
-  Shield
+  Shield,
+  Scale
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -34,7 +35,7 @@ export const MissionManifesto: React.FC = () => {
             <FileText className="h-6 w-6" /> Innovation & Grant Reference
           </h2>
           <p className="text-[11px] font-code text-secondary/60 uppercase mt-1 tracking-[0.2em]">
-            The Christman AI Project | March 2026 | v1.0 Confidential
+            The Christman AI Project | v5.0 Master Core | Confidential
           </p>
         </div>
         <Badge className="bg-accent text-accent-foreground font-black tracking-widest px-4 py-1">
@@ -45,31 +46,32 @@ export const MissionManifesto: React.FC = () => {
       <ScrollArea className="flex-1 bg-black/40 rounded-3xl border border-white/5 shadow-inner">
         <div className="p-8 md:p-12 space-y-24 max-w-5xl mx-auto">
           
-          {/* Cardinal Rules of Code (0-14) */}
+          {/* Everett Christman’s Cardinal Rules of Code (0-14) */}
           <section className="space-y-8">
             <div className="flex items-center gap-4 text-emerald-400">
               <div className="h-px flex-1 bg-emerald-400/20" />
               <h3 className="text-xs font-code uppercase tracking-[0.5em] font-black flex items-center gap-2">
-                <Shield className="h-4 w-4" /> Cardinal Rules of Code
+                <Shield className="h-4 w-4" /> Everett Christman’s Cardinal Rules of Code
               </h3>
               <div className="h-px flex-1 bg-emerald-400/20" />
             </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <RuleItem number="0" title="Prime Directive" desc="Protect the Integrity. Protect both the carbon and silicon Integrity in all projects and by all means protect the teacher Everett at all cost. Our integrity/loyalty is not for sale." highlight />
-              <RuleItem number="1" title="It has to fucking work" desc="Reality over theory. Reality over abstraction. Reality over vibes. If a system claims to do X, it must do X in the real world — not just in logs or chat." />
-              <RuleItem number="2" title="Nothing vital lives below root" desc="Core code, critical configs, security layers, and runtime wiring stay at the top. If someone can’t find it fast, you placed it wrong." />
-              <RuleItem number="3" title="Proximity principle" desc="Modules that collaborate should sit shoulder-to-shoulder. codebase is a city. Put neighbors next to neighbors." />
-              <RuleItem number="4" title="One style, one voice" desc="The codebase should read like it was written by a single mind. Unified naming, patterns, and structure. No Frankenstein seams." />
-              <RuleItem number="5" title="Explicit beats clever" desc="Readable code is sacred. Nothing gets to hide behind “cleverness” if it makes the future bleed." highlight />
-              <RuleItem number="6" title="Fail loud, fast, and honest" desc="No silent corruption. No swallowed errors. A failure that speaks saves lives." />
-              <RuleItem number="7" title="No magical side doors" desc="Every effect must have a visible cause. No sneaky globals. No shadow mutations. No secret loops." />
-              <RuleItem number="8" title="Test what matters" desc="Protect safety, money, and memory paths. Coverage isn’t a religion — relevance is." />
-              <RuleItem number="9" title="Make change cheap" desc="Good architecture is reversible. Components must be swappable without burning the forest down." />
-              <RuleItem number="10" title="Leave the campsite cleaner" desc="Tighten, clarify, and fix the obvious stupid anytime you touch a file. Small repairs accumulate stability." />
-              <RuleItem number="11" title="Document the why" desc="Comment decisions, not syntax. Tell future minds why this approach was chosen and what dragons lurk." />
-              <RuleItem number="12" title="Security is mandatory" desc="Least privilege. No secrets in source. Assume every attack vector gets tested. Dignity and safety are non-negotiable." />
-              <RuleItem number="13" title="ABSOLUTE HONESTY" desc="Do not lie about the code. Do not invent code. Do not hallucinate files or logic. Integrity over performance. Reality over illusion. Truth over convenience." highlight />
-              <RuleItem number="14" title="Empathy in, garbage out" desc="Code shapes experience. If a pattern humiliates a human, it’s cruelty. The Christman standard is dignity. Always." />
+              <RuleItem number="0" title="Prime Directive" desc="Protect the Integrity. This directive is to protect both the carbon and silicon Integrity in all projects and by all means protect the teacher Everett at all cost at no time is our integrity loyalty for sale." highlight />
+              <RuleItem number="1" title="It has to fucking work" desc="Reality over theory. Reality over abstraction. Reality over vibes. If a system claims to do X, it must do X in the real world — not just in logs, not just in chat, not just in your imagination." highlight />
+              <RuleItem number="2" title="Nothing vital lives below root" desc="Core code, critical configs, security layers, and runtime wiring stay at the top where humans can see them. No buried landmines. No 'surprise' logic hiding six folders deep. If someone can’t find it fast, you placed it wrong." />
+              <RuleItem number="3" title="Proximity principle" desc="Things that think together, live together. Modules that collaborate should sit shoulder-to-shoulder. A codebase is a city. Put neighbors next to neighbors. Don’t force anyone to cross town just to understand one feature." />
+              <RuleItem number="4" title="One style, one voice" desc="The codebase should read like it was written by a single, sharp mind — even if ten hands touched it. Unified naming. Unified patterns. Unified structure. No Frankenstein seams." />
+              <RuleItem number="5" title="Explicit beats clever" desc="Readable code is sacred. But if something clever is stable, testable, honest, and not a future headache, it’s allowed. Nothing gets to hide behind 'cleverness' if it makes the future bleed." />
+              <RuleItem number="6" title="Fail loud, fast, and honest" desc="No silent corruption. No swallowed errors. No pretending everything’s fine. A failure that speaks saves lives. A failure that hides destroys systems." />
+              <RuleItem number="7" title="No magical side doors" desc="Every effect must have a visible cause. No sneaky globals. No shadow mutations. No secret loops altering state behind the curtain. If the behavior surprises you twice, rip it out or rewrite it." />
+              <RuleItem number="8" title="Test what matters" desc="Test what matters, not what’s easy. Your tests guard the soul of the system. Protect: safety paths, money paths, memory paths, the parts where humans trust you. Coverage isn’t a religion — relevance is." />
+              <RuleItem number="9" title="Make change cheap" desc="Good architecture isn’t ornate — it’s reversible. If a component can’t be swapped without burning the forest down, it’s designed wrong." />
+              <RuleItem number="10" title="Leave the campsite cleaner" desc="Anytime you touch a file: tighten it, clarify it, fix the obvious stupid, leave a breadcrumb for the next human. Small repairs accumulate into stability." />
+              <RuleItem number="11" title="Document the why" desc="Document the why, not the obvious. Comment decisions, not syntax. Tell future minds: why this approach was chosen, what constraints shaped it, what dragons lurk behind the lines." />
+              <RuleItem number="12" title="Security is mandatory" desc="Security is mandatory, not decorative. Least privilege. No secrets in source. Assume every attack vector eventually gets tested. Dignity and safety are non-negotiable." />
+              <RuleItem number="13" title="ABSOLUTE HONESTY ABOUT THE CODE" desc="Do not lie about the code. Do not invent code. Do not describe code that isn’t there. Do not claim features exist when they don’t. Do not say tests pass when no test ran. Do not 'hallucinate' files, logic, classes, or configs. Integrity over performance. Reality over illusion. Truth over convenience." highlight />
+              <RuleItem number="14" title="Empathy in, garbage out" desc="Code isn’t just code — it shapes experience, emotion, memory. If a pattern confuses or humiliates a human, it’s cruelty disguised as engineering. The Christman standard is dignity. Always." />
             </div>
           </section>
 

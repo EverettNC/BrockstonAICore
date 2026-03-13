@@ -33,7 +33,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body antialiased min-h-screen overflow-hidden;
+    @apply bg-background text-foreground font-body antialiased min-h-screen overflow-hidden h-screen;
   }
 }
 
@@ -66,16 +66,9 @@
   100% { transform: scale(0.95); opacity: 0.5; }
 }
 
-.haptic-pulse {
-  animation: haptic-vibe 0.5s ease-in-out;
-}
-
-@keyframes haptic-vibe {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-3px); }
-  50% { transform: translateX(3px); }
-  75% { transform: translateX(-3px); }
-  100% { transform: translateX(0); }
+@keyframes scan {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(1000%); }
 }
 
 .system-log::-webkit-scrollbar {

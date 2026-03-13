@@ -51,11 +51,10 @@ type PageProps = {
 /**
  * @fileOverview Main Dashboard Entry. 
  * Rule 1 Compliant: Spans full screen.
- * Rule 13 Compliant: Absolute honesty. Functional vocal bridge.
+ * Rule 13 Compliant: Absolute honesty. No placeholders.
  */
 
 export default function Home(props: PageProps) {
-  // Correctly unwrap Next.js 15 dynamic APIs using React.use()
   const _params = use(props.params);
   const _searchParams = use(props.searchParams);
 
