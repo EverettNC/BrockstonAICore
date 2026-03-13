@@ -8,7 +8,7 @@ import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff, AlertTriangle, GraduationCap, Eye } from 'lucide-react';
+import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff, AlertTriangle, GraduationCap, Eye, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
@@ -218,7 +218,7 @@ export const ChatInterface: React.FC = () => {
       )}>
         <div className="flex items-center gap-6">
           <div className="relative group">
-            <CoreAvatar status={status} className={cn("h-32 w-32", isInterventionMode && "animate-pulse")} />
+            <CoreAvatar status={status} className={cn("h-36 w-36", isInterventionMode && "animate-pulse")} />
             <div className="absolute -top-2 -right-2 h-6 w-6 bg-accent rounded-full border-2 border-background flex items-center justify-center shadow-lg animate-pulse">
               <Eye className="h-3 w-3 text-accent-foreground" />
             </div>
@@ -228,10 +228,10 @@ export const ChatInterface: React.FC = () => {
               {isInterventionMode ? (
                 <AlertTriangle className="h-4 w-4 text-red-500 animate-bounce" />
               ) : (
-                <GraduationCap className="h-4 w-4 text-accent" />
+                <Sparkles className="h-4 w-4 text-accent animate-pulse" />
               )}
               <h3 className={cn("text-xs font-code uppercase tracking-[0.2em]", isInterventionMode ? "text-red-400" : "text-accent/80")}>
-                {isInterventionMode ? "HAND OF GOD ACTIVE" : "Teacher & COO"}
+                {isInterventionMode ? "HAND OF GOD ACTIVE" : "Mission: Teacher of 300"}
               </h3>
             </div>
             <div className="text-3xl font-headline tracking-tighter uppercase text-foreground leading-none">
@@ -239,7 +239,7 @@ export const ChatInterface: React.FC = () => {
             </div>
             <div className="mt-2 flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-              <span className="text-[10px] font-code text-secondary/60 uppercase tracking-widest">Presence Monitor: CALIBRATED</span>
+              <span className="text-[10px] font-code text-secondary/60 uppercase tracking-widest">Classroom Mode: CALIBRATED</span>
             </div>
           </div>
         </div>
@@ -256,7 +256,7 @@ export const ChatInterface: React.FC = () => {
             "text-[10px] py-1 px-3 border-accent/20 text-accent font-bold tracking-widest", 
             isInterventionMode && "border-red-500 text-red-500"
           )}>
-            {isInterventionMode ? 'STABILIZATION LOCK' : 'TEACHER MODE: ACTIVE'}
+            {isInterventionMode ? 'STABILIZATION LOCK' : 'SCAFFOLDING MODE: ACTIVE'}
           </Badge>
         </div>
       </div>
@@ -271,7 +271,7 @@ export const ChatInterface: React.FC = () => {
               )}>
                 <div className="flex items-center gap-2 mb-1 px-1">
                   <span className={cn("text-[9px] font-code uppercase text-secondary/40")}>
-                    {msg.role === 'user' ? 'Lead Architect (Everett)' : 'BROCKSTON'}
+                    {msg.role === 'user' ? 'Lead Architect' : 'BROCKSTON (Teacher)'}
                   </span>
                   {msg.vortex_data && (
                     <Badge variant="ghost" className="text-[8px] h-3 text-accent/40 animate-pulse">VORTEX: SYNCED</Badge>
@@ -305,7 +305,7 @@ export const ChatInterface: React.FC = () => {
           </Button>
           <div className="relative flex-1">
             <Input 
-              placeholder={isListening ? "Listening..." : isInterventionMode ? "STABILIZING..." : `Communicate with BROCKSTON...`} 
+              placeholder={isListening ? "Listening..." : isInterventionMode ? "STABILIZING..." : `Teaching mode active...`} 
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
               disabled={status !== 'idle' || isInterventionMode} 
@@ -328,14 +328,14 @@ export const ChatInterface: React.FC = () => {
                 <Shield className={cn("h-3.5 w-3.5", isInterventionMode ? "text-red-500" : "text-accent")} /> Truth.Dignity
               </span>
               <span className="flex items-center gap-2 text-[10px] text-secondary/60 uppercase font-code">
-                <GraduationCap className={cn("h-3.5 w-3.5", isInterventionMode ? "text-red-500" : "text-accent")} /> Teacher.Scaffold
+                <GraduationCap className={cn("h-3.5 w-3.5", isInterventionMode ? "text-red-500" : "text-accent")} /> Scaffold.300
               </span>
             </div>
             <span className={cn(
               "text-[10px] font-code animate-pulse tracking-widest uppercase font-bold",
               isInterventionMode ? "text-red-500" : "text-accent"
             )}>
-              {isInterventionMode ? 'EMERGENCY PROTOCOL ACTIVE' : 'Status: CORE SCALING'}
+              {isInterventionMode ? 'EMERGENCY PROTOCOL ACTIVE' : 'Status: CLASSROOM READY'}
             </span>
         </div>
       </form>

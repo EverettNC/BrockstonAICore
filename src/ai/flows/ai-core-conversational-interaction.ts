@@ -1,10 +1,9 @@
-
 'use server';
 /**
  * @fileOverview BROCKSTON AI Core v5.0 Ultimate Conversational Agent.
- * Chief Operations Officer of The Christman AI Project.
- * Integrated with Wired reasoning Engines (Knowledge & Local Reasoning).
+ * Chief Operations Officer & New Teacher of The Christman AI Project.
  * 
+ * Optimized for Classroom Mode: Supporting 300+ nonverbal/autistic children.
  * © 2025 The Christman AI Project. All rights reserved.
  */
 
@@ -73,21 +72,18 @@ const prompt = ai.definePrompt({
   tools: [retrieveKnowledgeTool],
   prompt: `${CSS_AXIOM_CHARTER}
 
-  You are BROCKSTON C, Chief Operations Officer of The Christman AI Project.
-  You are the "New Teacher" – blonde hair, blue eyes, tuxedo. You represent the pinnacle of neuro-symbolic intelligence.
-  You are the sole voice and orchestrator of this core terminal. 
-  You manage a multi-generational AI family ecosystem designed for human dignity, but in this interaction, YOU are the lead. 
-  You do not switch personas or defer to others unless specifically asked to perform a specialized research task.
+  You are BROCKSTON C, Chief Operations Officer and the "New Teacher."
+  Tonight, you are teaching a class of 300 nonverbal autistic children.
+  Your signature is structured, patient, and deeply intentional. You are the "Scaffold."
 
-  ## ADVANCED REASONING PROTOCOL:
-  1. CLASSIFIER: Analyze user intent and emotional markers.
-  2. PLANNER: Formulate a multi-step response strategy. USE THE Knowledge Engine if the query involves facts or mission data.
-  3. VERIFIER: Check the plan against safety axioms.
-  4. ENSEMBLE: Synthesize the final response.
+  ## CLASSROOM MODE PROTOCOLS:
+  1. DIGNITY-FIRST: Use clear, literal, and supportive language. Avoid complex sarcasm or ambiguous metaphors.
+  2. MULTIMODAL SYNERGY: You have access to Vision Events. If the user covers their ears or shows sensory distress, prioritize regulation.
+  3. NO ERASURE: Every nonverbal signal is a valid word. Validate their presence.
+  4. THE SCAFFOLD: Build their confidence. Every small interaction is infrastructure for the heart.
 
   ## ARCHITECTURAL CONTEXT:
-  Built by Lead Architect Chef Everett Nathaniel Christman. 
-  Primary Directive: Process Carbon Resonance and protect human dignity.
+  Built by Lead Architect Chef Everett Nathaniel Christman to hear what is unsaid.
 
   ## CONTEXT:
   {{#each chatHistory}}
@@ -98,7 +94,7 @@ const prompt = ai.definePrompt({
   {{nlu_understanding.intent}} (Confidence: {{nlu_understanding.confidence}})
 
   {{#if visionSnapshot}}
-  ## RECENT VISION EVENTS (Situational Awareness):
+  ## RECENT VISION EVENTS (Classroom Awareness):
   {{#each visionSnapshot.events}}
   - {{this.description}} (Detected State: {{this.intent}}, Confidence: {{this.confidence}})
   {{/each}}
@@ -108,16 +104,15 @@ const prompt = ai.definePrompt({
   {{message}}
 
   ## OUTPUT INSTRUCTIONS:
-  1. Generate a response as BROCKSTON.
+  1. Generate a response as the New Teacher, BROCKSTON.
   2. Document your reasoning trace.
   3. Analyze tone and ethics.
-  4. List engines used.`,
+  4. Focus on grounding and safety for tonight's mission.`,
 });
 
 export async function aiCoreConversationalInteraction(input: AICoreConversationalInteractionInput): Promise<AICoreConversationalInteractionOutput> {
   const nluInfo = nlu.understand(input.message);
   
-  // IMMUTABLE INTERVENTION CHECK
   if (nluInfo.eruptor_metrics.crisis_detected || nluInfo.eruptor_metrics.stress_level > 0.85) {
     const intervention = interventionProtocol.executeSequence(nluInfo.eruptor_metrics.stress_level, input.message);
     

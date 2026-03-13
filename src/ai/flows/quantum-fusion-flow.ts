@@ -1,8 +1,7 @@
-
 'use server';
 /**
  * @fileOverview AlphaVox Quantum Fusion Engine (AAC Symbol-to-Speech Translation).
- * Fuses compressed symbolic bursts into natural language via quantum entanglement simulation.
+ * Optimized for Brockston's Classroom Mode (Nonverbal/Autistic Support).
  * 
  * Logic: H-gates (superposition) -> RZ (valence phase) -> CNOT (entanglement) -> Measure.
  */
@@ -30,26 +29,26 @@ export type QuantumPayload = z.infer<typeof QuantumPayloadSchema>;
 export type QuantumTrace = z.infer<typeof QuantumTraceSchema>;
 
 const PHRASE_MATRIX: Record<string, string> = {
-  "000": "Safe here",
-  "001": "Need quiet",
-  "010": "Want space",
-  "011": "Feeling okay",
-  "100": "Miss you",
-  "101": "Hug time?",
-  "110": "You're kind",
-  "111": "I love you",
-  "0000": "Need help",
-  "0001": "Want to play",
-  "0010": "Hungry now",
-  "0011": "Tired rest",
-  "1000": "Feeling scared",
-  "1001": "Feel happy",
-  "1010": "Feel sad",
-  "1011": "Feel angry",
-  "1100": "Don't understand",
-  "1101": "Want to talk",
-  "1110": "Need alone time",
-  "1111": "Everything overwhelming",
+  "000": "I feel safe here.",
+  "001": "I need a quiet moment.",
+  "010": "I want some space, please.",
+  "011": "I am feeling okay right now.",
+  "100": "I missed you today.",
+  "101": "Is it time for a hug?",
+  "110": "You are very kind.",
+  "111": "I love you.",
+  "0000": "I need a little help.",
+  "0001": "I want to play a game.",
+  "0010": "I am hungry now.",
+  "0011": "I am tired and need to rest.",
+  "1000": "I am feeling a bit scared.",
+  "1001": "I feel so happy today!",
+  "1010": "I am feeling sad.",
+  "1011": "I am feeling angry.",
+  "1100": "I don't quite understand yet.",
+  "1101": "I want to talk to you.",
+  "1110": "I need some alone time to regulate.",
+  "1111": "Everything is a bit overwhelming right now.",
 };
 
 export async function quantumFuse(payload: QuantumPayload): Promise<QuantumTrace> {
@@ -64,25 +63,19 @@ const quantumFusionFlow = ai.defineFlow(
   },
   async (input) => {
     // 1. Build Quantum Circuit Simulation
-    // active_qubits maps to symbol burst size (capped for stability)
     const nQubits = Math.min(input.symbols.length, 4);
     const shots = 1024;
     const counts: Record<string, number> = {};
 
-    // 2. Probabilistic Run (Simulation of H-gates, RZ, and CNOT)
-    for (let s = 0; i < shots; i++) {
+    // 2. Probabilistic Run
+    for (let s = 0; s < shots; s++) {
       let state = "";
       
-      // Initial Qubit 0 (Heart Qubit)
-      // Affected by Hadamard + RZ Phase Shift based on valence
-      const heartThreshold = 0.5 + (input.valence - 0.5) * 0.6; // Scale phase impact
+      const heartThreshold = 0.5 + (input.valence - 0.5) * 0.6;
       const qubit0 = Math.random() < heartThreshold ? "1" : "0";
       state += qubit0;
 
-      // Entanglement chain (CNOT): Qubit 0 controls the others
       for (let j = 1; j < nQubits; j++) {
-        // High valence increases entanglement stability (1-to-1 mapping)
-        // Low valence increases decoherence (randomness)
         const entanglementStrength = 0.7 + (input.valence * 0.3);
         const entangledBit = Math.random() < entanglementStrength ? qubit0 : (qubit0 === "1" ? "0" : "1");
         state += entangledBit;
@@ -97,11 +90,11 @@ const quantumFusionFlow = ai.defineFlow(
     const decoherence = 1.0 - intentProb;
 
     // 4. Sensory Threshold Guard
-    if (decoherence > 0.7) {
+    if (decoherence > 0.85) {
       throw new Error("SENSORY THRESHOLD: High decoherence detected. Please recalibrate with calm.");
     }
 
-    const output = PHRASE_MATRIX[topState] || "Expanding possibility...";
+    const output = PHRASE_MATRIX[topState] || "Expanding the stars of possibility...";
 
     return {
       top_state: topState,
@@ -110,7 +103,7 @@ const quantumFusionFlow = ai.defineFlow(
       valence_arc: input.valence,
       decoherence_dip: decoherence,
       output: output,
-      patterns: input.valence > 0.8 ? "High Intensity Signature: Synergistic affinity detected." : "Stable baseline established."
+      patterns: input.valence > 0.8 ? "High Intensity Signature: Strong classroom resonance detected." : "Stable baseline established for learning."
     };
   }
 );
