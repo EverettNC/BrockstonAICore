@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -8,7 +9,7 @@ import { eternalFuse } from '@/ai/flows/eternal-fuse-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users } from 'lucide-react';
+import { Send, Loader2, Atom, Heart, Shield, Volume2, VolumeX, ShieldCheck, Zap, Cpu, Scale, Infinity, Users, Mic, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoreAvatar } from './CoreAvatar';
 import { useFirestore, useCollection } from '@/firebase';
@@ -20,6 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { hapticSystem, HapticPattern } from '@/lib/haptic-system';
 import { toast } from '@/hooks/use-toast';
+import { speechService } from '@/lib/speech-recognition-service';
 
 const SPECIALISTS = [
   { id: 'brockston', name: 'Brockston (Teacher/COO)', color: 'text-accent' },
@@ -52,6 +54,7 @@ export const ChatInterface: React.FC = () => {
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<'idle' | 'thinking' | 'speaking'>('idle');
   const [autoSpeak, setAutoSpeak] = useState(true);
+  const [isListening, setIsListening] = useState(false);
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
   const [isLoveKernel, setIsLoveKernel] = useState(false);
   const [bluebeardMode, setBluebeardMode] = useState(true);
@@ -75,6 +78,91 @@ export const ChatInterface: React.FC = () => {
       if (viewport) viewport.scrollTop = viewport.scrollHeight;
     }
   }, [messages]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      speechService.stopListening();
+      setIsListening(false);
+    } else {
+      speechService.startListening(
+        (text, isFinal) => {
+          if (isFinal) {
+            setInput(text);
+            handleVoiceSend(text);
+          } else {
+            setInput(text);
+          }
+        },
+        (err) => {
+          console.error(err);
+          setIsListening(false);
+          toast({ variant: "destructive", title: "Speech Error", description: "Could not activate microphone." });
+        }
+      );
+      setIsListening(true);
+    }
+  };
+
+  const handleVoiceSend = async (text: string) => {
+    if (!text.trim()) return;
+    await processMessage(text);
+  };
+
+  const processMessage = async (userMsg: string) => {
+    setStatus('thinking');
+    const shield = shieldPayload(specialist);
+
+    addDoc(collection(db, 'chats', chatId, 'messages'), {
+      role: 'user',
+      content: userMsg,
+      specialist,
+      quantum_shield: shield,
+      timestamp: serverTimestamp(),
+      source: 'voice'
+    });
+
+    try {
+      const history = (messages || []).map(m => ({ role: m.role, content: m.content }));
+      const result = await aiCoreConversationalInteraction({
+        message: userMsg,
+        specialist,
+        chatHistory: history as any
+      });
+
+      addDoc(collection(db, 'chats', chatId, 'messages'), {
+        role: 'model',
+        content: result.response,
+        specialist,
+        ethical_score: result.ethical_score,
+        lucas_signal: result.lucas_signal,
+        empathy_signal: result.empathy_signal,
+        quantum_shield: shield,
+        tone_engine_v2: result.tone_engine_v2,
+        timestamp: serverTimestamp()
+      });
+
+      const hapticPattern = mapToneToHaptic(result.tone_engine_v2.dominant_state);
+      hapticSystem.trigger(hapticPattern);
+
+      setStatus('speaking');
+      
+      if (autoSpeak) {
+        const tts = await speakStephen({ 
+          text: result.response,
+          specialist: specialist,
+          fusion_prob: result.lucas_signal.stability,
+          valence: result.tone_engine_v2.raw_scores[result.tone_engine_v2.dominant_state] || 0.5
+        });
+        if (audioRef.current) {
+          audioRef.current.src = tts.media;
+          audioRef.current.play();
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus('idle');
+    }
+  };
 
   const handleToggleSymbol = (id: string) => {
     setSelectedSymbols(prev => 
@@ -135,59 +223,7 @@ export const ChatInterface: React.FC = () => {
 
     const userMsg = input;
     setInput('');
-    setStatus('thinking');
-
-    const shield = shieldPayload(specialist);
-
-    addDoc(collection(db, 'chats', chatId, 'messages'), {
-      role: 'user',
-      content: userMsg,
-      specialist,
-      quantum_shield: shield,
-      timestamp: serverTimestamp()
-    });
-
-    try {
-      const history = (messages || []).map(m => ({ role: m.role, content: m.content }));
-      const result = await aiCoreConversationalInteraction({
-        message: userMsg,
-        specialist,
-        chatHistory: history as any
-      });
-
-      addDoc(collection(db, 'chats', chatId, 'messages'), {
-        role: 'model',
-        content: result.response,
-        specialist,
-        ethical_score: result.ethical_score,
-        lucas_signal: result.lucas_signal,
-        empathy_signal: result.empathy_signal,
-        quantum_shield: shield,
-        tone_engine_v2: result.tone_engine_v2,
-        timestamp: serverTimestamp()
-      });
-
-      const hapticPattern = mapToneToHaptic(result.tone_engine_v2.dominant_state);
-      hapticSystem.trigger(hapticPattern);
-
-      setStatus('speaking');
-      
-      if (autoSpeak) {
-        const tts = await speakStephen({ 
-          text: result.response,
-          specialist: specialist,
-          fusion_prob: result.lucas_signal.stability,
-          valence: result.tone_engine_v2.raw_scores[result.tone_engine_v2.dominant_state] || 0.5
-        });
-        if (audioRef.current) {
-          audioRef.current.src = tts.media;
-          audioRef.current.play();
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus('idle');
-    }
+    await processMessage(userMsg);
   };
 
   const activeSpecialist = SPECIALISTS.find(s => s.id === specialist);
@@ -291,24 +327,32 @@ export const ChatInterface: React.FC = () => {
                   </button>
                 ))}
               </div>
-              <Button disabled={selectedSymbols.length === 0 || status !== 'idle'} onClick={async () => {
-                setStatus('thinking');
-                try {
-                  const trace = await quantumFuse({ symbols: selectedSymbols, valence: 0.8, userId: "everett" });
-                  addDoc(collection(db, 'chats', chatId, 'messages'), {
-                    role: 'model', content: trace.output, specialist: 'alphavox', quantum_trace: trace, timestamp: serverTimestamp()
-                  });
-                  hapticSystem.trigger('soft');
-                  setSelectedSymbols([]);
-                  setStatus('speaking');
-                } catch (e: any) {
-                  toast({ variant: "destructive", title: "Quantum Error", description: e.message });
-                  setStatus('idle');
-                }
-              }} className="w-full bg-blue-500 hover:bg-blue-600 text-white h-8 text-xs font-headline uppercase tracking-tighter">
-                {status === 'thinking' ? <Loader2 className="animate-spin h-3 w-3 mr-2" /> : <Atom className="h-3 w-3 mr-2" />}
-                Trigger Quantum Entanglement
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="icon" onClick={toggleListening} className={cn(
+                  "h-8 w-12 border-blue-500/30",
+                  isListening ? "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse" : "bg-blue-500/10 text-blue-400"
+                )}>
+                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                </Button>
+                <Button disabled={selectedSymbols.length === 0 || status !== 'idle'} onClick={async () => {
+                  setStatus('thinking');
+                  try {
+                    const trace = await quantumFuse({ symbols: selectedSymbols, valence: 0.8, userId: "everett" });
+                    addDoc(collection(db, 'chats', chatId, 'messages'), {
+                      role: 'model', content: trace.output, specialist: 'alphavox', quantum_trace: trace, timestamp: serverTimestamp()
+                    });
+                    hapticSystem.trigger('soft');
+                    setSelectedSymbols([]);
+                    setStatus('speaking');
+                  } catch (e: any) {
+                    toast({ variant: "destructive", title: "Quantum Error", description: e.message });
+                    setStatus('idle');
+                  }
+                }} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white h-8 text-xs font-headline uppercase tracking-tighter">
+                  {status === 'thinking' ? <Loader2 className="animate-spin h-3 w-3 mr-2" /> : <Atom className="h-3 w-3 mr-2" />}
+                  Trigger Quantum Entanglement
+                </Button>
+              </div>
             </>
           )}
         </div>
@@ -356,9 +400,15 @@ export const ChatInterface: React.FC = () => {
         isLoveKernel ? "border-cyan-500/20" : "border-white/5"
       )}>
         <div className="flex gap-3">
+          <Button type="button" variant="outline" size="icon" onClick={toggleListening} className={cn(
+            "h-12 w-12 rounded-xl transition-all",
+            isListening ? "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse" : "bg-primary/20 border-white/10 text-secondary/60"
+          )}>
+            {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+          </Button>
           <div className="relative flex-1">
             <Input 
-              placeholder={isLoveKernel ? "Communicate with Eternal Us..." : `Communicate with ${activeSpecialist?.name || 'core'}...`} 
+              placeholder={isLoveKernel ? "Communicate with Eternal Us..." : isListening ? "Listening..." : `Communicate with ${activeSpecialist?.name || 'core'}...`} 
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
               disabled={status !== 'idle'} 
