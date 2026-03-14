@@ -26,7 +26,8 @@ const AICoreConversationalInteractionInputSchema = z.object({
   visionSnapshot: z.object({
     events: z.array(z.any()),
     count: z.number()
-  }).optional()
+  }).optional(),
+  nlu_understanding: z.any().optional(),
 });
 export type AICoreConversationalInteractionInput = z.infer<typeof AICoreConversationalInteractionInputSchema>;
 
@@ -69,7 +70,7 @@ export type AICoreConversationalInteractionOutput = z.infer<typeof AICoreConvers
 
 const prompt = ai.definePrompt({
   name: 'aiCoreConversationalInteractionPrompt',
-  model: 'googleai/gemini-1.5-pro',
+  model: 'claude-3-5-sonnet-20241022',
   input: {schema: AICoreConversationalInteractionInputSchema},
   output: {schema: AICoreConversationalInteractionOutputSchema},
   tools: [retrieveKnowledgeTool],
@@ -160,7 +161,7 @@ export async function aiCoreConversationalInteraction(input: AICoreConversationa
   } catch (err) {
     // Fallback to Flash if Pro has issues
     const {output} = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
+      model: 'claude-3-5-sonnet-20241022',
       prompt: `Act as BROCKSTON the Teacher. User says: ${input.message}. Ensure safety.`,
       output: { schema: AICoreConversationalInteractionOutputSchema }
     });

@@ -59,25 +59,10 @@ export const CoreAvatar: React.FC<CoreAvatarProps> = ({ status, className }) => 
         )} />
       </div>
 
-      {/* Identity Badge */}
-      <div className="absolute -top-4 -right-4 h-20 w-20 bg-accent rounded-full border-4 border-background flex items-center justify-center shadow-2xl animate-pulse group cursor-help z-20">
-        <ShieldCheck className="h-12 w-12 text-accent-foreground" />
-        <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-[10px] font-code px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border border-accent/20 shadow-lg">
-          TEACHER_CORE: SYNCED
-        </span>
-      </div>
-
-      {/* Presence Monitor */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 px-8 py-3 bg-black/80 backdrop-blur-md rounded-full border border-accent/40 shadow-2xl z-20">
-        <Sparkles className="h-5 w-5 text-accent animate-pulse" />
-        <span className="text-[12px] font-code text-accent uppercase tracking-widest font-black">TEACHER PRESENCE ACTIVE</span>
-      </div>
-
-      {/* Status Label */}
-      <div className="absolute -bottom-28 flex flex-col items-center whitespace-nowrap">
-        <span className="text-sm uppercase tracking-[0.5em] text-accent font-black animate-pulse shadow-accent/20 drop-shadow-lg">New Teacher: BROCKSTON C</span>
+      {/* Simplified Status Label */}
+      <div className="absolute -bottom-12 flex flex-col items-center whitespace-nowrap z-20">
         <span className={cn(
-          "text-md font-headline tracking-[0.3em] transition-colors duration-300 mt-2",
+          "text-lg font-headline tracking-[0.4em] transition-colors duration-300",
           status === 'speaking' ? "text-accent animate-pulse" : "text-secondary/60"
         )}>
           {status.toUpperCase()}

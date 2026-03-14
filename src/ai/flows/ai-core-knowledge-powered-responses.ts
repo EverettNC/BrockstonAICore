@@ -54,7 +54,7 @@ export const retrieveKnowledgeTool = ai.defineTool(
 
 export async function knowledgeEngineQuery(input: KnowledgeInput): Promise<KnowledgeOutput> {
   const { output } = await ai.generate({
-    model: 'googleai/gemini-2.5-flash',
+    model: 'claude-3-5-sonnet-20241022',
     prompt: `Research the following query in the mission knowledge base: ${input.query}`,
     tools: [retrieveKnowledgeTool],
   });

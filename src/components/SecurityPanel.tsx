@@ -13,11 +13,14 @@ export const SecurityPanel: React.FC = () => {
   const db = useFirestore();
   const [shieldStatus, setShieldStatus] = useState<ShieldStatus | null>(null);
   
-  const messagesQuery = useMemo(() => query(
-    collection(db, 'chats', 'ultimate-v5-session', 'messages'),
-    orderBy('timestamp', 'desc'),
-    limit(5)
-  ), [db]);
+  const messagesQuery = useMemo(() => {
+    if (!db) return null;
+    return query(
+      collection(db, 'chats', 'ultimate-v5-session', 'messages'),
+      orderBy('timestamp', 'desc'),
+      limit(5)
+    );
+  }, [db]);
 
   const { data: recentMessages } = useCollection<any>(messagesQuery);
 

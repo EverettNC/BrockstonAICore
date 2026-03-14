@@ -1,11 +1,10 @@
-
 "use client";
 
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BrainCircuit, ShieldAlert, Activity, Database, Eye, History, Zap, Cpu, SearchCode, Waves, ListTree, CheckCircle2, MessageSquareQuote, Rocket, Target, Heart, Infinity as InfinityIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BrainCircuit, Activity, Database, Cpu, SearchCode, Waves, ListTree, CheckCircle2, Rocket, Target, Heart, Infinity as InfinityIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -15,17 +14,23 @@ import { BehavioralInterpreter } from '@/lib/behavioral-interpreter';
 export const CortexMonitor: React.FC = () => {
   const db = useFirestore();
   
-  const messagesQuery = useMemo(() => query(
-    collection(db, 'chats', 'ultimate-v5-session', 'messages'),
-    orderBy('timestamp', 'desc'),
-    limit(10)
-  ), [db]);
+  const messagesQuery = useMemo(() => {
+    if (!db) return null;
+    return query(
+      collection(db, 'chats', 'ultimate-v5-session', 'messages'),
+      orderBy('timestamp', 'desc'),
+      limit(10)
+    );
+  }, [db]);
 
-  const behaviorQuery = useMemo(() => query(
-    collection(db, 'behavioral_history'),
-    orderBy('timestamp', 'desc'),
-    limit(10)
-  ), [db]);
+  const behaviorQuery = useMemo(() => {
+    if (!db) return null;
+    return query(
+      collection(db, 'behavioral_history'),
+      orderBy('timestamp', 'desc'),
+      limit(10)
+    );
+  }, [db]);
 
   const { data: messages } = useCollection<any>(messagesQuery);
   const { data: behaviorHistory } = useCollection<any>(behaviorQuery);
@@ -55,11 +60,11 @@ export const CortexMonitor: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Badge variant="outline" className="text-accent border-accent/40 font-code text-[8px]">
-            TEMPORAL MODE: ACTIVE
+          <Badge variant="outline" className={cn("font-code text-[8px]", db ? "text-accent border-accent/40" : "text-yellow-500 border-yellow-500/40")}>
+            TEMPORAL MODE: {db ? "ACTIVE" : "LOCAL"}
           </Badge>
           <Badge variant="outline" className="text-accent border-accent/40 font-code text-[8px]">
-            GEMINI 1.5 PRO: LINKED
+            ANTHROPIC LINKED
           </Badge>
         </div>
       </header>
@@ -75,7 +80,7 @@ export const CortexMonitor: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
-              <EngineStatus label="Reasoning Core (1.5 Pro)" active={true} icon={BrainCircuit} />
+              <EngineStatus label="Reasoning Core (Anthropic)" active={true} icon={BrainCircuit} />
               <EngineStatus label="Knowledge Engine" active={engines.includes('KnowledgeEngine')} icon={Database} />
               <EngineStatus label="Temporal Nonverbal Engine" active={true} icon={Waves} />
               
@@ -90,7 +95,7 @@ export const CortexMonitor: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </EngineStatus>
+            </CardContent>
           </Card>
 
           {/* MISSION HORIZON */}
@@ -153,7 +158,7 @@ export const CortexMonitor: React.FC = () => {
             <CardHeader className="py-4 border-b border-white/5 bg-primary/10">
               <CardTitle className="text-xs uppercase tracking-widest text-secondary flex items-center justify-between">
                 <span className="flex items-center gap-2"><SearchCode className="h-3 w-3 text-accent" /> Execution Log</span>
-                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent uppercase">Wired: Gemini 1.5 Pro</Badge>
+                <Badge variant="outline" className="text-[8px] border-accent/20 text-accent uppercase">Wired: Anthropic Claude 3.5</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6 overflow-y-auto system-log max-h-[700px]">
@@ -207,7 +212,7 @@ function HorizonItem({ icon: Icon, label, status }: { icon: any, label: string, 
         <Icon className="h-3 w-3 text-yellow-400/60" />
         <span className="text-[9px] font-code uppercase text-secondary/80">{label}</span>
       </div>
-      <Badge variant="ghost" className="text-[7px] text-yellow-400/40 uppercase">{status}</Badge>
+      <Badge variant="outline" className="text-[7px] text-yellow-400/40 uppercase">{status}</Badge>
     </div>
   );
 }

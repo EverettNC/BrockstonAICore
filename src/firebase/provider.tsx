@@ -15,7 +15,7 @@ const FirebaseContext = createContext<FirebaseContextType | null>(null);
 
 export const FirebaseProvider: React.FC<{
   children: React.ReactNode;
-  value: FirebaseContextType;
+  value: FirebaseContextType | null;
 }> = ({ children, value }) => {
   return (
     <FirebaseContext.Provider value={value}>
@@ -25,11 +25,9 @@ export const FirebaseProvider: React.FC<{
 };
 
 export const useFirebase = () => {
-  const context = useContext(FirebaseContext);
-  if (!context) throw new Error('useFirebase must be used within a FirebaseProvider');
-  return context;
+  return useContext(FirebaseContext);
 };
 
-export const useFirestore = () => useFirebase().db;
-export const useAuth = () => useFirebase().auth;
-export const useFirebaseApp = () => useFirebase().app;
+export const useFirestore = () => useFirebase()?.db || null;
+export const useAuth = () => useFirebase()?.auth || null;
+export const useFirebaseApp = () => useFirebase()?.app || null;

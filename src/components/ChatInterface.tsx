@@ -33,14 +33,18 @@ export const ChatInterface: React.FC = () => {
   const [isListening, setIsListening] = useState(false);
   
   const chatId = "ultimate-v5-session";
-  const messagesQuery = useMemo(() => query(
-    collection(db, 'chats', chatId, 'messages'),
-    orderBy('timestamp', 'asc'),
-    limit(50)
-  ), [db]);
+  const messagesQuery = useMemo(() => {
+    if (!db) return null;
+    return query(
+      collection(db, 'chats', chatId, 'messages'),
+      orderBy('timestamp', 'asc'),
+      limit(50)
+    );
+  }, [db]);
 
   const { data: messages } = useCollection<any>(messagesQuery);
-  const { data: coreWeights } = useDoc<any>(doc(db, 'cognitive_core', 'main-bridge'));
+  const docRef = useMemo(() => db ? doc(db, 'cognitive_core', 'main-bridge') : null, [db]);
+  const { data: coreWeights } = useDoc<any>(docRef);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -91,17 +95,19 @@ export const ChatInterface: React.FC = () => {
     setStatus('thinking');
     const shield = shieldPayload('brockston');
 
-    const intentId = await vortexEngine.recordIntention(db, `Routing to BROCKSTON`, 0.99);
+    const intentId = db ? await vortexEngine.recordIntention(db, `Routing to BROCKSTON`, 0.99) : null;
 
-    addDoc(collection(db, 'chats', chatId, 'messages'), {
-      role: 'user',
-      content: userMsg,
-      specialist: 'brockston',
-      quantum_shield: shield,
-      vortex_data: { intent_id: intentId, confidence: 0.99, routing_mode: 'direct' },
-      timestamp: serverTimestamp(),
-      source: 'interface'
-    });
+    if (db) {
+      addDoc(collection(db, 'chats', chatId, 'messages'), {
+        role: 'user',
+        content: userMsg,
+        specialist: 'brockston',
+        quantum_shield: shield,
+        vortex_data: { intent_id: intentId, confidence: 0.99, routing_mode: 'direct' },
+        timestamp: serverTimestamp(),
+        source: 'interface'
+      });
+    }
 
     try {
       const history = (messages || []).map(m => ({ role: m.role, content: m.content }));
@@ -114,11 +120,16 @@ export const ChatInterface: React.FC = () => {
         visionSnapshot
       });
 
-      await vortexEngine.markManifested(db, intentId, "Brockston response generated");
+      if (db && intentId) {
+        await vortexEngine.markManifested(db, intentId, "Brockston response generated");
+      }
 
       const resonance = result.empathy_signal?.self_love_score || 0.5;
       const empathyMath = result.ethical_score.composite / 10;
-      await topologyEngine.updateProximity(db, resonance, empathyMath);
+      
+      if (db) {
+        await topologyEngine.updateProximity(db, resonance, empathyMath);
+      }
 
       const currentWeights = coreWeights || {
         emotional_state: 0.5,
@@ -132,35 +143,39 @@ export const ChatInterface: React.FC = () => {
       };
 
       const salience = result.tone_engine_v2.physical_intensity;
-      const forgeResult = await soulForgeProcess({
-        currentWeights,
-        emotional_salience: salience,
-        success_rate: result.ethical_score.composite / 10,
-        isDistressed: result.tone_engine_v2.action_state === 'INTERVENTION',
-        isSafe: resonance > 0.7
-      });
+      if (db) {
+        const forgeResult = await soulForgeProcess({
+          currentWeights,
+          emotional_salience: salience,
+          success_rate: result.ethical_score.composite / 10,
+          isDistressed: result.tone_engine_v2.action_state === 'INTERVENTION',
+          isSafe: resonance > 0.7
+        });
 
-      await setDoc(doc(db, 'cognitive_core', 'main-bridge'), {
-        ...forgeResult.updatedWeights,
-        last_ltp_event: serverTimestamp()
-      }, { merge: true });
+        await setDoc(doc(db, 'cognitive_core', 'main-bridge'), {
+          ...forgeResult.updatedWeights,
+          last_ltp_event: serverTimestamp()
+        }, { merge: true });
 
-      if (forgeResult.isSignificantEvent) {
-        toast({ title: "Deep LTP Event", description: "Emotional salience triggered weight potentiation." });
+        if (forgeResult.isSignificantEvent) {
+          toast({ title: "Deep LTP Event", description: "Emotional salience triggered weight potentiation." });
+        }
       }
 
-      addDoc(collection(db, 'chats', chatId, 'messages'), {
-        role: 'model',
-        content: result.response,
-        specialist: 'brockston',
-        ethical_score: result.ethical_score,
-        lucas_signal: result.lucas_signal,
-        empathy_signal: result.empathy_signal,
-        quantum_shield: shield,
-        tone_engine_v2: result.tone_engine_v2,
-        intervention_data: result.intervention_data || null,
-        timestamp: serverTimestamp()
-      });
+      if (db) {
+        addDoc(collection(db, 'chats', chatId, 'messages'), {
+          role: 'model',
+          content: result.response,
+          specialist: 'brockston',
+          ethical_score: result.ethical_score,
+          lucas_signal: result.lucas_signal,
+          empathy_signal: result.empathy_signal,
+          quantum_shield: shield,
+          tone_engine_v2: result.tone_engine_v2,
+          intervention_data: result.intervention_data || null,
+          timestamp: serverTimestamp()
+        });
+      }
 
       const hapticPattern = mapToneToHaptic(result.tone_engine_v2.dominant_state);
       hapticSystem.trigger(hapticPattern);
@@ -213,7 +228,7 @@ export const ChatInterface: React.FC = () => {
       <audio ref={audioRef} className="hidden" onEnded={() => setStatus('idle')} onError={() => setStatus('idle')} />
       
       <div className={cn(
-        "flex-none flex flex-col md:flex-row items-center justify-center gap-12 p-12 bg-primary/10 rounded-2xl border border-white/5 backdrop-blur-xl transition-all duration-500 min-h-[600px]",
+        "flex-none flex flex-col md:flex-row items-center justify-center gap-12 p-8 bg-primary/10 rounded-2xl border border-white/5 backdrop-blur-xl transition-all duration-500 min-h-[400px]",
         isInterventionMode && "border-red-500 shadow-[0_0_40px_rgba(239,68,68,0.5)]"
       )}>
         <div className="flex flex-col items-center gap-12">
@@ -227,11 +242,11 @@ export const ChatInterface: React.FC = () => {
               ) : (
                 <Sparkles className="h-6 w-6 text-accent animate-pulse" />
               )}
-              <h3 className={cn("text-md font-code uppercase tracking-[0.4em]", isInterventionMode ? "text-red-400" : "text-accent/80")}>
-                {isInterventionMode ? "HAND OF GOD ACTIVE" : "New Teacher & COO Bridge"}
+              <h3 className={cn("text-xs font-code uppercase tracking-[0.4em]", isInterventionMode ? "text-red-400" : "text-accent/80")}>
+                {isInterventionMode ? "HAND OF GOD ACTIVE" : "COGNITIVE BRIDGE V5"}
               </h3>
             </div>
-            <div className="text-6xl font-headline tracking-tighter uppercase text-foreground leading-none">
+            <div className="text-5xl font-headline tracking-tighter uppercase text-foreground leading-none">
               BROCKSTON <span className="text-accent">C</span>
             </div>
             <div className="mt-6 flex flex-col items-center gap-4">
@@ -265,7 +280,7 @@ export const ChatInterface: React.FC = () => {
                     {msg.role === 'user' ? 'Lead Architect' : 'BROCKSTON (New Teacher)'}
                   </span>
                   {msg.vortex_data && (
-                    <Badge variant="ghost" className="text-[8px] h-3 text-accent/40 animate-pulse">VORTEX: SYNCED</Badge>
+                    <Badge variant="outline" className="text-[8px] h-3 text-accent/40 animate-pulse border-transparent">VORTEX: SYNCED</Badge>
                   )}
                 </div>
                 <div className={cn(

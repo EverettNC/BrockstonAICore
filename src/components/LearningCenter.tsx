@@ -52,21 +52,30 @@ export const LearningCenter: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [activeDomain, setActiveDomain] = useState(DOMAINS[0].id);
 
-  const masteryQuery = useMemo(() => query(collection(db, 'knowledge_domains')), [db]);
+  const masteryQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'knowledge_domains'));
+  }, [db]);
   const { data: masteryData } = useCollection<any>(masteryQuery);
 
-  const insightsQuery = useMemo(() => query(
-    collection(db, 'learned_insights'),
-    orderBy('timestamp', 'desc'),
-    limit(15)
-  ), [db]);
+  const insightsQuery = useMemo(() => {
+    if (!db) return null;
+    return query(
+      collection(db, 'learned_insights'),
+      orderBy('timestamp', 'desc'),
+      limit(15)
+    );
+  }, [db]);
   const { data: insights } = useCollection<any>(insightsQuery);
 
-  const memoryQuery = useMemo(() => query(
-    collection(db, 'enhanced_memory'),
-    orderBy('next_review', 'asc'),
-    limit(5)
-  ), [db]);
+  const memoryQuery = useMemo(() => {
+    if (!db) return null;
+    return query(
+      collection(db, 'enhanced_memory'),
+      orderBy('next_review', 'asc'),
+      limit(5)
+    );
+  }, [db]);
   const { data: memories } = useCollection<any>(memoryQuery);
 
   const handleLearn = async () => {
@@ -85,51 +94,53 @@ export const LearningCenter: React.FC = () => {
       
       const result = await learnTopic({ domain: activeDomain as any, subtopic });
       
-      // Update mastery
-      const newMastery = Math.min(1.0, currentMastery + result.mastery_boost);
-      await setDoc(doc(db, 'knowledge_domains', activeDomain), {
-        domain: activeDomain,
-        mastery_level: newMastery,
-        last_update: serverTimestamp()
-      }, { merge: true });
+      if (db) {
+        // Update mastery
+        const newMastery = Math.min(1.0, currentMastery + result.mastery_boost);
+        await setDoc(doc(db, 'knowledge_domains', activeDomain), {
+          domain: activeDomain,
+          mastery_level: newMastery,
+          last_update: serverTimestamp()
+        }, { merge: true });
 
-      // Store in Enhanced Memory (Spaced Repetition)
-      const memoryId = `mem_${Date.now()}`;
-      await setDoc(doc(db, 'enhanced_memory', memoryId), {
-        topic: subtopic,
-        domain: activeDomain,
-        content: result.summary,
-        last_review: Date.now(),
-        interval: 3600, // 1 hour initial
-        next_review: Date.now() + 3600 * 1000,
-        mastery: 0.8,
-        importance: domainInfo.priority
-      });
+        // Store in Enhanced Memory (Spaced Repetition)
+        const memoryId = `mem_${Date.now()}`;
+        await setDoc(doc(db, 'enhanced_memory', memoryId), {
+          topic: subtopic,
+          domain: activeDomain,
+          content: result.summary,
+          last_review: Date.now(),
+          interval: 3600, // 1 hour initial
+          next_review: Date.now() + 3600 * 1000,
+          mastery: 0.8,
+          importance: domainInfo.priority
+        });
+        
+        // Reflection: deriving insight
+        const insight = RetentionEngine.deriveHybridInsight({
+          id: memoryId,
+          topic: subtopic,
+          domain: activeDomain,
+          content: result.summary,
+          last_review: Date.now(),
+          interval: 3600,
+          mastery: 0.8,
+          importance: domainInfo.priority
+        });
 
-      // Reflection: deriving insight
-      const insight = RetentionEngine.deriveHybridInsight({
-        id: memoryId,
-        topic: subtopic,
-        domain: activeDomain,
-        content: result.summary,
-        last_review: Date.now(),
-        interval: 3600,
-        mastery: 0.8,
-        importance: domainInfo.priority
-      });
+        await addDoc(collection(db, 'learned_insights'), {
+          topic: subtopic,
+          domain: activeDomain,
+          insight: result.generated_insight,
+          reflection: insight,
+          timestamp: serverTimestamp()
+        });
 
-      await addDoc(collection(db, 'learned_insights'), {
-        topic: subtopic,
-        domain: activeDomain,
-        insight: result.generated_insight,
-        reflection: insight,
-        timestamp: serverTimestamp()
-      });
-
-      toast({
-        title: "Mastery Potentiated",
-        description: `Brockston reached ${(newMastery * 100).toFixed(1)}% mastery in ${activeDomain}.`,
-      });
+        toast({
+          title: "Mastery Potentiated",
+          description: `Brockston reached ${(newMastery * 100).toFixed(1)}% mastery in ${activeDomain}.`,
+        });
+      }
     } catch (error: any) {
       toast({ variant: "destructive", title: "Cognitive Stall", description: error.message });
     } finally {
@@ -138,6 +149,7 @@ export const LearningCenter: React.FC = () => {
   };
 
   const handleReview = async (memory: any) => {
+    if (!db) return;
     const nextInterval = RetentionEngine.calculateNextInterval(memory.interval, true);
     await setDoc(doc(db, 'enhanced_memory', memory.id), {
       ...memory,

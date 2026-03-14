@@ -9,8 +9,8 @@
     {
       "id": "brockston-avatar",
       "description": "The New Teacher: Brockston Professional Portrait",
-      "imageUrl": "https://picsum.photos/seed/teacher-brockston-v5/800/800",
-      "imageHint": "blonde man tuxedo portrait"
+      "imageUrl": "/images/brockston-blue.jpg",
+      "imageHint": "blonde man in blue suit professional portrait"
     }
   ]
 }

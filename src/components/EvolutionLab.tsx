@@ -21,14 +21,19 @@ export const EvolutionLab: React.FC = () => {
   const [evolving, setEvolving] = useState(false);
   const [fittestHistory, setFittestHistory] = useState<any[]>([]);
 
+  const q = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'fittest_models'), orderBy('timestamp', 'desc'), limit(10));
+  }, [db]);
+
   useEffect(() => {
-    const q = query(collection(db, 'fittest_models'), orderBy('timestamp', 'desc'), limit(10));
+    if (!db || !q) return;
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const models = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setFittestHistory(models);
     });
     return () => unsubscribe();
-  }, [db]);
+  }, [db, q]);
 
   const handleEvolve = async () => {
     setEvolving(true);
@@ -44,7 +49,7 @@ export const EvolutionLab: React.FC = () => {
   };
 
   const handlePersist = async () => {
-    if (!engine.bestFittest) return;
+    if (!engine.bestFittest || !db) return;
     try {
       await addDoc(collection(db, 'fittest_models'), {
         generation: engine.generation,
