@@ -173,8 +173,8 @@ class BrockstonBrain:
         self.anthropic_client = None
         if self.anthropic_key:
             self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_key)
-            self.model = "claude-3-5-sonnet-20241022"
-            logger.info("🧠 Brain Core (Anthropic Claude 3.5 Sonnet) initialized")
+            self.model = "claude-sonnet-4-6"
+            logger.info("🧠 Brain Core (Anthropic Claude Sonnet 4.6) initialized")
         else:
             logger.warning("No Anthropic API key found. Core intelligence offline.")
 

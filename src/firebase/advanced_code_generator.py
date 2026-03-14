@@ -403,7 +403,7 @@ async def chat(msg: ChatMessage):
         
         # Get AI response
         response = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-6",
             messages=conversations[msg.user_id],
             max_tokens=1024
         )

@@ -367,7 +367,7 @@ class ConversationEngine:
             raise Exception("Anthropic client could not be initialized (missing API key?)")
 
         # Use model from environment or default to local infrastructure expectation
-        model_id = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
+        model_id = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
         logger.info(f"Using Anthropic model: {model_id}")
 
         response = client.messages.create(

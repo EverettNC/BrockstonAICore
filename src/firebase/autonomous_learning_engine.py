@@ -485,7 +485,7 @@ Include:
         try:
             import concurrent.futures
             def make_api_call():
-                model = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20240620")
+                model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
                 response = self.anthropic_client.messages.create(
                     model=model,
                     max_tokens=1500,

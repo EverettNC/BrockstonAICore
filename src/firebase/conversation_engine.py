@@ -342,7 +342,7 @@ class ConversationEngine:
 
         # Send request to Anthropic
         response = ANTHROPIC_CLIENT.messages.create(
-            model="claude-3-sonnet-20240229",
+            model="claude-sonnet-4-6",
             max_tokens=1024,
             system=system_prompt,
             messages=messages,

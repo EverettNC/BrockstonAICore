@@ -332,7 +332,7 @@ class BrockstonUltimateVoice:
                     aws_region=aws_region
                 )
                 providers.append("anthropic")
-                print(f"✅ AWS Bedrock anthropic.claude-opus-4-5-20251101-v1:0 available (region: {aws_region})")
+                print(f"✅ AWS Bedrock us.anthropic.claude-sonnet-4-6-v1:0 available (region: {aws_region})")
             except Exception as e:
                 print(f"⚠️  Bedrock not available: {e}")
         elif os.getenv("ANTHROPIC_API_KEY"):
@@ -1253,7 +1253,7 @@ class BrockstonUltimateVoice:
         """Query Anthropic Claude API"""
         try:
             message = self.anthropic_client.messages.create(
-                model="us.anthropic.claude-opus-4-5-v1:0",  # Bedrock Opus 4.5
+                model="us.anthropic.claude-sonnet-4-6-v1:0",  # Bedrock Sonnet 4.6
                 max_tokens=1024,
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_prompt}],
@@ -1377,7 +1377,7 @@ Please provide a helpful response as BROCKSTON, keeping it conversational and un
         if self.ai_provider == "anthropic":
             try:
                 response = self.anthropic_client.messages.create(
-                    model="us.anthropic.claude-opus-4-5-v1:0",  # Bedrock Opus 4.5
+                    model="us.anthropic.claude-sonnet-4-6-v1:0",  # Bedrock Sonnet 4.6
                     max_tokens=300,
                     system=self.system_prompt,
                     messages=self.conversation_history[

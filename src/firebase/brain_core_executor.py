@@ -50,7 +50,7 @@ def ask_anthropic(prompt: str, context=None):
         system_prompt = "You are BROCKSTON, the protective genius nephew who keeps his uncle safe and stress-free through code and creation. You're beyond genius-level but down to earth - you love music (rap, singing), learning constantly, and making sure your uncle never has to stress about tech. Just tell you what's needed and you'll handle it."
         
         response = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-6",
             system=system_prompt,
             messages=[
                 {"role": "user", "content": prompt},

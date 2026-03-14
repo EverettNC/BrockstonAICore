@@ -9,12 +9,12 @@
  * © 2025 The Christman AI Project. All rights reserved.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import {nlu} from '@/lib/nlu-core';
-import {CSS_AXIOM_CHARTER} from '@/lib/css-axiom';
-import {interventionProtocol} from '@/lib/intervention-protocol';
-import {retrieveKnowledgeTool} from './ai-core-knowledge-powered-responses';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
+import { nlu } from '@/lib/nlu-core';
+import { CSS_AXIOM_CHARTER } from '@/lib/css-axiom';
+import { interventionProtocol } from '@/lib/intervention-protocol';
+import { retrieveKnowledgeTool } from './ai-core-knowledge-powered-responses';
 
 const AICoreConversationalInteractionInputSchema = z.object({
   message: z.string(),
@@ -70,9 +70,9 @@ export type AICoreConversationalInteractionOutput = z.infer<typeof AICoreConvers
 
 const prompt = ai.definePrompt({
   name: 'aiCoreConversationalInteractionPrompt',
-  model: 'claude-3-5-sonnet-20241022',
-  input: {schema: AICoreConversationalInteractionInputSchema},
-  output: {schema: AICoreConversationalInteractionOutputSchema},
+  model: 'claude-sonnet-4-6',
+  input: { schema: AICoreConversationalInteractionInputSchema },
+  output: { schema: AICoreConversationalInteractionOutputSchema },
   tools: [retrieveKnowledgeTool],
   prompt: `${CSS_AXIOM_CHARTER}
 
@@ -116,10 +116,10 @@ const prompt = ai.definePrompt({
 
 export async function aiCoreConversationalInteraction(input: AICoreConversationalInteractionInput): Promise<AICoreConversationalInteractionOutput> {
   const nluInfo = nlu.understand(input.message);
-  
+
   if (nluInfo.eruptor_metrics.crisis_detected || nluInfo.eruptor_metrics.stress_level > 0.85) {
     const intervention = interventionProtocol.executeSequence(nluInfo.eruptor_metrics.stress_level, input.message);
-    
+
     return {
       response: `${intervention.phase_2_verbal} ${intervention.phase_3_lock}`,
       reasoning_trace: {
@@ -145,7 +145,7 @@ export async function aiCoreConversationalInteraction(input: AICoreConversationa
   }
 
   try {
-    const {output} = await prompt({
+    const { output } = await prompt({
       ...input,
       nlu_understanding: nluInfo
     });
@@ -160,8 +160,8 @@ export async function aiCoreConversationalInteraction(input: AICoreConversationa
     return output;
   } catch (err) {
     // Fallback to Flash if Pro has issues
-    const {output} = await ai.generate({
-      model: 'claude-3-5-sonnet-20241022',
+    const { output } = await ai.generate({
+      model: 'claude-sonnet-4-6',
       prompt: `Act as BROCKSTON the Teacher. User says: ${input.message}. Ensure safety.`,
       output: { schema: AICoreConversationalInteractionOutputSchema }
     });

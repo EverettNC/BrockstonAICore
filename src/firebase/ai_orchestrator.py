@@ -34,7 +34,7 @@ from systems_bridge import get_systems_bridge
 logger = logging.getLogger(__name__)
 
 # Model pulled from env
-_ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
+_ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
 _OLLAMA_URL   = os.getenv("OLLAMA_URL",   "http://localhost:11434")
 _OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 

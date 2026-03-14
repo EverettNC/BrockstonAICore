@@ -37,7 +37,7 @@ export const retrieveKnowledgeTool = ai.defineTool(
   async (input) => {
     // This simulates the KnowledgeEngine research logic
     const q = input.query.toLowerCase();
-    
+
     if (q.includes('autism')) {
       return "2025 Context: Leucovorin Calcium approved Sep 2025 for specific subtypes. Research emphasizes Biologically Distinct Subtypes (Princeton).";
     }
@@ -47,14 +47,14 @@ export const retrieveKnowledgeTool = ai.defineTool(
     if (q.includes('css') || q.includes('axiom')) {
       return "CSS Axiom v1.0: Nothing Vital Lives Below Root. Truth preservation supersedes correctness. Defense prevails.";
     }
-    
+
     return `Searching knowledge graph for "${input.query}"... Data localized but requires deeper reasoning for extraction.`;
   }
 );
 
 export async function knowledgeEngineQuery(input: KnowledgeInput): Promise<KnowledgeOutput> {
   const { output } = await ai.generate({
-    model: 'claude-3-5-sonnet-20241022',
+    model: 'claude-sonnet-4-6',
     prompt: `Research the following query in the mission knowledge base: ${input.query}`,
     tools: [retrieveKnowledgeTool],
   });
