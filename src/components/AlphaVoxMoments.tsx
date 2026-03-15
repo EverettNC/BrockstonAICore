@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { captureMoment } from '@/ai/flows/moment-capture-flow';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
@@ -19,7 +19,10 @@ export const AlphaVoxMoments: React.FC = () => {
   const db = useFirestore();
   const { toast } = useToast();
 
-  const vaultQuery = query(collection(db, 'resonance_vault'), orderBy('timestamp', 'desc'));
+  const vaultQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'resonance_vault'), orderBy('timestamp', 'desc'));
+  }, [db]);
   const { data: moments } = useCollection<any>(vaultQuery);
 
   const handleCapture = async () => {
@@ -28,11 +31,13 @@ export const AlphaVoxMoments: React.FC = () => {
     
     try {
       const result = await captureMoment({ rawInput: input });
-      await addDoc(collection(db, 'resonance_vault'), {
-        ...result,
-        raw_signal: input,
-        timestamp: serverTimestamp()
-      });
+      if (db) {
+        await addDoc(collection(db, 'resonance_vault'), {
+          ...result,
+          raw_signal: input,
+          timestamp: serverTimestamp()
+        });
+      }
       setInput('');
       toast({ 
         title: "CONFIRMED: Moment preserved", 

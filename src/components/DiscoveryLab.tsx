@@ -33,7 +33,7 @@ export const DiscoveryLab: React.FC = () => {
       setResult(data);
       
       // Persist to HIPAA-logged Research collection
-      await addDoc(collection(db, 'research_discoveries'), {
+      if (db) await addDoc(collection(db, 'research_discoveries'), {
         ...data,
         insight,
         research_area: area,
@@ -147,7 +147,7 @@ export const DiscoveryLab: React.FC = () => {
                   <Loader2 className="h-8 w-8 animate-spin text-accent" />
                   <p className="text-xs font-code animate-pulse">Derek is scanning knowledge graph (v2025.11)...</p>
                 </div>
-              ) : (
+              ) : result ? (
                 <div className="space-y-8 animate-in fade-in duration-700">
                   {/* Analysis Segment */}
                   <div>
@@ -201,7 +201,7 @@ export const DiscoveryLab: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              )}
+              ) : null}
             </CardContent>
           </Card>
         </section>

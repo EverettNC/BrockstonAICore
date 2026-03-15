@@ -184,6 +184,20 @@ export class BehavioralInterpreter {
     return totalSimilarity / (sequence.length - 1);
   }
 
+  static detectPatterns(history: BehaviorObservation[]): PatternInfo[] {
+    if (history.length === 0) return [];
+    const primary = this.analyzeTemporalSequence(history);
+    return primary.pattern !== 'unknown' ? [primary] : [];
+  }
+
+  static predictNeeds(state: EmotionalState): string {
+    if (state.frustration > 0.7) return "De-escalation and grounding support needed.";
+    if (state.valence < -0.4) return "Emotional validation and calming presence needed.";
+    if (state.attention < 0.3) return "Re-engagement or sensory break may help.";
+    if (state.satisfaction > 0.7) return "Continue current engagement — positive state.";
+    return "Stable. Continue monitoring.";
+  }
+
   static generateEnhancedResponse(primaryResult: PatternInfo): string {
     if (primaryResult.confidence < 0.3) {
       return "I'm not detecting a clear pattern in your nonverbal communication.";

@@ -36,7 +36,7 @@ export const ResonanceCapacitor: React.FC = () => {
         hapticSystem.trigger('rough');
         
         // Log the overflow
-        await addDoc(collection(db, 'resonance_overflows'), {
+        if (db) await addDoc(collection(db, 'resonance_overflows'), {
           agony_input: agony,
           purpose_input: purpose,
           total_load: data.total_load,

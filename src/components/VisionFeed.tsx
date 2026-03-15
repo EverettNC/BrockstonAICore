@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { analyzeVision } from '@/ai/flows/vision-flow';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, Shield, Activity, Camera, Loader2, AlertCircle, Scan, History, Sparkles, MessageSquareQuote } from 'lucide-react';
@@ -24,7 +24,10 @@ export const VisionFeed: React.FC = () => {
   const [enhancedResponse, setEnhancedResponse] = useState<string>('');
   const { toast } = useToast();
 
-  const historyQuery = query(collection(db, 'behavioral_history'), orderBy('timestamp', 'desc'), limit(10));
+  const historyQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'behavioral_history'), orderBy('timestamp', 'desc'), limit(10));
+  }, [db]);
   const { data: history } = useCollection<any>(historyQuery);
 
   useEffect(() => {
@@ -78,17 +81,19 @@ export const VisionFeed: React.FC = () => {
       // 4. Persist Event
       const behaviorType = perception.cues.intent || "perception:general";
 
-      addDoc(collection(db, 'behavioral_history'), {
-        type: behaviorType,
-        intensity: perception.cues.intent ? 0.8 : 0.4,
-        context: { 
-          source: 'vision_system', 
-          scene: result.description, 
-          safety: result.safety_status,
-          cues: perception.cues
-        },
-        timestamp: new Date().toISOString()
-      });
+      if (db) {
+        addDoc(collection(db, 'behavioral_history'), {
+          type: behaviorType,
+          intensity: perception.cues.intent ? 0.8 : 0.4,
+          context: { 
+            source: 'vision_system', 
+            scene: result.description, 
+            safety: result.safety_status,
+            cues: perception.cues
+          },
+          timestamp: new Date().toISOString()
+        });
+      }
 
       toast({
         title: perception.cues.intent ? "Symbol Identified" : "Perception Logged",

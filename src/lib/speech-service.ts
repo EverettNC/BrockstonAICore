@@ -29,7 +29,7 @@ export class SpeechService {
    */
   async synthesizeSpeech(text: string, voice: string = "brockston"): Promise<string> {
     try {
-      const result = await speakStephen({ text, specialist: voice });
+      const result = await speakStephen({ text, specialist: voice, valence: 0.6, fusion_prob: 0.8 });
       return result.media;
     } catch (error) {
       console.error("Speech synthesis failed:", error);

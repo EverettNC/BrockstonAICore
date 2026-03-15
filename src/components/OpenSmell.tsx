@@ -78,7 +78,7 @@ export const OpenSmell: React.FC = () => {
         };
 
         setData(scanResult);
-        await addDoc(collection(db, 'chemical_scans'), scanResult);
+        if (db) await addDoc(collection(db, 'chemical_scans'), scanResult);
         
         toast({ title: "Sample Processed", description: "Chemical Truth synchronized with core." });
       }

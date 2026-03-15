@@ -38,6 +38,7 @@ export const PulseTerminal: React.FC = () => {
   };
 
   const handleBreakthrough = async () => {
+    if (!db) return;
     try {
       await addDoc(collection(db, 'pulse_breakthroughs'), {
         real_voice: PULSE_DATA.real,

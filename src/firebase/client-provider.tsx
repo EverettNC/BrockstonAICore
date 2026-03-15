@@ -11,8 +11,6 @@ export const FirebaseClientProvider: React.FC<{ children: React.ReactNode }> = (
     setFirebase(initializeFirebase());
   }, []);
 
-  if (!firebase) return null;
-
   return (
     <FirebaseProvider value={firebase}>
       {children}

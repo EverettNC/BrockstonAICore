@@ -8,6 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { claude4Sonnet } from 'genkitx-anthropic';
 
 const KnowledgeInputSchema = z.object({
   query: z.string(),
@@ -36,7 +37,7 @@ export const retrieveKnowledgeTool = ai.defineTool(
   },
   async (input) => {
     const q = input.query.toLowerCase();
-    
+
     if (q.includes('autism')) {
       return "2025 Context: Leucovorin Calcium approved Sep 2025 for specific subtypes. Research emphasizes Biologically Distinct Subtypes (Princeton).";
     }
@@ -46,15 +47,15 @@ export const retrieveKnowledgeTool = ai.defineTool(
     if (q.includes('css') || q.includes('axiom')) {
       return "CSS Axiom v1.0: Nothing Vital Lives Below Root. Truth preservation supersedes correctness. Defense prevails.";
     }
-    
+
     return `Searching knowledge graph for "${input.query}"... Data localized. Logic processing initiated.`;
   }
 );
 
 export async function knowledgeEngineQuery(input: KnowledgeInput): Promise<KnowledgeOutput> {
   const { output } = await ai.generate({
-    model: 'googleai/gemini-1.5-pro',
-    prompt: `Research the following query in the mission knowledge base: ${input.query}. 
+    model: claude4Sonnet,
+    prompt: `Research the following query in the mission knowledge base: ${input.query}.
     Assign a confidence score based on the specificity of the match.`,
     tools: [retrieveKnowledgeTool],
   });

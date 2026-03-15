@@ -68,7 +68,7 @@ export class NeuralNetIndividual {
         } else {
           val = 1.0 / (1.0 + Math.exp(-Math.max(-100, Math.min(100, val))));
         }
-        nextActivation.append ? nextActivation.push(val) : nextActivation.push(val);
+        nextActivation.push(val);
       }
       activation = nextActivation;
     }

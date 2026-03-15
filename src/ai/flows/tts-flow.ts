@@ -8,9 +8,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/google-genai';
 import {z} from 'genkit';
-import wav from 'wav';
 
 const TTSInputSchema = z.object({
   text: z.string(),
@@ -94,56 +92,13 @@ const ttsFlow = ai.defineFlow(
             media: `data:audio/mpeg;base64,${buffer.toString('base64')}`,
           };
         }
-        console.warn('ElevenLabs API returned an error, falling back to Gemini TTS.');
+        console.warn('ElevenLabs API returned an error:', response.status, response.statusText);
       } catch (e) {
         console.error('ElevenLabs Bridge failed:', e);
       }
     }
 
-    // 2. Fallback to Gemini High-Fidelity Bridge
-    const rate = profile.speedFactor < 0.92 || fusion_prob < 0.6 ? "slow" : "medium";
-    const pitch = valence > 0.7 ? "happy" : valence < 0.3 ? "serious" : profile.pitch;
-    const accentNote = `Speak with a ${profile.accent} accent.`;
-
-    const { media } = await ai.generate({
-      model: googleAI.model('gemini-2.5-flash-preview-tts'),
-      config: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: profile.voiceName as any },
-          },
-        },
-      },
-      prompt: `${accentNote} Respond at a ${rate} speed with a ${pitch} tone: ${text}`,
-    });
-
-    if (!media) throw new Error('Voice bridge failure');
-
-    const audioBuffer = Buffer.from(
-      media.url.substring(media.url.indexOf(',') + 1),
-      'base64'
-    );
-
-    return {
-      media: 'data:audio/wav;base64,' + (await toWav(audioBuffer)),
-    };
+    // No fallback available — throw so the UI can handle gracefully
+    throw new Error('Voice bridge unavailable. ElevenLabs key missing or request failed.');
   }
 );
-
-async function toWav(
-  pcmData: Buffer,
-  channels = 1,
-  rate = 24000,
-  sampleWidth = 2
-): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const writer = new wav.Writer({ channels, sampleRate: rate, bitDepth: sampleWidth * 8 });
-    let bufs = [] as any[];
-    writer.on('error', reject);
-    writer.on('data', (d) => bufs.push(d));
-    writer.on('end', () => resolve(Buffer.concat(bufs).toString('base64')));
-    writer.write(pcmData);
-    writer.end();
-  });
-}

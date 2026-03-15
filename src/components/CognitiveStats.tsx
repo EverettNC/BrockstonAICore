@@ -29,17 +29,20 @@ export const CognitiveStats: React.FC = () => {
   const db = useFirestore();
   const [isMounted, setIsMounted] = useState(false);
   
-  const coreRef = useMemo(() => doc(db, 'cognitive_core', 'main-bridge'), [db]);
-  const topologyRef = useMemo(() => doc(db, 'cognitive_core', 'relational-topology'), [db]);
+  const coreRef = useMemo(() => db ? doc(db, 'cognitive_core', 'main-bridge') : null, [db]);
+  const topologyRef = useMemo(() => db ? doc(db, 'cognitive_core', 'relational-topology') : null, [db]);
   
   const { data: forgeState } = useDoc<any>(coreRef);
   const { data: topologyState } = useDoc<any>(topologyRef);
 
-  const messagesQuery = useMemo(() => query(
-    collection(db, 'chats', 'ultimate-v5-session', 'messages'),
-    orderBy('timestamp', 'desc'),
-    limit(10)
-  ), [db]);
+  const messagesQuery = useMemo(() => {
+    if (!db) return null;
+    return query(
+      collection(db, 'chats', 'ultimate-v5-session', 'messages'),
+      orderBy('timestamp', 'desc'),
+      limit(10)
+    );
+  }, [db]);
   const { data: recentMessages } = useCollection<any>(messagesQuery);
 
   useEffect(() => {

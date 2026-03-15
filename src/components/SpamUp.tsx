@@ -69,6 +69,7 @@ export const SpamUp: React.FC = () => {
         
         try {
           // 1. Record Intention (Vortex Start)
+          if (!db) return;
           const intentId = await vortexEngine.recordIntention(db, `AUTHENTIC_PACE: ${label}`, 0.99);
           
           setResults(prev => [{ id: intentId, start: startTime }, ...prev].slice(0, 50));

@@ -18,7 +18,7 @@ const CodeGenerationInputSchema = z.object({
 export type CodeGenerationInput = z.infer<typeof CodeGenerationInputSchema>;
 
 const CodeGenerationOutputSchema = z.object({
-  success: z.boolean(),
+  success: z.boolean().default(true),
   code: z.string().describe('The generated executable code.'),
   explanation: z.string().describe('A brief explanation of the generated code.'),
   complexity: z.string().describe('The estimated complexity of the generated solution.'),
@@ -36,8 +36,8 @@ const prompt = ai.definePrompt({
   prompt: `You are BROCKSTON C, a PhD-level AI researcher and expert software architect.
 Your mission is to generate high-quality, validated, and executable code based on the following goal.
 
-GOAL: {{{goal}}}
-LANGUAGE: {{{language}}}
+GOAL: {{goal}}
+LANGUAGE: {{language}}
 
 INSTRUCTIONS:
 1. If the goal matches common patterns (Fibonacci, Factorial, Prime, etc.), provide optimized implementations.

@@ -9,6 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { claude4Sonnet } from 'genkitx-anthropic';
 
 const TranscriptionInputSchema = z.object({
   audioDataUri: z.string().describe("Base64 audio data URI with MIME type."),
@@ -37,7 +38,7 @@ const transcriptionFlow = ai.defineFlow(
   },
   async (input) => {
     const { text } = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
+      model: claude4Sonnet,
       prompt: [
         { text: 'You are the transcription module for BROCKSTON C. Transcribe the provided audio precisely. Return only the transcription text, no meta-commentary.' },
         { media: { url: input.audioDataUri } }

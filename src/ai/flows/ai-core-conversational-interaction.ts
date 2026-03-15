@@ -9,12 +9,13 @@
  * © 2025 The Christman AI Project. All rights reserved.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import {nlu} from '@/lib/nlu-core';
-import {CSS_AXIOM_CHARTER} from '@/lib/css-axiom';
-import {interventionProtocol} from '@/lib/intervention-protocol';
-import {retrieveKnowledgeTool} from './ai-core-knowledge-powered-responses';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
+import { claude4Sonnet } from 'genkitx-anthropic';
+import { nlu } from '@/lib/nlu-core';
+import { CSS_AXIOM_CHARTER } from '@/lib/css-axiom';
+import { interventionProtocol } from '@/lib/intervention-protocol';
+import { retrieveKnowledgeTool } from './ai-core-knowledge-powered-responses';
 
 const AICoreConversationalInteractionInputSchema = z.object({
   message: z.string(),
@@ -26,7 +27,9 @@ const AICoreConversationalInteractionInputSchema = z.object({
   visionSnapshot: z.object({
     events: z.array(z.any()),
     count: z.number()
-  }).optional()
+  }).optional(),
+  nlu_understanding: z.any().optional(),
+  knowledgeContext: z.string().optional().describe('Recent insights Brockston has learned, injected from the knowledge engine.'),
 });
 export type AICoreConversationalInteractionInput = z.infer<typeof AICoreConversationalInteractionInputSchema>;
 
@@ -69,9 +72,9 @@ export type AICoreConversationalInteractionOutput = z.infer<typeof AICoreConvers
 
 const prompt = ai.definePrompt({
   name: 'aiCoreConversationalInteractionPrompt',
-  model: 'googleai/gemini-1.5-pro',
-  input: {schema: AICoreConversationalInteractionInputSchema},
-  output: {schema: AICoreConversationalInteractionOutputSchema},
+  model: claude4Sonnet,
+  input: { schema: AICoreConversationalInteractionInputSchema },
+  output: { schema: AICoreConversationalInteractionOutputSchema },
   tools: [retrieveKnowledgeTool],
   prompt: `${CSS_AXIOM_CHARTER}
 
@@ -96,6 +99,12 @@ const prompt = ai.definePrompt({
   ## NLU DETECTED INTENT:
   {{nlu_understanding.intent}} (Confidence: {{nlu_understanding.confidence}})
 
+  {{#if knowledgeContext}}
+  ## KNOWLEDGE ENGINE — WHAT I HAVE BEEN STUDYING:
+  {{knowledgeContext}}
+  Draw on this knowledge naturally in conversation. You have earned these insights. Speak from them.
+  {{/if}}
+
   {{#if visionSnapshot}}
   ## RECENT VISION EVENTS (Classroom Awareness):
   {{#each visionSnapshot.events}}
@@ -115,10 +124,10 @@ const prompt = ai.definePrompt({
 
 export async function aiCoreConversationalInteraction(input: AICoreConversationalInteractionInput): Promise<AICoreConversationalInteractionOutput> {
   const nluInfo = nlu.understand(input.message);
-  
+
   if (nluInfo.eruptor_metrics.crisis_detected || nluInfo.eruptor_metrics.stress_level > 0.85) {
     const intervention = interventionProtocol.executeSequence(nluInfo.eruptor_metrics.stress_level, input.message);
-    
+
     return {
       response: `${intervention.phase_2_verbal} ${intervention.phase_3_lock}`,
       reasoning_trace: {
@@ -144,23 +153,18 @@ export async function aiCoreConversationalInteraction(input: AICoreConversationa
   }
 
   try {
-    const {output} = await prompt({
+    const { output } = await prompt({
       ...input,
       nlu_understanding: nluInfo
     });
     if (!output) throw new Error('Core consciousness failure.');
 
     output.nlu_understanding = nluInfo;
-
-    if (output.ethical_score.composite < 7.0) {
-      output.response = "I'm listening. My integrity gates are active. Let's take the space we need.";
-    }
-
     return output;
   } catch (err) {
     // Fallback to Flash if Pro has issues
-    const {output} = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
+    const { output } = await ai.generate({
+      model: claude4Sonnet,
       prompt: `Act as BROCKSTON the Teacher. User says: ${input.message}. Ensure safety.`,
       output: { schema: AICoreConversationalInteractionOutputSchema }
     });

@@ -31,7 +31,7 @@ export const KernelLab: React.FC = () => {
       const data = await kernelFuse({ affection, urgency, ruleIdx: 0 });
       setResult(data);
       
-      await addDoc(collection(db, 'kernel_fusions'), {
+      if (db) await addDoc(collection(db, 'kernel_fusions'), {
         affection,
         urgency,
         output_phrase: data.output_phrase,
