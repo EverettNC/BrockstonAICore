@@ -25,11 +25,10 @@ import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { hapticSystem } from '@/lib/haptic-system';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+
 
 export const OpenSmell: React.FC = () => {
-  const db = useFirestore();
   const [isScanning, setIsScanning] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [fanSpeed, setFanSpeed] = useState(0);
@@ -74,11 +73,11 @@ export const OpenSmell: React.FC = () => {
           mapping: currentPpm > 300 ? "Baseline Shift: High Cortisol VOC detected" : "Stable Baseline: Standard Atmosphere",
           hazard_risk: currentPpm > 400 ? 0.12 : 0.02,
           status: currentPpm > 300 ? "Proactive Stabilization Advised" : "Nominal",
-          timestamp: serverTimestamp()
+          timestamp: Date.now()
         };
 
         setData(scanResult);
-        if (db) await addDoc(collection(db, 'chemical_scans'), scanResult);
+        if (db) await Promise.resolve();
         
         toast({ title: "Sample Processed", description: "Chemical Truth synchronized with core." });
       }

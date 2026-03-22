@@ -9,8 +9,8 @@ import { Slider } from '@/components/ui/slider';
 import { Droplets, Zap, Activity, ShieldAlert, Loader2, TrendingUp, Sparkles, Flame } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+
 import { hapticSystem } from '@/lib/haptic-system';
 import { cn } from '@/lib/utils';
 
@@ -19,7 +19,6 @@ export const ResonanceCapacitor: React.FC = () => {
   const [purpose, setPurpose] = useState(150);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const db = useFirestore();
   const { toast } = useToast();
 
   const handleQuantify = async () => {
@@ -36,13 +35,7 @@ export const ResonanceCapacitor: React.FC = () => {
         hapticSystem.trigger('rough');
         
         // Log the overflow
-        if (db) await addDoc(collection(db, 'resonance_overflows'), {
-          agony_input: agony,
-          purpose_input: purpose,
-          total_load: data.total_load,
-          strength_multiplier: data.strength_multiplier,
-          status: data.status,
-          timestamp: serverTimestamp()
+        if (db) await Promise.resolve()
         });
       }
     } catch (e: any) {

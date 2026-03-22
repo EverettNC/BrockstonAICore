@@ -1,10 +1,7 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { learnTopic } from '@/ai/flows/autonomous-learning-flow';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, addDoc, doc, setDoc, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -47,8 +44,41 @@ const SUBTOPICS: Record<string, string[]> = {
   mathematics: ["Optimization Theory", "Graph Theory", "Probabilistic Models", "Topological Spacing"],
 };
 
+interface DomainData {
+  id: string;
+  domain: string;
+  mastery_level: number;
+  last_update: number;
+}
+
+interface Memory {
+  id: string;
+  topic: string;
+  domain: string;
+  content: string;
+  last_review: number;
+  interval: number;
+  next_review: number;
+  mastery: number;
+  importance: number;
+}
+
+interface Insight {
+  id: string;
+  topic: string;
+  domain: string;
+  insight: string;
+  reflection?: string;
+  timestamp: number;
+}
+
+const STORAGE_KEYS = {
+  DOMAINS: 'brockston:learning:domains',
+  MEMORIES: 'brockston:learning:memories',
+  INSIGHTS: 'brockston:learning:insights',
+};
+
 export const LearningCenter: React.FC = () => {
-  const db = useFirestore();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [activeDomain, setActiveDomain] = useState(DOMAINS[0].id);
@@ -57,30 +87,59 @@ export const LearningCenter: React.FC = () => {
   const [sessionCount, setSessionCount] = useState(0);
   const autonomousRef = useRef(false);
   const domainIndexRef = useRef(0);
-  // Always-fresh mastery data — avoids stale closure inside the async while loop
-  const masteryRef = useRef<any[]>([]);
+  const masteryRef = useRef<DomainData[]>([]);
 
-  const masteryQuery = useMemo(() => {
-    if (!db) return null;
-    return query(collection(db, 'knowledge_domains'));
-  }, [db]);
-  const { data: masteryData } = useCollection<any>(masteryQuery);
-  // Keep masteryRef in sync so the async loop always reads the latest Firestore values
-  useEffect(() => { masteryRef.current = masteryData || []; }, [masteryData]);
+  const [masteryData, setMasteryData] = useState<DomainData[]>([]);
+  const [memories, setMemories] = useState<Memory[]>([]);
+  const [insights, setInsights] = useState<Insight[]>([]);
 
-  const insightsQuery = useMemo(() => {
-    if (!db) return null;
-    return query(collection(db, 'learned_insights'), orderBy('timestamp', 'desc'), limit(20));
-  }, [db]);
-  const { data: insights } = useCollection<any>(insightsQuery);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const storedDomains = localStorage.getItem(STORAGE_KEYS.DOMAINS);
+      if (storedDomains) {
+        const parsed = JSON.parse(storedDomains);
+        setMasteryData(parsed);
+        masteryRef.current = parsed;
+      } else {
+        const initialDomains: DomainData[] = DOMAINS.map(d => ({
+          id: d.id,
+          domain: d.id,
+          mastery_level: 0,
+          last_update: Date.now()
+        }));
+        setMasteryData(initialDomains);
+        masteryRef.current = initialDomains;
+        localStorage.setItem(STORAGE_KEYS.DOMAINS, JSON.stringify(initialDomains));
+      }
 
-  const memoryQuery = useMemo(() => {
-    if (!db) return null;
-    return query(collection(db, 'enhanced_memory'), orderBy('next_review', 'asc'), limit(5));
-  }, [db]);
-  const { data: memories } = useCollection<any>(memoryQuery);
+      const storedMemories = localStorage.getItem(STORAGE_KEYS.MEMORIES);
+      if (storedMemories) setMemories(JSON.parse(storedMemories));
 
-  const runLearnCycle = useCallback(async (domainId: string, masterySnapshot: any[]) => {
+      const storedInsights = localStorage.getItem(STORAGE_KEYS.INSIGHTS);
+      if (storedInsights) setInsights(JSON.parse(storedInsights));
+    } catch (e) {
+      console.error('Error loading learning data:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORAGE_KEYS.DOMAINS, JSON.stringify(masteryData));
+    masteryRef.current = masteryData;
+  }, [masteryData]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORAGE_KEYS.MEMORIES, JSON.stringify(memories));
+  }, [memories]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORAGE_KEYS.INSIGHTS, JSON.stringify(insights));
+  }, [insights]);
+
+  const runLearnCycle = useCallback(async (domainId: string, masterySnapshot: DomainData[]) => {
     const domainInfo = DOMAINS.find(d => d.id === domainId)!;
     const currentMastery = masterySnapshot?.find(d => d.id === domainId)?.mastery_level || 0;
     const subtopics = SUBTOPICS[domainId];
@@ -90,57 +149,62 @@ export const LearningCenter: React.FC = () => {
 
     const result = await learnTopic({ domain: domainId as any, subtopic });
 
-    if (db) {
-      const newMastery = Math.min(1.0, currentMastery + result.mastery_boost);
-      await setDoc(doc(db, 'knowledge_domains', domainId), {
-        domain: domainId,
-        mastery_level: newMastery,
-        last_update: serverTimestamp()
-      }, { merge: true });
+    const newMastery = Math.min(1.0, currentMastery + result.mastery_boost);
+    setMasteryData(prev => {
+      const existing = prev.find(d => d.id === domainId);
+      if (existing) {
+        return prev.map(d => d.id === domainId
+          ? { ...d, mastery_level: newMastery, last_update: Date.now() }
+          : d
+        );
+      }
+      return [...prev, { id: domainId, domain: domainId, mastery_level: newMastery, last_update: Date.now() }];
+    });
 
-      const memoryId = `mem_${Date.now()}`;
-      await setDoc(doc(db, 'enhanced_memory', memoryId), {
-        topic: subtopic,
-        domain: domainId,
-        content: result.summary,
-        last_review: Date.now(),
-        interval: 3600,
-        next_review: Date.now() + 3600 * 1000,
-        mastery: 0.8,
-        importance: domainInfo.priority
-      });
+    const memoryId = `mem_${Date.now()}`;
+    const newMemory: Memory = {
+      id: memoryId,
+      topic: subtopic,
+      domain: domainId,
+      content: result.summary,
+      last_review: Date.now(),
+      interval: 3600,
+      next_review: Date.now() + 3600 * 1000,
+      mastery: 0.8,
+      importance: domainInfo.priority
+    };
+    setMemories(prev => [...prev, newMemory]);
 
-      const insight = RetentionEngine.deriveHybridInsight({
-        id: memoryId,
-        topic: subtopic,
-        domain: domainId,
-        content: result.summary,
-        last_review: Date.now(),
-        interval: 3600,
-        mastery: 0.8,
-        importance: domainInfo.priority
-      });
+    const insight = RetentionEngine.deriveHybridInsight({
+      id: memoryId,
+      topic: subtopic,
+      domain: domainId,
+      content: result.summary,
+      last_review: Date.now(),
+      interval: 3600,
+      mastery: 0.8,
+      importance: domainInfo.priority
+    });
 
-      await addDoc(collection(db, 'learned_insights'), {
-        topic: subtopic,
-        domain: domainId,
-        insight: result.generated_insight,
-        reflection: insight,
-        timestamp: serverTimestamp()
-      });
-    }
+    const newInsight: Insight = {
+      id: `ins_${Date.now()}`,
+      topic: subtopic,
+      domain: domainId,
+      insight: result.generated_insight,
+      reflection: insight,
+      timestamp: Date.now()
+    };
+    setInsights(prev => [newInsight, ...prev].slice(0, 100));
 
     return subtopic;
-  }, [db]);
+  }, []);
 
-  // Autonomous loop — cycles all domains by priority, never stops until told
   useEffect(() => {
     if (!autonomous) return;
     autonomousRef.current = true;
 
     const loop = async () => {
       while (autonomousRef.current) {
-        // Sort domains by score: priority * (1 - mastery) — lowest mastery + highest priority goes first
         const ranked = [...DOMAINS].sort((a, b) => {
           const mastA = masteryData?.find(d => d.id === a.id)?.mastery_level || 0;
           const mastB = masteryData?.find(d => d.id === b.id)?.mastery_level || 0;
@@ -151,14 +215,12 @@ export const LearningCenter: React.FC = () => {
           if (!autonomousRef.current) break;
           setActiveDomain(domain.id);
           try {
-            // masteryRef.current is always the latest Firebase snapshot — no stale closure
             const topic = await runLearnCycle(domain.id, masteryRef.current);
             setSessionCount(c => c + 1);
-            // Brief pause between domains so the system breathes
             await new Promise(r => setTimeout(r, 3000));
           } catch (err: any) {
             console.error(`Learning cycle error (${domain.id}):`, err);
-            await new Promise(r => setTimeout(r, 10000)); // back off on error
+            await new Promise(r => setTimeout(r, 10000));
           }
         }
       }
@@ -170,7 +232,7 @@ export const LearningCenter: React.FC = () => {
     return () => {
       autonomousRef.current = false;
     };
-  }, [autonomous]);
+  }, [autonomous, masteryData]);
 
   const handleLearn = async () => {
     setLoading(true);
@@ -185,15 +247,17 @@ export const LearningCenter: React.FC = () => {
     }
   };
 
-  const handleReview = async (memory: any) => {
-    if (!db) return;
+  const handleReview = async (memory: Memory) => {
     const nextInterval = RetentionEngine.calculateNextInterval(memory.interval, true);
-    await setDoc(doc(db, 'enhanced_memory', memory.id), {
-      ...memory,
-      last_review: Date.now(),
-      interval: nextInterval,
-      next_review: Date.now() + nextInterval * 1000,
-    }, { merge: true });
+    setMemories(prev => prev.map(m => m.id === memory.id
+      ? {
+          ...m,
+          last_review: Date.now(),
+          interval: nextInterval,
+          next_review: Date.now() + nextInterval * 1000,
+        }
+      : m
+    ));
     toast({ title: "Memory Consolidated", description: `Interval: ${Math.floor(nextInterval / 60)} min.` });
   };
 
@@ -249,7 +313,6 @@ export const LearningCenter: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0 flex-1 overflow-hidden">
 
-        {/* Left: Domains */}
         <section className="lg:col-span-4 flex flex-col gap-4 overflow-y-auto pr-2">
           <Card className="bg-card/50 border-accent/20 shadow-2xl">
             <CardHeader className="pb-3 border-b border-white/5">
@@ -305,7 +368,6 @@ export const LearningCenter: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Spaced Repetition Queue */}
           <Card className="bg-primary/5 border-white/5">
             <CardHeader className="py-2 px-4 border-b border-white/5">
               <div className="text-[9px] uppercase font-code text-accent/60 flex items-center gap-2">
@@ -313,8 +375,8 @@ export const LearningCenter: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent className="p-4 space-y-2">
-              {memories?.map((mem, i) => (
-                <div key={i} className="p-2 bg-black/40 rounded border border-white/5 flex justify-between items-center group">
+              {memories?.map((mem) => (
+                <div key={mem.id} className="p-2 bg-black/40 rounded border border-white/5 flex justify-between items-center group">
                   <div className="space-y-0.5">
                     <div className="text-[10px] font-bold text-foreground truncate max-w-[150px]">{mem.topic}</div>
                     <div className="text-[8px] font-code text-secondary/40">Due: {new Date(mem.next_review).toLocaleTimeString()}</div>
@@ -329,7 +391,6 @@ export const LearningCenter: React.FC = () => {
           </Card>
         </section>
 
-        {/* Right: Insights */}
         <section className="lg:col-span-8 flex flex-col min-h-0">
           <Card className="bg-black/40 border-white/5 h-full flex flex-col overflow-hidden">
             <CardHeader className="py-4 border-b border-white/5 bg-primary/10">
@@ -341,8 +402,8 @@ export const LearningCenter: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto p-6 space-y-4">
-              {insights?.map((insight, i) => (
-                <div key={i} className="space-y-2 animate-in slide-in-from-bottom-2 duration-300">
+              {insights?.map((insight) => (
+                <div key={insight.id} className="space-y-2 animate-in slide-in-from-bottom-2 duration-300">
                   <div className="p-4 bg-primary/10 rounded-2xl border border-white/5 hover:border-accent/20 transition-all">
                     <div className="flex justify-between items-center mb-3">
                       <div className="flex items-center gap-3">
@@ -351,7 +412,7 @@ export const LearningCenter: React.FC = () => {
                         <span className="text-[9px] text-secondary/40 font-code">{insight.topic}</span>
                       </div>
                       <span className="text-[8px] text-secondary/30 font-code">
-                        {new Date(insight.timestamp?.toDate ? insight.timestamp.toDate() : Date.now()).toLocaleTimeString()}
+                        {new Date(insight.timestamp).toLocaleTimeString()}
                       </span>
                     </div>
                     <div className="text-xs text-foreground/85 italic leading-relaxed pl-3 border-l-2 border-accent/20 mb-2">

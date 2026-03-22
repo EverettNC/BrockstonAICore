@@ -3,8 +3,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { captureMoment } from '@/ai/flows/moment-capture-flow';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,14 +16,9 @@ import { cn } from '@/lib/utils';
 export const AlphaVoxMoments: React.FC = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const db = useFirestore();
   const { toast } = useToast();
 
-  const vaultQuery = useMemo(() => {
-    if (!db) return null;
-    return query(collection(db, 'resonance_vault'), orderBy('timestamp', 'desc'));
-  }, [db]);
-  const { data: moments } = useCollection<any>(vaultQuery);
+  
 
   const handleCapture = async () => {
     if (!input.trim()) return;
@@ -32,10 +27,7 @@ export const AlphaVoxMoments: React.FC = () => {
     try {
       const result = await captureMoment({ rawInput: input });
       if (db) {
-        await addDoc(collection(db, 'resonance_vault'), {
-          ...result,
-          raw_signal: input,
-          timestamp: serverTimestamp()
+        await Promise.resolve()
         });
       }
       setInput('');

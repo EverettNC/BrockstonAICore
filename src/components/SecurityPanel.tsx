@@ -4,31 +4,22 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ShieldCheck, Lock, Cpu, Eye, Atom, ShieldAlert, Zap, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+
+
 import { Badge } from '@/components/ui/badge';
 import { dependencyShield, ShieldStatus } from '@/lib/dependency-shield';
 
 export const SecurityPanel: React.FC = () => {
-  const db = useFirestore();
   const [shieldStatus, setShieldStatus] = useState<ShieldStatus | null>(null);
   
-  const messagesQuery = useMemo(() => {
-    if (!db) return null;
-    return query(
-      collection(db, 'chats', 'ultimate-v5-session', 'messages'),
-      orderBy('timestamp', 'desc'),
-      limit(5)
-    );
-  }, [db]);
+  
 
-  const { data: recentMessages } = useCollection<any>(messagesQuery);
 
   useEffect(() => {
     // Initial Scan
     const status = (dependencyShield as any).constructor.scan();
     setShieldStatus(status);
-  }, []);
+  });
 
   const activeShield = useMemo(() => {
     if (!recentMessages?.length) return null;

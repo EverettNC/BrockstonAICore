@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Zap, Gauge, Activity, AlertCircle, Play, Pause, RefreshCw, Database, Heart, BarChart3, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useFirestore } from '@/firebase';
+
 import { vortexEngine } from '@/lib/vortex-engine';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +27,6 @@ export const SpamUp: React.FC = () => {
   const [results, setResults] = useState<{ id: string, start: number, end?: number, latency?: number }[]>([]);
   const [totalSent, setTotalSent] = useState(0);
   const [avgLatency, setAvgLatency] = useState(0);
-  const db = useFirestore();
   const { toast } = useToast();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const rampRef = useRef<NodeJS.Timeout | null>(null);
@@ -159,7 +158,7 @@ export const SpamUp: React.FC = () => {
                     <Label className="text-[10px] uppercase font-code text-secondary/60">Gradual Ascent</Label>
                     <div className="text-[9px] text-secondary/40">Slowly ramp up frequency</div>
                   </div>
-                  <Switch checked={gradualMode} onCheckedChange={setGradualMode} className="data-[state=checked]:bg-yellow-500" />
+                  <Switch checked={gradualMode} onCheckedChange={setGradualMode} />
                 </div>
 
                 <div className="space-y-4">

@@ -14,11 +14,10 @@ import { Slider } from '@/components/ui/slider';
 import { Cpu, Zap, Activity, Binary, ShieldCheck, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+
 
 export const KernelLab: React.FC = () => {
-  const db = useFirestore();
   const [affection, setAffection] = useState(0.6);
   const [urgency, setUrgency] = useState(0.2);
   const [loading, setLoading] = useState(false);
@@ -31,14 +30,7 @@ export const KernelLab: React.FC = () => {
       const data = await kernelFuse({ affection, urgency, ruleIdx: 0 });
       setResult(data);
       
-      if (db) await addDoc(collection(db, 'kernel_fusions'), {
-        affection,
-        urgency,
-        output_phrase: data.output_phrase,
-        latent_hash: data.latent_hash,
-        rule_applied: data.rule_applied,
-        confidence: data.confidence,
-        timestamp: serverTimestamp()
+      if (db) await Promise.resolve()
       });
 
       toast({ title: "Fusion Successful", description: "Neural latent bound to symbolic kernel." });

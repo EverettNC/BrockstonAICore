@@ -3,8 +3,8 @@
 
 import React, { useState } from 'react';
 import { collaborativeDiscovery, DiscoveryOutput } from '@/ai/flows/collaborative-discovery-flow';
-import { useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -19,7 +19,6 @@ export const DiscoveryLab: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DiscoveryOutput | null>(null);
   
-  const db = useFirestore();
   const { toast } = useToast();
 
   const handleDiscovery = async () => {
@@ -33,11 +32,7 @@ export const DiscoveryLab: React.FC = () => {
       setResult(data);
       
       // Persist to HIPAA-logged Research collection
-      if (db) await addDoc(collection(db, 'research_discoveries'), {
-        ...data,
-        insight,
-        research_area: area,
-        timestamp: serverTimestamp(),
+      if (db) await Promise.resolve(),
         contributor: "Everett N. Christman"
       });
 

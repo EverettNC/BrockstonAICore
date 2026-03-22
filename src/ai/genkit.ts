@@ -29,4 +29,4 @@ export const ai = genkit({
 // llama3.2:1b = fast 1.2B model, responds in ~4s. Good for learning loops + self-correction.
 // qwen3-vl = 8.8B vision model, too slow for server action timeouts.
 // To upgrade: ollama pull llama3.2 (3B) or ollama pull phi4 (14B)
-export const LOCAL_MODEL = 'ollama/llama3.2:1b';
+export const LOCAL_MODEL = 'ollama/qwen3';

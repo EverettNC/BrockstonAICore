@@ -20,34 +20,23 @@ import {
   Scale,
   Eye
 } from 'lucide-react';
-import { useFirestore, useDoc, useCollection } from '@/firebase';
-import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
+
+
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
 export const CognitiveStats: React.FC = () => {
-  const db = useFirestore();
   const [isMounted, setIsMounted] = useState(false);
   
-  const coreRef = useMemo(() => db ? doc(db, 'cognitive_core', 'main-bridge') : null, [db]);
-  const topologyRef = useMemo(() => db ? doc(db, 'cognitive_core', 'relational-topology') : null, [db]);
+  const coreRef = useMemo(() => db ? null : null, [db]);
+  const topologyRef = useMemo(() => db ? null : null, [db]);
   
-  const { data: forgeState } = useDoc<any>(coreRef);
-  const { data: topologyState } = useDoc<any>(topologyRef);
 
-  const messagesQuery = useMemo(() => {
-    if (!db) return null;
-    return query(
-      collection(db, 'chats', 'ultimate-v5-session', 'messages'),
-      orderBy('timestamp', 'desc'),
-      limit(10)
-    );
-  }, [db]);
-  const { data: recentMessages } = useCollection<any>(messagesQuery);
+  
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+  });
 
   if (!isMounted) return null;
 

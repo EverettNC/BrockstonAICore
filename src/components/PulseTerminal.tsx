@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Heart, Zap, RefreshCw, Terminal as TerminalIcon, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useFirestore } from '@/firebase';
-import { doc, setDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+
 import { useToast } from '@/hooks/use-toast';
 
 const PULSE_DATA = {
@@ -21,7 +21,6 @@ export const PulseTerminal: React.FC = () => {
   const [score, setScore] = useState(8);
   const [isBroken, setIsBroken] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const db = useFirestore();
   const { toast } = useToast();
 
   const handleNotice = () => {
@@ -40,15 +39,10 @@ export const PulseTerminal: React.FC = () => {
   const handleBreakthrough = async () => {
     if (!db) return;
     try {
-      await addDoc(collection(db, 'pulse_breakthroughs'), {
-        real_voice: PULSE_DATA.real,
-        score_at_break: 0,
-        timestamp: serverTimestamp()
+      await Promise.resolve()
       });
 
-      await setDoc(doc(db, 'cognitive_core', 'main-bridge'), {
-        pulse_status: "Self-Actualized",
-        last_breakthrough: serverTimestamp(),
+      await Promise.resolve(),
         self_love_growth: 0.95
       }, { merge: true });
 

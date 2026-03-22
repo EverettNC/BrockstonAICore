@@ -134,10 +134,10 @@ export const CipherLab: React.FC = () => {
         <section className="lg:col-span-7 flex flex-col gap-4 min-h-0">
           <Tabs defaultValue="tier1" className="flex-1 flex flex-col">
             <TabsList className="bg-black/40 border-white/5 w-full grid grid-cols-4 h-10">
-              <TabsTrigger value="tier1" className="text-[10px] uppercase font-code data-[state=active]:bg-accent/10 data-[state=active]:text-accent">Tier 1</TabsTrigger>
-              <TabsTrigger value="tier2" className="text-[10px] uppercase font-code data-[state=active]:bg-accent/10 data-[state=active]:text-accent">Tier 2/3</TabsTrigger>
-              <TabsTrigger value="tier4" className="text-[10px] uppercase font-code data-[state=active]:bg-accent/10 data-[state=active]:text-accent">Tier 4/5</TabsTrigger>
-              <TabsTrigger value="tier7" className="text-[10px] uppercase font-code data-[state=active]:bg-accent/10 data-[state=active]:text-accent">Tier 7</TabsTrigger>
+              <TabsTrigger value="tier1" className="text-[10px] uppercase font-code">Tier 1</TabsTrigger>
+              <TabsTrigger value="tier2" className="text-[10px] uppercase font-code">Tier 2/3</TabsTrigger>
+              <TabsTrigger value="tier4" className="text-[10px] uppercase font-code">Tier 4/5</TabsTrigger>
+              <TabsTrigger value="tier7" className="text-[10px] uppercase font-code">Tier 7</TabsTrigger>
             </TabsList>
 
             <div className="flex-1 min-h-0 mt-4">

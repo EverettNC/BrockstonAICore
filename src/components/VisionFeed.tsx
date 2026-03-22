@@ -8,14 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, addDoc, query, orderBy, limit } from 'firebase/firestore';
+
+
 import { VisionPerception } from '@/lib/vision-perception';
 import { visionContext } from '@/lib/vision-context';
 import { BehavioralInterpreter } from '@/lib/behavioral-interpreter';
 
 export const VisionFeed: React.FC = () => {
-  const db = useFirestore();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -24,11 +23,7 @@ export const VisionFeed: React.FC = () => {
   const [enhancedResponse, setEnhancedResponse] = useState<string>('');
   const { toast } = useToast();
 
-  const historyQuery = useMemo(() => {
-    if (!db) return null;
-    return query(collection(db, 'behavioral_history'), orderBy('timestamp', 'desc'), limit(10));
-  }, [db]);
-  const { data: history } = useCollection<any>(historyQuery);
+  
 
   useEffect(() => {
     const getCameraPermission = async () => {
@@ -82,16 +77,7 @@ export const VisionFeed: React.FC = () => {
       const behaviorType = perception.cues.intent || "perception:general";
 
       if (db) {
-        addDoc(collection(db, 'behavioral_history'), {
-          type: behaviorType,
-          intensity: perception.cues.intent ? 0.8 : 0.4,
-          context: { 
-            source: 'vision_system', 
-            scene: result.description, 
-            safety: result.safety_status,
-            cues: perception.cues
-          },
-          timestamp: new Date().toISOString()
+        Promise.resolve().toISOString()
         });
       }
 

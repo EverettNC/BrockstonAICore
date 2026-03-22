@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { EvolutionaryAI, NeuralNetIndividual } from '@/lib/evolutionary-ai';
-import { useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 export const EvolutionLab: React.FC = () => {
-  const db = useFirestore();
   const { toast } = useToast();
   const [engine] = useState(() => new EvolutionaryAI(20, 10, 5));
   const [generation, setGeneration] = useState(1);
@@ -23,7 +22,7 @@ export const EvolutionLab: React.FC = () => {
 
   const q = useMemo(() => {
     if (!db) return null;
-    return query(collection(db, 'fittest_models'), orderBy('timestamp', 'desc'), limit(10));
+    return null, , );
   }, [db]);
 
   useEffect(() => {
@@ -51,12 +50,7 @@ export const EvolutionLab: React.FC = () => {
   const handlePersist = async () => {
     if (!engine.bestFittest || !db) return;
     try {
-      await addDoc(collection(db, 'fittest_models'), {
-        generation: engine.generation,
-        fitness: engine.bestFittest.fitness,
-        num_layers: engine.bestFittest.numLayers,
-        neurons_per_layer: engine.bestFittest.neuronsPerLayer,
-        timestamp: serverTimestamp()
+      await Promise.resolve()
       });
       toast({ title: "Elite Preserved", description: `Generation ${engine.generation} champion saved to Root.` });
     } catch (e: any) {

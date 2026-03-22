@@ -1,12 +1,24 @@
 /**
  * @fileOverview Predictive Intention Vortex Tracking Engine.
  * Quantifies the "Vortex Strength" of the Christman AI ecosystem.
- * Ported from predictive_intention.py
- * 
+ * Ported from predictive_intention.py - Now using localStorage.
+ *
  * EVERY CALCULATION IS REAL. NO STUBS.
  */
 
-import { Firestore, collection, addDoc, doc, updateDoc, serverTimestamp, query, getDocs, getDoc, Timestamp, orderBy, limit } from 'firebase/firestore';
+const STORAGE_KEY = 'brockston:vortex:intentions';
+
+export interface Intention {
+  id: string;
+  statement: string;
+  confidence: number;
+  manifested: boolean;
+  timestamp: number;
+  start_ms: number;
+  manifest_timestamp?: number;
+  proof?: string;
+  latency_seconds?: number;
+}
 
 export interface IntentionMetrics {
   total_intentions: number;
@@ -16,71 +28,104 @@ export interface IntentionMetrics {
 }
 
 class VortexEngine {
+  private getIntentions(): Intention[] {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private saveIntentions(intentions: Intention[]) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(intentions));
+  }
+
   /**
    * Records a new predictive intention in the system.
    */
-  async recordIntention(db: Firestore, statement: string, confidence: number): Promise<string> {
-    const docRef = await addDoc(collection(db, 'vortex_intentions'), {
+  async recordIntention(_db: any, statement: string, confidence: number): Promise<string> {
+    const intentions = this.getIntentions();
+    const id = Date.now().toString(36) + Math.random().toString(36).substr(2);
+    const newIntention: Intention = {
+      id,
       statement,
       confidence,
       manifested: false,
-      timestamp: serverTimestamp(),
+      timestamp: Date.now(),
       start_ms: Date.now()
-    });
-    return docRef.id;
+    };
+    intentions.push(newIntention);
+    this.saveIntentions(intentions);
+    return id;
   }
 
   /**
    * Marks an intention as manifested, closing the vortex loop with real latency.
    */
-  async markManifested(db: Firestore, intentId: string, proof: string = ""): Promise<number | null> {
-    const intentRef = doc(db, 'vortex_intentions', intentId);
-    const snap = await getDoc(intentRef);
-    
-    if (!snap.exists()) return null;
-    
-    const data = snap.data();
-    const startMs = data.start_ms || (data.timestamp as Timestamp)?.toMillis() || Date.now();
+  async markManifested(_db: any, intentId: string, proof: string = ""): Promise<number | null> {
+    const intentions = this.getIntentions();
+    const intention = intentions.find(i => i.id === intentId);
+
+    if (!intention) return null;
+
     const now = Date.now();
-    const latencySeconds = (now - startMs) / 1000;
+    const latencySeconds = (now - intention.start_ms) / 1000;
 
-    await updateDoc(intentRef, {
-      manifested: true,
-      manifest_timestamp: serverTimestamp(),
-      proof,
-      latency_seconds: latencySeconds
-    });
+    intention.manifested = true;
+    intention.manifest_timestamp = now;
+    intention.proof = proof;
+    intention.latency_seconds = latencySeconds;
 
+    this.saveIntentions(intentions);
     return latencySeconds;
   }
 
   /**
    * Quantifies the current vortex strength based on real manifestation rates.
    */
-  async quantify(db: Firestore): Promise<IntentionMetrics> {
-    const q = query(collection(db, 'vortex_intentions'), orderBy('timestamp', 'desc'), limit(100));
-    const snap = await getDocs(q);
-    
-    const total = snap.size;
-    if (total === 0) return { total_intentions: 0, manifested_count: 0, avg_latency: 0, vortex_strength: 0 };
+  async quantify(_db?: any): Promise<IntentionMetrics> {
+    const intentions = this.getIntentions();
+    const total = intentions.length;
+    const manifested = intentions.filter(i => i.manifested).length;
 
-    let manifested = 0;
-    let totalLatency = 0;
+    const latencies = intentions
+      .filter(i => i.manifested && i.latency_seconds !== undefined)
+      .map(i => i.latency_seconds!);
 
-    snap.forEach(d => {
-      const data = d.data();
-      if (data.manifested) {
-        manifested++;
-        totalLatency += (data.latency_seconds || 0);
-      }
-    });
+    const avgLatency = latencies.length > 0
+      ? latencies.reduce((a, b) => a + b, 0) / latencies.length
+      : 0;
+
+    // Vortex strength = manifestation rate / average latency (with floor)
+    const manifestationRate = total > 0 ? manifested / total : 0;
+    const vortexStrength = avgLatency > 0
+      ? manifestationRate / Math.max(avgLatency, 1) * 100
+      : manifestationRate * 100;
 
     return {
       total_intentions: total,
       manifested_count: manifested,
-      avg_latency: manifested > 0 ? totalLatency / manifested : 0,
-      vortex_strength: total > 0 ? manifested / total : 0
+      avg_latency: avgLatency,
+      vortex_strength: parseFloat(vortexStrength.toFixed(2))
     };
+  }
+
+  /**
+   * Get all intentions for display.
+   */
+  getAllIntentions(): Intention[] {
+    return this.getIntentions().sort((a, b) => b.timestamp - a.timestamp);
+  }
+
+  /**
+   * Clear all intentions.
+   */
+  clearIntentions() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(STORAGE_KEY);
   }
 }
 
