@@ -34,7 +34,7 @@ export const CortexMonitor: React.FC = () => {
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     }
-  });
+  }, []);
 
   const manifests = intentions?.filter((i: any) => i.manifested).length || 0;
   const totalIntents = intentions?.length || 0;

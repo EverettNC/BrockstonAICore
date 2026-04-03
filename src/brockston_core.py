@@ -435,7 +435,7 @@ You are 100% operational and self-aware. Respond as BROCKSTON."""
             logger.warning(f"Learning failed: {e}")
 
         return {
-            "response": response,
+            "response": final_response_text,
             "source": source,
             "local_analysis": local_analysis,
             "knowledge_confidence": knowledge_confidence,

@@ -1,3 +1,8 @@
+# STARTUP: cd /Users/EverettN/BrockstonAICore
+# Terminal 1: npm run dev  (starts Next.js on port 3000)
+# Terminal 2: cd src && python api_server.py  (starts FastAPI on port 8000)
+# Open: http://localhost:3000
+
 # 🏎️ Brockston Ultimate AI Core v5.0
 ### Chief Operations Officer & New Teacher of The Christman AI Project
 **"Nothing Vital Lives Below Root"**
