@@ -3,20 +3,20 @@
   "configurations": [
     {
       "name": "Next.js (Turbopack)",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "PATH=/usr/local/bin:$PATH npm run dev"],
       "port": 9002
     },
     {
       "name": "Genkit Dev UI",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "genkit:dev"],
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "PATH=/usr/local/bin:$PATH npm run genkit:dev"],
       "port": 4000
     },
     {
       "name": "Genkit Dev UI (watch)",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "genkit:watch"],
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "PATH=/usr/local/bin:$PATH npm run genkit:watch"],
       "port": 4000
     }
   ]

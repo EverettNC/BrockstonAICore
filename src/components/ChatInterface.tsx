@@ -9,6 +9,8 @@
 
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
+import { speakStephen } from '@/ai/flows/tts-flow';
+import { getLipSyncVideo } from '@/ai/flows/lipsync-flow';
 import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,8 +24,6 @@ import { hapticSystem, HapticPattern } from '@/lib/haptic-system';
 import { useToast } from '@/hooks/use-toast';
 import { speechService as localSpeech } from '@/lib/speech-recognition-service';
 
-const ELEVEN_LABS_KEY = process.env.NEXT_PUBLIC_ELEVEN_LABS_API_KEY || '';
-const VOICE_ID = process.env.NEXT_PUBLIC_ELEVEN_LABS_VOICE_ID || 'EXAVITQu4vr4xnSDxMaL';
 
 interface Message {
   id?: string;
@@ -73,6 +73,8 @@ export const ChatInterface: React.FC = () => {
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<AvatarStatus>('idle');
   const [avatarEmotion, setAvatarEmotion] = useState<AvatarEmotion>('neutral');
+  const [speechDuration, setSpeechDuration] = useState<number | undefined>(undefined);
+  const [lipSyncVideo, setLipSyncVideo] = useState<string | undefined>(undefined);
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const { toast } = useToast();
@@ -199,27 +201,21 @@ export const ChatInterface: React.FC = () => {
       if (autoSpeak) {
         setStatus('speaking');
         try {
-          const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
-            method: 'POST',
-            headers: {
-              'Accept': 'audio/mpeg',
-              'xi-api-key': ELEVEN_LABS_KEY,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              text: result.response,
-              model_id: "eleven_monolingual_v1",
-              voice_settings: { stability: 0.5, similarity_boost: 0.75 },
-            }),
+          const estimated = avatarEngine.estimateSpeechDuration(result.response);
+          setSpeechDuration(estimated);
+          const ttsResult = await speakStephen({ text: result.response, specialist: 'brockston' });
+
+          // Play audio immediately
+          const audio = new Audio(ttsResult.media);
+          avatarEngine.startTalking(avatarEmotion);
+          audio.onended = () => { avatarEngine.stopTalking(); setStatus('idle'); setLipSyncVideo(undefined); };
+          audio.play().catch(() => { avatarEngine.stopTalking(); setStatus('idle'); });
+
+          // Request lip sync video in background (Wav2Lip via api_server.py)
+          const audioB64 = ttsResult.media.includes(',') ? ttsResult.media.split(',')[1] : ttsResult.media;
+          getLipSyncVideo(audioB64).then(videoSrc => {
+            if (videoSrc) setLipSyncVideo(videoSrc);
           });
-
-          if (!response.ok) throw new Error('ElevenLabs failed');
-          const audioBlob = await response.blob();
-          const audioUrl = URL.createObjectURL(audioBlob);
-
-          const audio = new Audio(audioUrl);
-          audio.onended = () => setStatus('idle');
-          audio.play().catch(() => setStatus('idle'));
         } catch (err) {
           console.error('TTS error:', err);
           toast({ variant: "destructive", title: "Voice fail", description: "Can't talk right now." });
@@ -252,7 +248,7 @@ export const ChatInterface: React.FC = () => {
   return (
     <div className="flex h-full gap-6 overflow-hidden">
       <div className="flex-none w-80 flex flex-col items-center justify-center gap-6 rounded-3xl bg-black border border-white/10 p-8">
-        <CoreAvatar status={status} emotion={avatarEmotion} />
+        <CoreAvatar status={status} emotion={avatarEmotion} speechDuration={speechDuration} videoSrc={lipSyncVideo} />
         <div className="flex items-center gap-3">
           <Switch id="voice" checked={autoSpeak} onCheckedChange={setAutoSpeak} />
           {autoSpeak ? <Volume2 className="h-4 w-4 text-accent" /> : <VolumeX className="h-4 w-4 text-secondary/30" />}
