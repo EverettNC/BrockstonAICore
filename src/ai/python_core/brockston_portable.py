@@ -26,6 +26,18 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 # ---------------------------------------------------------------------------
+# PATH SETUP — wire to src/ai/python_core/core/ explicitly
+# This file lives in src/ai/python_core/ — core/ is one level down.
+# Rule 2: Nothing vital buried. Rule 3: Things that think together, live together.
+# ---------------------------------------------------------------------------
+_HERE = Path(__file__).resolve().parent          # src/ai/python_core/
+_CORE = _HERE / "core"                           # src/ai/python_core/core/
+
+for _p in [str(_HERE), str(_CORE)]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+# ---------------------------------------------------------------------------
 # Logging — fail loud, never silent (Cardinal Rule 6)
 # ---------------------------------------------------------------------------
 logging.basicConfig(
