@@ -23,6 +23,12 @@ from memory_engine import MemoryEngine
 
 logger = logging.getLogger(__name__)
 
+# Provider Router — unified intelligence layer (sovereignty path)
+try:
+    from provider_router import get_router as _get_router
+except ImportError:
+    _get_router = None
+
 # Perplexity — Brockston's live search engine (not a stub)
 try:
     import sys as _sys
@@ -219,6 +225,16 @@ class BrockstonBrain:
                 self.speech_to_speech = None
         else:
             self.speech_to_speech = None
+
+        # Provider Router — unified intelligence layer (sovereignty path)
+        # Cardinal Rule 1: Real init, not a stub.
+        self.provider_router = None
+        if _get_router is not None:
+            try:
+                self.provider_router = _get_router()
+                self.provider_router.print_status()
+            except Exception as _e:
+                logger.warning(f'ProviderRouter init failed: {_e}')
 
         # Statistics
         self.stats = {
