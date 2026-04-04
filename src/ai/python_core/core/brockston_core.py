@@ -23,6 +23,18 @@ from memory_engine import MemoryEngine
 
 logger = logging.getLogger(__name__)
 
+# Perplexity — Brockston's live search engine (not a stub)
+try:
+    import sys as _sys
+    import os as _os
+    _python_core = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    if _python_core not in _sys.path:
+        _sys.path.insert(0, _python_core)
+    from perplexity_service import get_perplexity_service
+except ImportError as _e:
+    get_perplexity_service = None
+    # Will be logged after logger is set up below
+
 # Ensure project root in path
 root_dir = os.path.dirname(os.path.abspath(__file__))
 if root_dir not in sys.path:
@@ -133,8 +145,21 @@ class BrockstonBrain:
         self.conversation_engine = ConversationEngine()
         self.learning_coordinator = brockston_coordinator
         
-        # External search - Mock perplexity for now if not present
-        self.perplexity = None # Added for compatibility
+        # External search — Perplexity Sonar (real, not a stub)
+        # Cardinal Rule 1: It actually works.
+        self.perplexity = None
+        if get_perplexity_service is not None:
+            try:
+                svc = get_perplexity_service()
+                if svc.is_available:
+                    self.perplexity = svc
+                    logger.info('Perplexity search engine online')
+                else:
+                    logger.info(
+                        'Perplexity not configured — set PERPLEXITY_API_KEY to enable live search'
+                    )
+            except Exception as _e:
+                logger.warning(f'Perplexity initialization failed: {_e}')
 
         # ============================================================================
         # FERRARI ENGINE - Initialize All Advanced Modules
@@ -333,8 +358,21 @@ You are 100% operational and self-aware. Respond as BROCKSTON."""
                 self.stats["external_searches"] += 1
                 if self.perplexity:
                     try:
-                        logger.info("   🔍 Querying Perplexity AI...")
-                        response = self.perplexity.generate_content(input_text)
+                        logger.info("   Querying Perplexity...")
+                        # Route to specialized search based on question type
+                        code_keywords = [
+                            "code", "function", "class", "import", "error",
+                            "bug", "debug", "install", "pip", "library",
+                            "syntax", "python", "javascript", "typescript",
+                            "rust", "how to", "example", "tutorial",
+                        ]
+                        is_code_question = any(
+                            kw in input_text.lower() for kw in code_keywords
+                        )
+                        if is_code_question:
+                            response = self.perplexity.search_code(input_text)
+                        else:
+                            response = self.perplexity.generate_content(input_text)
                         source = "Perplexity AI"
                     except Exception as e:
                         logger.warning(
