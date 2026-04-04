@@ -505,8 +505,9 @@ class SelfImprovementEngine:
             try:
                 with open(suggestions_file, "r") as file:
                     existing = json.load(file)
-            except json.JSONDecodeError:
-                pass
+            except json.JSONDecodeError as e:
+                logger.warning(f"[AILearningEngine] Failed to load suggestions file: {e}")
+                existing = []
 
         # Add timestamp to new suggestions
         timestamp = datetime.now().isoformat()

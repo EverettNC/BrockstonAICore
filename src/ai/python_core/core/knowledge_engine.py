@@ -153,7 +153,8 @@ class FactManager:
             try:
                 with open(FACTS_FILE, "r") as f:
                     self.facts = json.load(f)
-            except:
+            except (FileNotFoundError, json.JSONDecodeError) as e:
+                logger.error(f"[FactManager] Failed to load facts from {FACTS_FILE}: {e}")
                 self.facts = []
 
     def save_facts(self):
@@ -202,8 +203,8 @@ class WebCrawler:
             try:
                 with open(CRAWLER_STATUS_FILE, "r") as f:
                     self.status = json.load(f)
-            except:
-                pass
+            except (FileNotFoundError, json.JSONDecodeError) as e:
+                logger.warning(f"[WebCrawler] Failed to load crawler status: {e}")
 
     def _save_status(self):
         with open(CRAWLER_STATUS_FILE, "w") as f:

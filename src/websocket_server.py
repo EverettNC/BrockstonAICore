@@ -1,5 +1,15 @@
+"""BROCKSTON WebSocket Server — Real-time communication endpoint.
+
+Provides WebSocket-based communication for the BROCKSTON dashboard,
+including chat, TTS, and memory operations.
+
+NOTE: This file was previously named crisis_hotline.py, which was
+misleading — it contains no crisis logic. Crisis detection lives in
+src/ai/python_core/core/crisis_detection.py (Cardinal Rule 13).
+"""
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import Dict, List
+from typing import Dict, List, Optional
 import json
 import logging
 
@@ -126,20 +136,62 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
 
 
+# =============================================================================
+# BROCKSTON INSTANCE — Must be injected before the server starts
+# =============================================================================
+
+_brockston_instance = None
+
+
+def set_brockston_instance(instance) -> None:
+    """Inject the Brockston brain instance before starting the server.
+
+    Must be called before any WebSocket connections are accepted.
+    Cardinal Rule 1: It has to actually work.
+    """
+    global _brockston_instance
+    _brockston_instance = instance
+    logger.info("BROCKSTON instance injected into WebSocket server")
+
+
+def _get_brockston():
+    """Get the injected Brockston instance or raise loud.
+
+    Cardinal Rule 6: Fail loud, fast, and honest.
+    """
+    if _brockston_instance is None:
+        error_msg = (
+            "BROCKSTON instance not initialized. "
+            "Call set_brockston_instance() before starting the WebSocket server. "
+            "Cardinal Rule 1: It has to actually work."
+        )
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
+    return _brockston_instance
+
+
 # Helper functions
 async def generate_tts_response(text: str) -> Dict:
     """Generate TTS audio for the given text"""
     try:
-        audio_data = brockston_instance.speak(text)
+        brockston = _get_brockston()
+        audio_data = brockston.speak(text)
         return {"success": True, "audio": audio_data, "text": text}
+    except RuntimeError:
+        raise  # Re-raise initialization errors — don't swallow (Rule 6)
     except Exception as e:
+        logger.error(f"TTS generation failed: {e}", exc_info=True)
         return {"success": False, "error": str(e)}
 
 
 async def brockston_chat_response(message: str) -> str:
     """Get BROCKSTON's chat response"""
     try:
-        response = brockston_instance.process_input(message)
+        brockston = _get_brockston()
+        response = brockston.process_input(message)
         return response
+    except RuntimeError:
+        raise  # Re-raise initialization errors — don't swallow (Rule 6)
     except Exception as e:
+        logger.error(f"Chat response failed: {e}", exc_info=True)
         return f"Error: {str(e)}"

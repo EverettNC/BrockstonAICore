@@ -513,12 +513,11 @@ from functools import wraps
 import jwt
 import datetime
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-change-this'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', '')  # REQUIRED: Set SECRET_KEY in environment
 # Dummy user database
-users = {
-    "admin": {"password": "admin123", "role": "admin"},
-    "user": {"password": "user123", "role": "user"}
-}
+# WARNING: Replace with a real user database and hashed passwords.
+# Never ship plaintext credentials. Cardinal Rule 12.
+users = {}  # Populate from secure storage — no hardcoded passwords
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -697,7 +696,7 @@ import bcrypt
 import datetime
 from functools import wraps
 from typing import Optional
-SECRET_KEY = "your-secret-key-change-in-production"
+SECRET_KEY = os.environ.get("SECRET_KEY", "")  # REQUIRED: Set SECRET_KEY in environment
 # Simulated user database
 users_db = {}
 class AuthSystem:
@@ -754,11 +753,12 @@ def login_user(username: str, password: str):
 # Demo
 if __name__ == "__main__":
     # Register users
-    success, msg = register_user("alice", "password123")
+    # Demo — use strong passwords in production
+    success, msg = register_user("alice", os.environ.get("DEMO_PASSWORD", "CHANGE_ME"))
     print(f"Register: {msg}")
     
     # Login
-    token, msg = login_user("alice", "password123")
+    token, msg = login_user("alice", os.environ.get("DEMO_PASSWORD", "CHANGE_ME"))
     print(f"Login: {msg}")
     print(f"Token: {token}")
     

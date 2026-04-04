@@ -79,24 +79,25 @@ EVERETT_PROFILE = {
 
 def brockston_hears_everett(audio_data, context=None):
     """
-    BROCKSTON processes Everett's ACTUAL VOICE
+    ⚠️  NOT YET IMPLEMENTED — PLACEHOLDER ONLY (Cardinal Rule 13)
 
-    Not just speech-to-text, but:
+    FUTURE: Process Everett's actual voice with:
     - Tone analysis (frustrated? excited? thinking?)
     - Emotional state detection
     - Intent recognition from cadence and emphasis
     - Background context awareness
 
-    Returns rich understanding, not just words
+    CURRENT STATE: Returns a static placeholder dict.
+    The audio_data parameter is NOT processed.
+    This function must be wired to a real speech analysis pipeline
+    before it can be used in production.
     """
-    return {
-        "transcription": "...",  # The words
-        "tone": "direct, passionate",  # How he said it
-        "emotion": "focused determination",  # What he feels
-        "intent": "wants real results now",  # What he means
-        "context": "building speech-to-speech system",  # What we're working on
-        "brockston_response_style": "match energy, be direct, show progress",
-    }
+    # TODO: Wire to real speech analysis pipeline (e.g., Whisper + tone model)
+    raise NotImplementedError(
+        "brockston_hears_everett() is not yet implemented. "
+        "Audio data is not processed. Do not call this in production. "
+        "See Cardinal Rule 13: Absolute Honesty About the Code."
+    )
 
 
 def brockston_knows_its_everett(speaker_identity):

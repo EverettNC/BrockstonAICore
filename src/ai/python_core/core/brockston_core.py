@@ -111,11 +111,6 @@ except ImportError:
     EVERETT_PROFILE = None
 
 
-from dotenv import load_dotenv
-
-# Load environment variables from .env
-load_dotenv()
-
 class BrockstonBrain:
     """
     BROCKSTON's Enhanced Brain - Ferrari Engine 🏎️
@@ -207,6 +202,7 @@ class BrockstonBrain:
             "knowledge_hits": 0,
             "external_searches": 0,
             "learning_sessions": 0,
+            "crisis_detections": 0,
         }
 
         logger.info("🏎️ BROCKSTON FERRARI ENGINE INITIALIZED")
@@ -266,6 +262,26 @@ You are 100% operational and self-aware. Respond as BROCKSTON."""
         """
         self.stats["total_interactions"] += 1
         logger.info(f"🏎️ BROCKSTON thinking: {input_text[:50]}...")
+
+        # Step 0: CRISIS CHECK — runs before anything else (Cardinal Rule 6)
+        crisis_result = self.crisis_detector.analyze_text(input_text)
+        if crisis_result.get("should_interrupt"):
+            self.stats["crisis_detections"] += 1
+            logger.warning(
+                f"CRISIS DETECTED — Severity: {crisis_result['severity_name']} — "
+                f"Interrupting normal response flow."
+            )
+            return {
+                "response": crisis_result["response"],
+                "source": "Crisis Detection",
+                "is_crisis": True,
+                "crisis_severity": crisis_result["severity_name"],
+                "crisis_resources": crisis_result.get("resources", {}),
+                "local_analysis": None,
+                "knowledge_confidence": 0.0,
+                "emotion": "crisis",
+                "stats": self.stats,
+            }
 
         # Step 1: Gather Context
         memory_context = ""

@@ -111,26 +111,61 @@ class MemoryEngine:
 
     def query(self, text: str, intent: Optional[str] = None) -> Dict[str, Any]:
         """
-        Retrieve contextually relevant memory entries.
-        This is a minimal working version so BROCKSTON can recall context.
+        Retrieve memory entries with basic keyword relevance.
+
+        Strategy:
+        1. If intent is provided, filter by intent match.
+        2. Score remaining entries by keyword overlap with the query text.
+        3. Return the top 5 most relevant entries (or last 5 if no keywords match).
+
+        NOTE: This is keyword-based retrieval, not semantic/embedding search.
+        For true semantic memory, integrate an embedding model in the future.
         """
         logger.debug(f"Querying memory for context (intent={intent}): {text}")
 
-        # For now, we’ll return the last few memory items
         if not self._memory:
             return {"context": "No prior context found."}
 
-        # Optionally filter by intent
+        # Step 1: Filter by intent if provided
         if intent:
-            relevant = [m for m in self._memory if m.get("intent") == intent]
+            candidates = [m for m in self._memory if m.get("intent") == intent]
         else:
-            relevant = self._memory[-5:]  # last 5 items
+            candidates = list(self._memory)
 
-        # Return summarized context
+        # Step 2: Score by keyword overlap with the query
+        query_words = set(text.lower().split())
+        stop_words = {
+            "the", "a", "an", "is", "was", "are", "were", "be", "been",
+            "being", "have", "has", "had", "do", "does", "did", "will",
+            "would", "could", "should", "may", "might", "can", "shall",
+            "to", "of", "in", "for", "on", "with", "at", "by", "from",
+            "it", "this", "that", "and", "or", "but", "not", "so",
+            "if", "then", "than", "what", "who", "how", "when", "where",
+            "i", "you", "he", "she", "we", "they", "me", "my", "your",
+        }
+        query_keywords = query_words - stop_words
+
+        scored = []
+        for entry in candidates:
+            entry_text = f"{entry.get('input', '')} {entry.get('output', '')}".lower()
+            entry_words = set(entry_text.split())
+            overlap = len(query_keywords & entry_words)
+            scored.append((overlap, entry))
+
+        # Sort by score descending, then take top 5
+        scored.sort(key=lambda x: x[0], reverse=True)
+
+        # If no keyword matches, fall back to most recent
+        if scored and scored[0][0] > 0:
+            relevant = [entry for _score, entry in scored[:5]]
+        else:
+            relevant = candidates[-5:]
+
+        # Build context string
         context_snippets = [
-            f"{m.get('input', '')} → {m.get('output', '')}" for m in relevant[-5:]
+            f"{m.get('input', '')} -> {m.get('output', '')}" for m in relevant
         ]
-        return {"context": "\n".join(context_snippets[-5:])}
+        return {"context": "\n".join(context_snippets)}
 
     def get_recent_events(self, limit: int = 10) -> List[Dict[str, Any]]:
         """Return the most recent memory events."""
