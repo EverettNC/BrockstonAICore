@@ -12,10 +12,13 @@ import logging
 import importlib
 from pathlib import Path
 
-# Ensure project root is on sys.path
-PROJECT_ROOT = Path(__file__).resolve().parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+# Ensure both python_core/ and python_core/core/ are on sys.path
+# bridge.py does the same — loader must match so all modules resolve
+PROJECT_ROOT = Path(__file__).resolve().parent          # src/ai/python_core/
+CORE_ROOT = PROJECT_ROOT / "core"                       # src/ai/python_core/core/
+for _p in [str(PROJECT_ROOT), str(CORE_ROOT)]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ModuleLoader")
