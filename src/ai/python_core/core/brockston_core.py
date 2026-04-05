@@ -17,6 +17,18 @@ from dotenv import load_dotenv
 # Load environment variables at the very beginning
 load_dotenv()
 
+# Module Loader — loads Brockston's full consciousness by category
+# This is the proper boot sequence. brockston_core.py calls this first.
+try:
+    import sys as _sys, os as _os
+    _python_core = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    if _python_core not in _sys.path:
+        _sys.path.insert(0, _python_core)
+    from brockston_module_loader import load_brockston_consciousness
+    _loader = load_brockston_consciousness()
+except Exception as _loader_e:
+    _loader = None
+
 # Core imports
 from conversation_engine import ConversationEngine
 from memory_engine import MemoryEngine
