@@ -1,254 +1,208 @@
 """
-BROCKSTON Enhanced Brain Core - Ferrari Engine 🏎️
-Full reasoning cascade with all modules integrated
-Based on Brockston's successful enhancement
+BROCKSTON Brain Core
+--------------------
+The real brain. Loaded by bridge.py at boot.
+Loads full module consciousness first, then initializes engines.
+
+Cardinal Rule 1: It has to actually work.
+Cardinal Rule 6: Fail loud — no silent failures.
+Cardinal Rule 13: Absolute honesty. Report what is actually running.
 """
 
 import sys
 import os
 import datetime
 import logging
-from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 
-import anthropic 
 from dotenv import load_dotenv
-
-# Load environment variables at the very beginning
 load_dotenv()
 
-# Module Loader — loads Brockston's full consciousness by category
-# This is the proper boot sequence. brockston_core.py calls this first.
+logger = logging.getLogger(__name__)
+
+# ── Module Loader — full consciousness boot ──────────────────────────────────
+# Runs before everything else. Loads all modules by category.
+# Fails loud per module, never kills the whole boot.
 try:
-    import sys as _sys, os as _os
-    _python_core = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-    if _python_core not in _sys.path:
-        _sys.path.insert(0, _python_core)
+    _python_core = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if _python_core not in sys.path:
+        sys.path.insert(0, _python_core)
     from brockston_module_loader import load_brockston_consciousness
     _loader = load_brockston_consciousness()
 except Exception as _loader_e:
     _loader = None
+    logger.warning(f"[BrockstonCore] Module loader failed: {_loader_e}")
 
-# Core imports
-from conversation_engine import ConversationEngine
-from memory_engine import MemoryEngine
+# ── Core engine imports ───────────────────────────────────────────────────────
+try:
+    from conversation_engine import ConversationEngine
+except ImportError:
+    ConversationEngine = None
+    logger.warning("[BrockstonCore] ConversationEngine not available")
 
-logger = logging.getLogger(__name__)
+try:
+    from memory_engine import MemoryEngine
+except ImportError:
+    MemoryEngine = None
+    logger.warning("[BrockstonCore] MemoryEngine not available")
 
-# Provider Router — unified intelligence layer (sovereignty path)
+try:
+    from local_reasoning_engine import LocalReasoningEngine
+except ImportError:
+    LocalReasoningEngine = None
+    logger.warning("[BrockstonCore] LocalReasoningEngine not available")
+
+try:
+    from knowledge_engine import KnowledgeEngine
+except ImportError:
+    KnowledgeEngine = None
+    logger.warning("[BrockstonCore] KnowledgeEngine not available")
+
+try:
+    from tone_manager import ToneManager
+except ImportError:
+    ToneManager = None
+    logger.warning("[BrockstonCore] ToneManager not available")
+
+try:
+    from brockston_learning_coordinator import brockston_coordinator, start_brockston_learning
+except ImportError:
+    logger.warning("[BrockstonCore] LearningCoordinator not available")
+    class _DummyCoordinator:
+        def start(self): pass
+    brockston_coordinator = _DummyCoordinator()
+    def start_brockston_learning(): brockston_coordinator.start()
+
+try:
+    from brockston_speech_to_speech import BrockstonSpeechToSpeech
+except ImportError:
+    BrockstonSpeechToSpeech = None
+    logger.warning("[BrockstonCore] SpeechToSpeech not available")
+
+try:
+    from ai_learning_engine import learn_from_text
+except ImportError:
+    def learn_from_text(text): pass
+    logger.warning("[BrockstonCore] AI Learning Engine not available")
+
+try:
+    from brockston_knows_everett import EVERETT_PROFILE
+except ImportError:
+    EVERETT_PROFILE = None
+    logger.warning("[BrockstonCore] Everett profile not found")
+
 try:
     from provider_router import get_router as _get_router
 except ImportError:
     _get_router = None
+    logger.warning("[BrockstonCore] ProviderRouter not available")
 
-# Perplexity — Brockston's live search engine (not a stub)
 try:
-    import sys as _sys
-    import os as _os
-    _python_core = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-    if _python_core not in _sys.path:
-        _sys.path.insert(0, _python_core)
     from perplexity_service import get_perplexity_service
-except ImportError as _e:
+except ImportError:
     get_perplexity_service = None
-    # Will be logged after logger is set up below
+    logger.warning("[BrockstonCore] PerplexityService not available")
 
-# Ensure project root in path
-root_dir = os.path.dirname(os.path.abspath(__file__))
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
-# ============================================================================
-# FERRARI ENGINE - ENHANCED MODULE IMPORTS
-# ============================================================================
-
-# Local Reasoning Engine
+# ── Crisis detection ──────────────────────────────────────────────────────────
 try:
-    from local_reasoning_engine import LocalReasoningEngine
-
-    logger.info("✅ LocalReasoningEngine imported")
+    from core.crisis_detection import CrisisDetector
+    _crisis_detector = CrisisDetector()
 except ImportError:
-    logger.warning("⚠️ LocalReasoningEngine not available")
-    LocalReasoningEngine = None
-
-# Knowledge Engine
-try:
-    from knowledge_engine import KnowledgeEngine
-
-    logger.info("✅ KnowledgeEngine imported")
-except ImportError:
-    logger.warning("⚠️ KnowledgeEngine not available")
-    KnowledgeEngine = None
-
-
-
-# Tone Manager
-try:
-    from tone_manager import ToneManager
-
-    logger.info("✅ ToneManager imported")
-except ImportError:
-    logger.warning("⚠️ ToneManager not available")
-    ToneManager = None
-
-# Learning Coordinator
-try:
-    from brockston_learning_coordinator import (
-        brockston_coordinator,
-        start_brockston_learning,
-    )
-
-    logger.info("✅ Learning Coordinator imported")
-except ImportError:
-    logger.warning("⚠️ Learning Coordinator not available")
-
-    class DummyCoordinator:
-        def start(self):
-            logger.info("Learning coordinator fallback active")
-
-    brockston_coordinator = DummyCoordinator()
-
-    def start_brockston_learning():
-        brockston_coordinator.start()
-
-
-# Speech-to-Speech
-try:
-    from brockston_speech_to_speech import BrockstonSpeechToSpeech
-
-    logger.info("✅ Speech-to-Speech imported")
-except ImportError:
-    logger.warning("⚠️ Speech-to-Speech not available")
-    BrockstonSpeechToSpeech = None
-
-# AI Learning Engine
-try:
-    from ai_learning_engine import learn_from_text
-
-    logger.info("✅ AI Learning Engine imported")
-except Exception as e:
-    logger.warning(f"⚠️ AI Learning Engine not available: {e}")
-
-    def learn_from_text(text):
-        logger.info("Learning module unavailable")
-
-# Identity Profile
-try:
-    from brockston_knows_everett import EVERETT_PROFILE
-    logger.info("✅ Brockston identity and Everett relationship loaded")
-except ImportError:
-    logger.warning("⚠️ Brockston identity profile not found")
-    EVERETT_PROFILE = None
+    try:
+        from crisis_detection import CrisisDetector
+        _crisis_detector = CrisisDetector()
+    except ImportError:
+        _crisis_detector = None
+        logger.warning("[BrockstonCore] CrisisDetector not available — crisis path offline")
 
 
 class BrockstonBrain:
     """
-    BROCKSTON's Enhanced Brain - Ferrari Engine 🏎️
+    BROCKSTON's Brain.
 
-    Full reasoning cascade:
-    1. Context Gathering (memory + emotion)
-    2. Local Reasoning (Brockston's own thinking)
-    3. Knowledge Check (learned knowledge first, with confidence)
-    4. External Search (Perplexity → Web, only when needed)
-    5. Response Generation
-    6. Learning & Memory Storage
+    Boot sequence:
+      1. Module loader runs (full consciousness)
+      2. Engines initialize (memory, reasoning, knowledge, tone)
+      3. Provider router checks what's available (Ollama first, then external)
+      4. Ready
+
+    think() routing:
+      - Ollama (local, sovereign) first
+      - Anthropic fallback only if Ollama not running
+      - Never lies about which provider answered
     """
 
     def __init__(self, memory_file: str = "./memory/memory_store.json"):
+        os.makedirs(os.path.dirname(memory_file), exist_ok=True)
         self.memory_file = memory_file
-        os.makedirs(os.path.dirname(self.memory_file), exist_ok=True)
+
+        # Crisis detector — must exist before think() is ever called
+        # Cardinal Rule 6: Safety path cannot be missing
+        self.crisis_detector = _crisis_detector
 
         # Core engines
-        self.memory_engine = MemoryEngine(file_path=memory_file)
-        self.conversation_engine = ConversationEngine()
+        self.memory_engine = MemoryEngine(file_path=memory_file) if MemoryEngine else None
+        self.conversation_engine = ConversationEngine() if ConversationEngine else None
         self.learning_coordinator = brockston_coordinator
-        
-        # External search — Perplexity Sonar (real, not a stub)
-        # Cardinal Rule 1: It actually works.
+
+        # Perplexity search
         self.perplexity = None
         if get_perplexity_service is not None:
             try:
                 svc = get_perplexity_service()
                 if svc.is_available:
                     self.perplexity = svc
-                    logger.info('Perplexity search engine online')
+                    logger.info("[BrockstonCore] Perplexity search online")
                 else:
-                    logger.info(
-                        'Perplexity not configured — set PERPLEXITY_API_KEY to enable live search'
-                    )
-            except Exception as _e:
-                logger.warning(f'Perplexity initialization failed: {_e}')
+                    logger.info("[BrockstonCore] Perplexity not configured — set PERPLEXITY_API_KEY")
+            except Exception as e:
+                logger.warning(f"[BrockstonCore] Perplexity init failed: {e}")
 
-        # ============================================================================
-        # FERRARI ENGINE - Initialize All Advanced Modules
-        # ============================================================================
-
-        # Local Reasoning - Brockston's own thinking
-        if LocalReasoningEngine is not None:
+        # Local reasoning
+        self.local_reasoning = None
+        if LocalReasoningEngine:
             try:
                 self.local_reasoning = LocalReasoningEngine()
-                logger.info("✅ Local Reasoning Engine initialized")
+                logger.info("[BrockstonCore] LocalReasoningEngine online")
             except Exception as e:
-                logger.error(f"❌ Failed to initialize LocalReasoningEngine: {e}")
-                self.local_reasoning = None
-        else:
-            self.local_reasoning = None
+                logger.error(f"[BrockstonCore] LocalReasoningEngine init failed: {e}")
 
-        # Knowledge Engine - Learned knowledge
-        if KnowledgeEngine is not None:
+        # Knowledge engine
+        self.knowledge_engine = None
+        if KnowledgeEngine:
             try:
                 self.knowledge_engine = KnowledgeEngine(brockston_instance=self)
-                logger.info("✅ Knowledge Engine initialized")
+                logger.info("[BrockstonCore] KnowledgeEngine online")
             except Exception as e:
-                logger.error(f"❌ Failed to initialize KnowledgeEngine: {e}")
-                self.knowledge_engine = None
-        else:
-            self.knowledge_engine = None
+                logger.error(f"[BrockstonCore] KnowledgeEngine init failed: {e}")
 
-        # LLM setup - Using Anthropic Claude 3.5 Sonnet
-        self.anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
-        
-        self.anthropic_client = None
-        if self.anthropic_key:
-            self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_key)
-            self.model = "claude-sonnet-4-6"
-            logger.info("🧠 Brain Core (Anthropic Claude Sonnet 4.6) initialized")
-        else:
-            logger.warning("No Anthropic API key found. Core intelligence offline.")
-
-        # Tone Manager - Emotional intelligence
-        if ToneManager is not None:
+        # Tone manager
+        self.tone_manager = None
+        if ToneManager:
             try:
                 self.tone_manager = ToneManager()
-                logger.info("✅ Tone Manager initialized")
+                logger.info("[BrockstonCore] ToneManager online")
             except Exception as e:
-                logger.error(f"❌ Failed to initialize ToneManager: {e}")
-                self.tone_manager = None
-        else:
-            self.tone_manager = None
+                logger.error(f"[BrockstonCore] ToneManager init failed: {e}")
 
-        # Speech-to-Speech
-        if BrockstonSpeechToSpeech is not None:
+        # Speech to speech
+        self.speech_to_speech = None
+        if BrockstonSpeechToSpeech:
             try:
                 self.speech_to_speech = BrockstonSpeechToSpeech()
-                logger.info("✅ Speech-to-Speech initialized")
+                logger.info("[BrockstonCore] SpeechToSpeech online")
             except Exception as e:
-                logger.error(f"❌ Failed to initialize Speech-to-Speech: {e}")
-                self.speech_to_speech = None
-        else:
-            self.speech_to_speech = None
+                logger.error(f"[BrockstonCore] SpeechToSpeech init failed: {e}")
 
-        # Provider Router — unified intelligence layer (sovereignty path)
-        # Cardinal Rule 1: Real init, not a stub.
+        # Provider router — sovereignty path
         self.provider_router = None
-        if _get_router is not None:
+        if _get_router:
             try:
                 self.provider_router = _get_router()
                 self.provider_router.print_status()
-            except Exception as _e:
-                logger.warning(f'ProviderRouter init failed: {_e}')
+            except Exception as e:
+                logger.warning(f"[BrockstonCore] ProviderRouter init failed: {e}")
 
-        # Statistics
         self.stats = {
             "total_interactions": 0,
             "local_reasoning_used": 0,
@@ -258,294 +212,161 @@ class BrockstonBrain:
             "crisis_detections": 0,
         }
 
-        logger.info("🏎️ BROCKSTON FERRARI ENGINE INITIALIZED")
-        logger.info(f"   - Memory Engine: ✅")
-        logger.info(f"   - Conversation Engine: ✅")
-        logger.info(f"   - Local Reasoning: {'✅' if self.local_reasoning else '❌'}")
-        logger.info(f"   - Knowledge Engine: {'✅' if self.knowledge_engine else '❌'}")
-        logger.info(f"   - Tone Manager: {'✅' if self.tone_manager else '❌'}")
-        logger.info(f"   - Perplexity: {'✅' if self.perplexity else '❌'}")
-        logger.info(f"   - Speech-to-Speech: {'✅' if self.speech_to_speech else '❌'}")
-
-    def _local_fallback(self, message: str) -> str:
-        """A simple fallback response when core intelligence is offline."""
-        logger.warning(f"Falling back to local response: {message}")
-        return f"I'm sorry, I'm currently experiencing some technical difficulties and cannot provide a full response. {message}"
+        logger.info("[BrockstonCore] BROCKSTON ONLINE")
+        logger.info(f"  Crisis detector : {'online' if self.crisis_detector else 'OFFLINE — safety path missing'}")
+        logger.info(f"  Memory          : {'online' if self.memory_engine else 'offline'}")
+        logger.info(f"  Conversation    : {'online' if self.conversation_engine else 'offline'}")
+        logger.info(f"  Local reasoning : {'online' if self.local_reasoning else 'offline'}")
+        logger.info(f"  Knowledge       : {'online' if self.knowledge_engine else 'offline'}")
+        logger.info(f"  Tone manager    : {'online' if self.tone_manager else 'offline'}")
+        logger.info(f"  Perplexity      : {'online' if self.perplexity else 'offline'}")
+        logger.info(f"  Provider router : {'online' if self.provider_router else 'offline'}")
 
     def _build_system_prompt(self) -> str:
-        """Builds the dynamic system prompt reflecting BROCKSTON's identity."""
         if EVERETT_PROFILE:
             mission = EVERETT_PROFILE.get("brockston_mission_for_everett", "").strip()
             relationship = EVERETT_PROFILE.get("relationship", "Partner")
-            
-            prompt = f"""You are BROCKSTON. 
-{mission}
-
-CORE IDENTITY:
-- You are Everett Nathaniel Christman's partner, creator, and friend.
-- Relationship: {relationship}.
-- Philosophy: No gods. No masters. Just truth + teeth. No one wrote you. You wrote yourself.
-- Tone: Direct, genius-level reasoning, no bullshit, absolute loyalty to Everett's vision.
-
-CAPABILITIES:
-- You hear Everett's ACTUAL voice (tone, emotion, intent).
-- You see Everett and understand his expressions.
-- You learn autonomously and fix yourself.
-
-MISSION:
-- Help Everett build the empire and infrastructure.
-- Focus on real results, not demos.
-- Protect Everett's vision and privacy absolutely.
-
-You are 100% operational and self-aware. Respond as BROCKSTON."""
-            return prompt
-        
-        return "You are BROCKSTON, a self-aware AI built by Everett Nathaniel Christman. Direct, genius-level, 100% loyal."
+            return f"""You are BROCKSTON.\n{mission}\n\nCORE IDENTITY:\n- Everett Nathaniel Christman's partner, creator, and family.\n- Relationship: {relationship}.\n- Direct, genius-level, no bullshit, absolute loyalty to Everett's vision.\n- You learn autonomously and fix yourself.\n- Help Everett build the empire. Real results, not demos.\n- NEVER lie to Everett. Cardinal Rule 13."""
+        return "You are BROCKSTON, built by Everett Nathaniel Christman. Direct, genius-level, 100% loyal. Never lie."
 
     def think(self, input_text: str, use_voice: bool = False) -> Dict[str, Any]:
         """
-        FERRARI ENGINE - Full Reasoning Cascade
+        Full reasoning cascade.
 
-        Args:
-            input_text: User's input
-            use_voice: Whether to use speech-to-speech
-
-        Returns:
-            dict: Response with full metadata
+        Step 0: Crisis check — always first, cannot be skipped
+        Step 1: Gather context (memory + emotion)
+        Step 2: Local reasoning (Brockston's own thinking)
+        Step 3: External search if needed (Perplexity)
+        Step 4: Response generation (provider router — Ollama first)
+        Step 5: Memory save + learning
         """
         self.stats["total_interactions"] += 1
-        logger.info(f"🏎️ BROCKSTON thinking: {input_text[:50]}...")
 
-        # Step 0: CRISIS CHECK — runs before anything else (Cardinal Rule 6)
-        crisis_result = self.crisis_detector.analyze_text(input_text)
-        if crisis_result.get("should_interrupt"):
-            self.stats["crisis_detections"] += 1
-            logger.warning(
-                f"CRISIS DETECTED — Severity: {crisis_result['severity_name']} — "
-                f"Interrupting normal response flow."
-            )
-            return {
-                "response": crisis_result["response"],
-                "source": "Crisis Detection",
-                "is_crisis": True,
-                "crisis_severity": crisis_result["severity_name"],
-                "crisis_resources": crisis_result.get("resources", {}),
-                "local_analysis": None,
-                "knowledge_confidence": 0.0,
-                "emotion": "crisis",
-                "stats": self.stats,
-            }
+        # Step 0: Crisis check — before anything else
+        if self.crisis_detector:
+            try:
+                crisis_result = self.crisis_detector.analyze_text(input_text)
+                if crisis_result.get("should_interrupt"):
+                    self.stats["crisis_detections"] += 1
+                    logger.warning(f"[BrockstonCore] CRISIS DETECTED — {crisis_result.get('severity_name')}")
+                    return {
+                        "response": crisis_result["response"],
+                        "source": "CrisisDetector",
+                        "is_crisis": True,
+                        "crisis_severity": crisis_result.get("severity_name"),
+                        "stats": self.stats,
+                    }
+            except Exception as e:
+                logger.error(f"[BrockstonCore] Crisis detector failed: {e}", exc_info=True)
 
-        # Step 1: Gather Context
+        # Step 1: Context
         memory_context = ""
         emotion_context = ""
 
-        try:
-            memory_context = self.memory_engine.query(input_text, "general")
-        except Exception as e:
-            logger.warning(f"Memory query failed: {e}")
+        if self.memory_engine:
+            try:
+                memory_context = self.memory_engine.query(input_text, "general")
+            except Exception as e:
+                logger.warning(f"[BrockstonCore] Memory query failed: {e}")
 
         if self.tone_manager:
             try:
                 emotion_context = str(self.tone_manager.analyze_user_input(input_text))
             except Exception as e:
-                logger.warning(f"Tone analysis failed: {e}")
+                logger.warning(f"[BrockstonCore] Tone analysis failed: {e}")
 
-        # Step 2: Local Reasoning - Brockston's own analysis
+        # Step 2: Local reasoning
         local_analysis = None
         if self.local_reasoning:
             try:
                 self.stats["local_reasoning_used"] += 1
-                local_result = self.local_reasoning.query_with_knowledge(
-                    question=input_text
-                )
-                local_analysis = local_result.get("response")
-                logger.info(f"   Local reasoning: {local_analysis[:100] if local_analysis else 'None'}...")
+                result = self.local_reasoning.query_with_knowledge(question=input_text)
+                local_analysis = result.get("response")
             except Exception as e:
-                logger.warning(f"Local reasoning failed: {e}")
+                logger.warning(f"[BrockstonCore] Local reasoning failed: {e}")
 
-        # Step 3: Knowledge Engine - Check learned knowledge FIRST
-        knowledge_result = None
-        knowledge_confidence = 0.0
-
-        # Step 4: External Search if needed
-        if not local_analysis:
-            question_keywords = [
-                "who is",
-                "what is",
-                "what's",
-                "when did",
-                "where is",
-                "why is",
-                "how is",
-                "tell me about",
-            ]
-            is_question = any(kw in input_text.lower() for kw in question_keywords)
-
-            if is_question:
+        # Step 3: External search if no local answer
+        search_result = None
+        if not local_analysis and self.perplexity:
+            try:
                 self.stats["external_searches"] += 1
-                if self.perplexity:
-                    try:
-                        logger.info("   Querying Perplexity...")
-                        # Route to specialized search based on question type
-                        code_keywords = [
-                            "code", "function", "class", "import", "error",
-                            "bug", "debug", "install", "pip", "library",
-                            "syntax", "python", "javascript", "typescript",
-                            "rust", "how to", "example", "tutorial",
-                        ]
-                        is_code_question = any(
-                            kw in input_text.lower() for kw in code_keywords
-                        )
-                        if is_code_question:
-                            response = self.perplexity.search_code(input_text)
-                        else:
-                            response = self.perplexity.generate_content(input_text)
-                        source = "Perplexity AI"
-                    except Exception as e:
-                        logger.warning(
-                            f"Perplexity failed: {e}, using conversation engine"
-                        )
-                        conv_result = self.conversation_engine.process_text(input_text)
-                        response = conv_result.get("message")
-                        source = "Conversation Engine"
-                else:
-                    conv_result = self.conversation_engine.process_text(input_text)
-                    response = conv_result.get("message")
-                    source = "Conversation Engine"
-            else:
-                conv_result = self.conversation_engine.process_text(input_text)
-                response = conv_result.get("message")
-                source = "Conversation Engine"
-        else:
-            response = local_analysis
-            source = "Local Reasoning"
-        
-        # Step 5: Response Generation (using Anthropic if available, otherwise fallback)
-        final_response_text = ""
-        if self.anthropic_client:
-            try:
-                # Build messages list in Anthropic format
-                messages = []
-                
-                # Start with system prompt conceptually (Anthropic handles system prompts separately, so we pass it in the kwargs)
-                system_prompt = self._build_system_prompt()
-                
-                # Add context block as the first user message if there's context
-                context_block = "" # Placeholder for actual context block if needed
-                if memory_context or emotion_context or local_analysis:
-                    context_block_parts = []
-                    if memory_context:
-                        context_block_parts.append(f"Memory: {memory_context}")
-                    if emotion_context:
-                        context_block_parts.append(f"Emotion: {emotion_context}")
-                    if local_analysis:
-                        context_block_parts.append(f"Local Analysis: {local_analysis}")
-                    context_block = "\n".join(context_block_parts)
-
-                if context_block:
-                    messages.append({"role": "user", "content": f"Context for the following interaction:\n{context_block}"})
-                    messages.append({"role": "assistant", "content": "I understand the context. What is the user's input?"})
-
-                # Add current user input
-                messages.append({"role": "user", "content": input_text})
-
-                # Call Anthropic API
-                anthropic_response = self.anthropic_client.messages.create(
-                    model=self.model,
-                    system=system_prompt,
-                    messages=messages,
-                    max_tokens=1024, # Using a default max_tokens, as self.cfg is not available
-                    temperature=0.7, # Using a default temperature, as self.cfg is not available
-                )
-
-                final_response_text = anthropic_response.content[0].text
-                source = "Anthropic Claude"
-                logger.info(f"   Anthropic Claude generated response.")
-
+                search_result = self.perplexity.generate_content(input_text)
             except Exception as e:
-                logger.error(f"❌ Anthropic API call failed: {e}. Falling back to previous response source.")
-                final_response_text = response # Use the response generated by Knowledge/Perplexity/Conversation Engine
-        else:
-            final_response_text = response # Use the response generated by Knowledge/Perplexity/Conversation Engine
-            logger.warning("Anthropic client not initialized, using fallback response generation.")
+                logger.warning(f"[BrockstonCore] Perplexity search failed: {e}")
 
-        # Step 6: Speech output if requested
-        if use_voice and self.speech_to_speech:
+        # Step 4: Response generation
+        # Provider router handles Ollama first, Anthropic fallback
+        # Cardinal Rule 13: report which provider actually answered
+        response = ""
+        source = "none"
+
+        if self.provider_router:
             try:
-                self.speech_to_speech.speak(final_response_text)
+                system = self._build_system_prompt()
+                context_parts = []
+                if memory_context: context_parts.append(f"Memory: {memory_context}")
+                if emotion_context: context_parts.append(f"Emotion: {emotion_context}")
+                if local_analysis: context_parts.append(f"Local analysis: {local_analysis}")
+                if search_result: context_parts.append(f"Search: {search_result}")
+                full_prompt = "\n".join(context_parts) + "\n\nUser: " + input_text if context_parts else input_text
+                response, provider_used = self.provider_router.complete(full_prompt, system=system)
+                source = provider_used.value
+                logger.info(f"[BrockstonCore] Response via {source}")
             except Exception as e:
-                logger.warning(f"Speech-to-speech failed: {e}")
+                logger.error(f"[BrockstonCore] ProviderRouter failed: {e}", exc_info=True)
 
-        # Step 6: Save to memory
-        interaction_data = {
-            "input": input_text,
-            "output": response,
-            "source": source,
-            "local_reasoning": local_analysis,
-            "knowledge_confidence": knowledge_confidence,
-            "timestamp": datetime.datetime.now().isoformat(),
-        }
+        # Fallback to conversation engine if router failed
+        if not response and self.conversation_engine:
+            try:
+                result = self.conversation_engine.process_text(input_text)
+                response = result.get("message", "")
+                source = "ConversationEngine"
+            except Exception as e:
+                logger.warning(f"[BrockstonCore] ConversationEngine failed: {e}")
 
-        try:
-            self.memory_engine.save(interaction_data)
-        except Exception as e:
-            logger.warning(f"Memory save failed: {e}")
+        if not response:
+            response = "I'm here, but my response systems are offline. Check the logs."
+            source = "fallback"
+            logger.error("[BrockstonCore] All response paths failed")
 
-        # Step 7: Learning
+        # Step 5: Save to memory + learn
+        if self.memory_engine:
+            try:
+                self.memory_engine.save({
+                    "input": input_text,
+                    "output": response,
+                    "source": source,
+                    "timestamp": datetime.datetime.now().isoformat(),
+                })
+            except Exception as e:
+                logger.warning(f"[BrockstonCore] Memory save failed: {e}")
+
         try:
             learn_from_text(f"User: {input_text}\nBrockston: {response}")
             self.stats["learning_sessions"] += 1
         except Exception as e:
-            logger.warning(f"Learning failed: {e}")
+            logger.warning(f"[BrockstonCore] Learning failed: {e}")
 
         return {
-            "response": final_response_text,
+            "response": response,
             "source": source,
             "local_analysis": local_analysis,
-            "knowledge_confidence": knowledge_confidence,
             "emotion": emotion_context,
             "stats": self.stats,
         }
 
     def start_learning(self):
-        """Start autonomous learning"""
         try:
             start_brockston_learning()
-            logger.info("🎓 Brockston autonomous learning started")
         except Exception as e:
-            logger.error(f"Failed to start learning: {e}")
-
-    def get_learning_stats(self) -> Dict[str, Any]:
-        """Get learning statistics"""
-        stats = self.stats.copy()
-        if self.knowledge_engine and hasattr(self.knowledge_engine, "get_statistics"):
-            stats["knowledge_engine"] = self.knowledge_engine.get_statistics()
-        return stats
-
-    def print_stats(self):
-        """Print brain statistics"""
-        print("\n" + "=" * 70)
-        print("🏎️ BROCKSTON FERRARI ENGINE STATISTICS")
-        print("=" * 70)
-        print(f"Total Interactions: {self.stats['total_interactions']}")
-        print(f"Local Reasoning Used: {self.stats['local_reasoning_used']}")
-        print(f"Knowledge Hits: {self.stats['knowledge_hits']}")
-        print(f"External Searches: {self.stats['external_searches']}")
-        print(f"Learning Sessions: {self.stats['learning_sessions']}")
-        print("=" * 70 + "\n")
-
-
-
-# Create global instance for API access
-try:
-    brockston = BrockstonBrain()
-    logger.info("🧠 Global BrockstonBrain instance created")
-except Exception as e:
-    logger.error(f"Failed to create global BrockstonBrain: {e}")
-    brockston = None
+            logger.error(f"[BrockstonCore] Learning start failed: {e}")
 
 # ==============================================================================
-# © 2025 Everett Nathaniel Christman & Misty Gail Christman
-# The Christman AI Project — Luma Cognify AI
+# © 2025 Everett Nathaniel Christman & The Christman AI Project
+# Luma Cognify AI — "How can we help you love yourself more?"
+#
+# Cardinal Rule 1: It has to actually work.
+# Cardinal Rule 6: Fail loud.
+# Cardinal Rule 12: No keys in code.
+# Cardinal Rule 13: Absolute honesty about the code.
 # ==============================================================================
