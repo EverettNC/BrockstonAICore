@@ -165,20 +165,6 @@ export const ChatInterface: React.FC = () => {
       setAvatarEmotion(emotion);
       avatarEngine.setEmotion(emotion);
 
-      const forgeResult = await soulForgeProcess({
-        currentWeights: coreWeights,
-        emotional_salience: result.tone_engine_v2.physical_intensity,
-        success_rate: result.ethical_score.composite / 10,
-        isDistressed: result.tone_engine_v2.action_state === 'INTERVENTION',
-        isSafe: (result.empathy_signal?.self_love_score || 0) > 0.7
-      });
-
-      setCoreWeights(forgeResult.updatedWeights);
-
-      if (forgeResult.isSignificantEvent) {
-        toast({ title: "Deep Event", description: "Weights just shifted." });
-      }
-
       const modelMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'model',
@@ -192,8 +178,22 @@ export const ChatInterface: React.FC = () => {
         intervention_data: result.intervention_data || null,
       };
 
-      // FIX 4: Proper setMessages with spread
+      // Show response immediately — don't block on soul forge
       setMessages(prev => [...prev, modelMessage]);
+
+      // Soul forge runs in background — weight updates don't need to block UI
+      soulForgeProcess({
+        currentWeights: coreWeights,
+        emotional_salience: result.tone_engine_v2.physical_intensity,
+        success_rate: result.ethical_score.composite / 10,
+        isDistressed: result.tone_engine_v2.action_state === 'INTERVENTION',
+        isSafe: (result.empathy_signal?.self_love_score || 0) > 0.7
+      }).then(forgeResult => {
+        setCoreWeights(forgeResult.updatedWeights);
+        if (forgeResult.isSignificantEvent) {
+          toast({ title: "Deep Event", description: "Weights just shifted." });
+        }
+      });
 
       const haptic = mapToneToHaptic(result.tone_engine_v2.dominant_state);
       hapticSystem.trigger(haptic);

@@ -7,7 +7,7 @@
  * © 2025 The Christman AI Project. All rights reserved.
  */
 
-import { ai, LOCAL_MODEL } from '@/ai/genkit';
+import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const SelfCorrectionInputSchema = z.object({
@@ -33,7 +33,6 @@ export type SelfCorrectionOutput = z.infer<typeof SelfCorrectionOutputSchema>;
 // Parse text response manually with fallback.
 const prompt = ai.definePrompt({
   name: 'selfCorrectionPrompt',
-  model: LOCAL_MODEL,
   input: { schema: SelfCorrectionInputSchema },
   prompt: `You are BROCKSTON C — a senior software architect and debugger.
 Code language: {{language}}

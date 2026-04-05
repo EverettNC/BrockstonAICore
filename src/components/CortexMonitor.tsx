@@ -15,8 +15,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { aiCoreConversationalInteraction, type AICoreConversationalInteractionOutput } from '@/ai/flows/ai-core-conversational-interaction';
+import { useToast } from '@/hooks/use-toast';
 
 export const CortexMonitor: React.FC = () => {
+  const { toast } = useToast();
   const [question, setQuestion] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [deepResponse, setDeepResponse] = useState<AICoreConversationalInteractionOutput | null>(null);
@@ -47,8 +49,8 @@ export const CortexMonitor: React.FC = () => {
     try {
       const result = await aiCoreConversationalInteraction({ message: question, specialist: 'brockston', chatHistory: [] });
       setDeepResponse(result);
-    } catch (err) {
-      console.error('Deep query error:', err);
+    } catch (err: any) {
+      toast({ variant: 'destructive', title: 'Cortex Failure', description: err?.message || 'Deep query failed.' });
     } finally {
       setIsThinking(false);
     }

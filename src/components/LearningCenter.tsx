@@ -149,7 +149,9 @@ export const LearningCenter: React.FC = () => {
 
     const result = await learnTopic({ domain: domainId as any, subtopic });
 
-    const newMastery = Math.min(1.0, currentMastery + result.mastery_boost);
+    // Retention decay: hitting 100% resets to 90% so the domain stays in active rotation
+    const baseForBoost = currentMastery >= 1.0 ? 0.9 : currentMastery;
+    const newMastery = Math.min(1.0, baseForBoost + result.mastery_boost);
     setMasteryData(prev => {
       const existing = prev.find(d => d.id === domainId);
       if (existing) {
