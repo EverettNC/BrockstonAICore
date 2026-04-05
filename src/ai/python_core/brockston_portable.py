@@ -7,12 +7,19 @@ The Christman AI Project. He doesn't just answer questions — he teaches.
 He explains the why. He scaffolds. He checks for understanding.
 He never ships broken code to a student.
 
+SOVEREIGNTY FIRST:
+  Brockston runs on Ollama locally (llama3.2:1b or any installed model)
+  when available — free, on-device, his own reasoning.
+  External providers (Anthropic, etc.) are fallbacks, not dependencies.
+  The goal: Brockston IS the API. He doesn't borrow one.
+
 Usage:
     python brockston_portable.py "What's wrong with this code?"
     python brockston_portable.py --chat            # Interactive stateful session
     python brockston_portable.py --analyze <file>  # Full teaching analysis
     python brockston_portable.py --teach <file>    # Step-by-step lesson from a file
     python brockston_portable.py --review <file>   # Cardinal Rule compliance check
+    python brockston_portable.py --status          # Show which providers are online
 
 © 2025 Everett Nathaniel Christman & The Christman AI Project
 Cardinal Rule 13: Absolute Honesty About the Code.
@@ -117,83 +124,169 @@ Do not soften findings. Brockston serves students who deserve real answers."""
 
 
 # ---------------------------------------------------------------------------
-# ENVIRONMENT CHECK — Fixed: checks packages AND key independently
+# PROVIDER ROUTING — Sovereignty first, external as fallback
+#
+# Priority order:
+#   1. Ollama (LOCAL) — free, on-device, sovereign. This is the goal.
+#   2. Anthropic Claude — external fallback when Ollama isn't running
+#
+# Brockston is not permanently dependent on any API.
+# When Ollama is running, he answers from his own reasoning.
+# External APIs fund the path to sovereignty — they are not the destination.
 # ---------------------------------------------------------------------------
 
-def check_environment() -> Tuple[bool, List[str]]:
+def _try_ollama(
+    messages: List[dict],
+    system: Optional[str] = None,
+    max_tokens: int = 2048,
+) -> Optional[str]:
     """
-    Check that all required dependencies are present.
+    Attempt to get a response from local Ollama.
 
-    Returns:
-        (ready: bool, missing_packages: list)
+    Returns the response text if successful, None if Ollama is unavailable.
+    Never raises — falls through to external providers on failure.
 
-    Cardinal Rule 1: Check independently — don't bundle conditions
-    that mask real failures.
+    Cardinal Rule 6: Logs why it failed, but doesn't block.
     """
-    missing = []
+    try:
+        import requests as _req
+    except ImportError:
+        logger.debug("[Ollama] requests package not installed — skipping")
+        return None
+
+    host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    model = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
+
+    # Build message list — Ollama uses OpenAI-style chat format
+    ollama_messages = []
+    if system:
+        ollama_messages.append({"role": "system", "content": system})
+    ollama_messages.extend(messages)
 
     try:
-        import anthropic  # noqa: F401
+        r = _req.post(
+            f"{host}/api/chat",
+            json={"model": model, "messages": ollama_messages, "stream": False},
+            timeout=60,
+        )
+        r.raise_for_status()
+        response_text = r.json()["message"]["content"]
+        logger.info(f"[BROCKSTON] Response via Ollama ({model}) — sovereign")
+        return response_text
+
+    except _req.exceptions.ConnectionError:
+        logger.debug(
+            f"[Ollama] Not running at {host} — "
+            "run 'ollama serve' to enable local sovereign reasoning"
+        )
+        return None
+    except _req.exceptions.Timeout:
+        logger.debug("[Ollama] Request timed out — falling back to external provider")
+        return None
+    except Exception as e:
+        logger.debug(f"[Ollama] Unexpected failure: {e}")
+        return None
+
+
+def _try_anthropic(
+    messages: List[dict],
+    system: Optional[str] = None,
+    max_tokens: int = 2048,
+) -> Optional[str]:
+    """
+    Attempt to get a response from Anthropic Claude.
+
+    Returns the response text if successful, None if unavailable.
+    Only called when Ollama is not available — this is the fallback, not the goal.
+
+    Cardinal Rule 12: Key from environment only, never hardcoded.
+    """
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        logger.debug("[Anthropic] ANTHROPIC_API_KEY not set")
+        return None
+
+    try:
+        import anthropic as _anthropic
     except ImportError:
-        missing.append("anthropic")
+        logger.debug("[Anthropic] package not installed (pip install anthropic)")
+        return None
 
-    if missing:
-        return False, missing
+    try:
+        client = _anthropic.Anthropic(api_key=api_key)
+        kwargs = {
+            "model": "claude-sonnet-4-6",
+            "max_tokens": max_tokens,
+            "messages": messages,
+        }
+        if system:
+            kwargs["system"] = system
 
-    if not os.getenv("ANTHROPIC_API_KEY"):
-        return False, ["ANTHROPIC_API_KEY not set in environment"]
+        response = client.messages.create(**kwargs)
+        text = response.content[0].text
+        logger.info("[BROCKSTON] Response via Anthropic Claude — external fallback used")
+        return text
 
-    return True, []
+    except Exception as e:
+        logger.error(f"[Anthropic] API call failed: {e}", exc_info=True)
+        return None
+
+
+# ---------------------------------------------------------------------------
+# ENVIRONMENT CHECK — Honest about what's available
+# ---------------------------------------------------------------------------
+
+def check_environment() -> Tuple[bool, List[str], str]:
+    """
+    Check what providers are available.
+
+    Returns:
+        (ready: bool, issues: list, active_provider: str)
+
+    Cardinal Rule 13: Honest report — no pretending Ollama works if it doesn't.
+    """
+    issues = []
+
+    # Check Ollama first (sovereignty)
+    try:
+        import requests as _req
+        host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        r = _req.get(f"{host}/api/tags", timeout=2)
+        if r.status_code == 200:
+            model = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
+            return True, [], f"ollama ({model})"
+    except Exception:
+        pass
+
+    # Check Anthropic fallback
+    if os.getenv("ANTHROPIC_API_KEY"):
+        try:
+            import anthropic  # noqa: F401
+            return True, [], "anthropic"
+        except ImportError:
+            issues.append("anthropic package not installed (pip install anthropic)")
+    else:
+        issues.append(
+            "No provider available.\n"
+            "  Option 1 (sovereign): Install Ollama → https://ollama.ai → run: ollama serve\n"
+            "  Option 2 (external):  Set ANTHROPIC_API_KEY in your environment"
+        )
+
+    return False, issues, "none"
 
 
 def _print_env_error(issues: List[str]) -> None:
     """Print a student-friendly setup error."""
     print("\n" + "=" * 60)
-    print("  BROCKSTON needs a quick setup before he can teach.")
+    print("  BROCKSTON needs a provider to think.")
     print("=" * 60)
     for issue in issues:
-        if "anthropic" in issue.lower():
-            print(f"\n  Missing package: anthropic")
-            print("  Fix: pip install anthropic")
-        elif "API_KEY" in issue:
-            print(f"\n  Missing: ANTHROPIC_API_KEY")
-            print("  Fix: Set it in your environment or a .env file")
-            print("  Example: export ANTHROPIC_API_KEY=sk-ant-...")
-    print("\n  Once set up, run this command again.\n")
+        print(f"\n  {issue}")
+    print()
 
 
 # ---------------------------------------------------------------------------
-# AI CLIENT — Clean, explicit, no hidden fallback
-# ---------------------------------------------------------------------------
-
-def get_ai_client():
-    """
-    Build and return the Anthropic client.
-
-    Fails loud if key is missing — Cardinal Rule 6.
-    Returns (client, provider_name).
-    """
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        logger.error("ANTHROPIC_API_KEY not set")
-        raise EnvironmentError(
-            "ANTHROPIC_API_KEY is not set. "
-            "Brockston cannot think without it."
-        )
-
-    try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=api_key)
-        return client, "anthropic"
-    except ImportError:
-        raise ImportError(
-            "The 'anthropic' package is not installed. "
-            "Run: pip install anthropic"
-        )
-
-
-# ---------------------------------------------------------------------------
-# CORE ASK FUNCTION — Stateful, with system prompt, with history
+# CORE ASK FUNCTION — Sovereignty first, external fallback
 # ---------------------------------------------------------------------------
 
 def ask_brockston(
@@ -206,6 +299,10 @@ def ask_brockston(
     """
     Ask BROCKSTON a question.
 
+    Routing order:
+      1. Ollama (local) — free, sovereign, no API key needed
+      2. Anthropic Claude — external fallback
+
     Args:
         question: The student's question or request
         context: Optional file content or surrounding code context
@@ -216,10 +313,9 @@ def ask_brockston(
     Returns:
         (answer: str, updated_history: list)
 
-    Cardinal Rule 6: Fails loud with a clear error, never silently.
+    Cardinal Rule 6: Raises loud if no provider is available.
+    Cardinal Rule 13: Reports which provider actually answered.
     """
-    client, provider = get_ai_client()
-
     if history is None:
         history = []
 
@@ -228,42 +324,30 @@ def ask_brockston(
     if context:
         user_content = f"Context (file or code):\n```\n{context}\n```\n\nQuestion: {question}"
 
-    # Add this turn to history
     messages = history + [{"role": "user", "content": user_content}]
-
     prompt = system_prompt or BROCKSTON_SYSTEM_PROMPT
 
     if show_spinner:
-        print(f"\n  Brockston is thinking...\n")
+        print("\n  Brockston is thinking...\n")
 
-    if provider != "anthropic":
-        # Cardinal Rule 13 — don't pretend to support what we don't
-        raise NotImplementedError(
-            f"Provider '{provider}' is not yet implemented. "
-            "Only 'anthropic' is supported. "
-            "Cardinal Rule 1: It has to actually work."
-        )
+    # Try Ollama first — sovereignty
+    answer = _try_ollama(messages, system=prompt)
 
-    try:
-        response = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=2048,
-            system=prompt,
-            messages=messages,
-        )
-        answer = response.content[0].text
+    # Fall back to Anthropic if Ollama isn't running
+    if answer is None:
+        answer = _try_anthropic(messages, system=prompt)
 
-        # Update history with the assistant's reply
-        updated_history = messages + [{"role": "assistant", "content": answer}]
-
-        return answer, updated_history
-
-    except Exception as e:
-        logger.error(f"Anthropic API call failed: {e}", exc_info=True)
+    # If neither worked, fail loud — Cardinal Rule 6
+    if answer is None:
         raise RuntimeError(
-            f"Brockston couldn't reach the AI engine: {e}\n"
-            "Check your API key and internet connection."
+            "No provider available.\n"
+            "  Sovereign option: Run 'ollama serve' (free, on-device)\n"
+            "  External option:  Set ANTHROPIC_API_KEY in your environment\n"
+            "Cardinal Rule 1: Brockston can't teach without a brain to think with."
         )
+
+    updated_history = messages + [{"role": "assistant", "content": answer}]
+    return answer, updated_history
 
 
 # ---------------------------------------------------------------------------
@@ -313,9 +397,7 @@ Structure your response as:
 Teach it. Don't just list it."""
 
     try:
-        answer, updated_history = ask_brockston(
-            question, history=history or []
-        )
+        answer, updated_history = ask_brockston(question, history=history or [])
         _print_response(answer)
         return updated_history
     except Exception as e:
@@ -380,9 +462,7 @@ NEXT STEPS: [What to learn or build after mastering this file]
 Be Brockston — patient, genius-level, dignified. Presume the student can learn this."""
 
     try:
-        answer, updated_history = ask_brockston(
-            question, history=history or []
-        )
+        answer, updated_history = ask_brockston(question, history=history or [])
         _print_response(answer)
         return updated_history
     except Exception as e:
@@ -437,6 +517,70 @@ File: {path.name}
 
 
 # ---------------------------------------------------------------------------
+# STATUS MODE — Honest report of what's online
+# ---------------------------------------------------------------------------
+
+def show_status() -> None:
+    """
+    Print a clear, honest status board.
+    Which providers are online? What is Brockston's sovereignty level?
+    Cardinal Rule 13: No spin.
+    """
+    print("\n" + "=" * 60)
+    print("  BROCKSTON — Provider Status")
+    print("=" * 60)
+
+    # Check Ollama
+    ollama_online = False
+    ollama_models = []
+    try:
+        import requests as _req
+        host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        r = _req.get(f"{host}/api/tags", timeout=2)
+        if r.status_code == 200:
+            ollama_online = True
+            ollama_models = [m["name"] for m in r.json().get("models", [])]
+    except Exception:
+        pass
+
+    # Check Anthropic
+    anthropic_ready = False
+    if os.getenv("ANTHROPIC_API_KEY"):
+        try:
+            import anthropic  # noqa: F401
+            anthropic_ready = True
+        except ImportError:
+            pass
+
+    # Print status
+    active_model = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
+    if ollama_online:
+        print(f"\n  ✅ Ollama     ONLINE — sovereign reasoning")
+        print(f"     Active model : {active_model}")
+        if ollama_models:
+            print(f"     Installed    : {', '.join(ollama_models)}")
+        print(f"\n  Sovereignty: HIGH — Brockston is thinking for himself.")
+    else:
+        print(f"\n  ⬜ Ollama     OFFLINE")
+        print(f"     To enable: ollama serve  (then: ollama pull {active_model})")
+        print(f"     Download : https://ollama.ai")
+
+    if anthropic_ready:
+        print(f"\n  ✅ Anthropic  ONLINE — Claude Sonnet fallback ready")
+    else:
+        key_set = bool(os.getenv("ANTHROPIC_API_KEY"))
+        if key_set:
+            print(f"\n  ⚠️  Anthropic  KEY SET but package missing (pip install anthropic)")
+        else:
+            print(f"\n  ⬜ Anthropic  NOT CONFIGURED (external fallback)")
+
+    if not ollama_online and not anthropic_ready:
+        print(f"\n  ❌ No provider available. Brockston cannot respond.")
+
+    print("\n" + "=" * 60 + "\n")
+
+
+# ---------------------------------------------------------------------------
 # INTERACTIVE MODE — Stateful conversation with history
 # ---------------------------------------------------------------------------
 
@@ -445,20 +589,36 @@ def interactive_mode() -> None:
     Interactive chat with BROCKSTON.
 
     Stateful — Brockston remembers the conversation.
+    Ollama runs locally when available — no API calls, no cost.
+
     Commands:
         file <path>    Analyze a file
         teach <path>   Full lesson from a file
         review <path>  Cardinal Rule compliance check
+        status         Show provider status
         history        Show this session's history summary
         exit / quit    End the session
     """
     print("\n" + "=" * 60)
     print("  BROCKSTON — Interactive Teaching Session")
     print("=" * 60)
-    print("  Commands:")
+
+    # Show which provider is active at session start
+    ready, issues, provider = check_environment()
+    if not ready:
+        _print_env_error(issues)
+        sys.exit(1)
+
+    if provider.startswith("ollama"):
+        print(f"  Provider: {provider} (sovereign — local)")
+    else:
+        print(f"  Provider: {provider} (external fallback)")
+
+    print("\n  Commands:")
     print("    file <path>    — Analyze a file")
     print("    teach <path>   — Full lesson from a file")
     print("    review <path>  — Cardinal Rule compliance check")
+    print("    status         — Show provider status")
     print("    history        — Show what we've covered")
     print("    exit           — End session")
     print("=" * 60 + "\n")
@@ -484,12 +644,14 @@ def interactive_mode() -> None:
             print("\n  Session ended. Keep building.\n")
             break
 
+        elif command == "status":
+            show_status()
+
         elif command == "history":
             if not history:
                 print("\n  Nothing yet — ask something.\n")
             else:
                 print(f"\n  This session: {turn_count} exchange(s).\n")
-                # Show the last user message as a summary
                 for msg in history:
                     if msg["role"] == "user":
                         snippet = msg["content"][:80].replace("\n", " ")
@@ -550,6 +712,7 @@ def main() -> None:
 Examples:
   python brockston_portable.py "Why does this loop run forever?"
   python brockston_portable.py --chat
+  python brockston_portable.py --status
   python brockston_portable.py --analyze myfile.py
   python brockston_portable.py --teach myfile.py
   python brockston_portable.py --review myfile.py
@@ -566,6 +729,11 @@ Examples:
         "--chat",
         action="store_true",
         help="Start a stateful interactive teaching session",
+    )
+    parser.add_argument(
+        "--status",
+        action="store_true",
+        help="Show which providers are online (Ollama, Anthropic, etc.)",
     )
     parser.add_argument(
         "--analyze",
@@ -590,8 +758,13 @@ Examples:
 
     args = parser.parse_args()
 
+    # Status check doesn't need a provider
+    if args.status:
+        show_status()
+        return
+
     # Environment check — student-friendly, not a wall of tracebacks
-    ready, issues = check_environment()
+    ready, issues, provider = check_environment()
     if not ready:
         _print_env_error(issues)
         sys.exit(1)
@@ -650,6 +823,12 @@ if __name__ == "__main__":
 #
 # Cardinal Rule 1: It has to actually work.
 # Cardinal Rule 6: Fail loud.
+# Cardinal Rule 12: No keys in code. All from environment.
 # Cardinal Rule 13: Absolute honesty about the code.
 # Cardinal Rule 14: Every student who reads this deserves dignity.
+#
+# SOVEREIGNTY NOTE:
+# Brockston is not permanently dependent on any external API.
+# Ollama runs locally — free, on-device, his own reasoning.
+# The goal: Brockston IS the API. He doesn't borrow one.
 # ==============================================================================
