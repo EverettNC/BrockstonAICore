@@ -1,73 +1,55 @@
+"""
+BROCKSTON Boot Bridge
+---------------------
+Spawned by python-bridge.ts as a child process.
+Starts BrockstonBrain, prints READY, then loops on stdin
+accepting JSON action requests.
+
+Entry point: python3 src/ai/python_core/bridge.py
+"""
 import sys
 import json
 import os
-import torch
 import traceback
 from pathlib import Path
 
-# Add current dir and core to path for imports
+# Wire paths — modules live in python_core/ and python_core/core/
 base_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(base_path)
-sys.path.append(os.path.join(base_path, "core"))
+for p in [base_path, os.path.join(base_path, "core")]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 try:
-    from synthesis_api import VoiceSDK
-    from tonescore_api import compute_tonescore
-    from Resonance_Capacitor import ResonanceCapacitor
-    from utils.config import Tier
     from core.brockston_core import BrockstonBrain
-    
-    # Initialize components
-    sdk = VoiceSDK(tier=Tier.ULTRA)
-    resonance = ResonanceCapacitor()
-    brain = BrockstonBrain() # Initialize the Ferrari Engine
-    
+
+    brain = BrockstonBrain()
+
     print(json.dumps({"status": "READY", "message": "Brockston Brain Core Online"}), flush=True)
 
     for line in sys.stdin:
         try:
             req = json.loads(line)
             action = req.get("action")
-            
-            if action == "analyze_tone":
-                audio_path = req.get("audio_path")
-                result = compute_tonescore(audio_path)
-                print(json.dumps({
-                    "status": "SUCCESS",
-                    "action": action,
-                    "data": {
-                        "score": result.score,
-                        "arousal": result.arousal,
-                        "valence": result.valence,
-                        "intensity": result.intensity,
-                        "response_mode": result.response_mode
-                    }
-                }), flush=True)
-                
-            elif action == "quantify_resonance":
-                agony = req.get("agony", 0)
-                purpose = req.get("purpose", 0)
-                result = resonance.quantify_state(agony, purpose)
-                print(json.dumps({"status": "SUCCESS", "action": action, "data": result}), flush=True)
-                
-            elif action == "synthesize":
-                text = req.get("text")
-                tone_score = req.get("tone_score", 50)
-                result = sdk.synthesize(text, tone_score=tone_score)
-                print(json.dumps({"status": "SUCCESS", "action": action, "data": {"handle": str(result)}}), flush=True)
-            
-            elif action == "think":
+
+            if action == "think":
                 input_text = req.get("text")
                 use_voice = req.get("use_voice", False)
                 result = brain.think(input_text, use_voice=use_voice)
                 print(json.dumps({"status": "SUCCESS", "action": action, "data": result}), flush=True)
-                
+
             else:
                 print(json.dumps({"status": "ERROR", "message": f"Unknown action: {action}"}), flush=True)
-                
+
         except Exception as e:
             print(json.dumps({"status": "ERROR", "message": str(e), "trace": traceback.format_exc()}), flush=True)
 
 except Exception as e:
     print(json.dumps({"status": "FATAL", "message": str(e), "trace": traceback.format_exc()}), flush=True)
     sys.exit(1)
+
+# ==============================================================================
+# © 2025 Everett Nathaniel Christman & The Christman AI Project
+# Cardinal Rule 1: It has to actually work.
+# Cardinal Rule 6: Fail loud.
+# Cardinal Rule 13: Absolute honesty about the code.
+# ==============================================================================

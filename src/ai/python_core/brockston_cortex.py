@@ -123,8 +123,15 @@ if not KMS_KEY_ID:
     KMS_KEY_ID = None
 OPAQUE_SECRET = os.getenv("BROCKSTON_OPAQUE_SECRET")
 if not OPAQUE_SECRET:
-    logger.warning("BROCKSTON_OPAQUE_SECRET not set - using default")
-    OPAQUE_SECRET = "default_brockston_secret_not_secure"
+    logger.critical(
+        "BROCKSTON_OPAQUE_SECRET is not set. "
+        "Refusing to start with an insecure default. "
+        "Set BROCKSTON_OPAQUE_SECRET in your environment or .env file."
+    )
+    raise RuntimeError(
+        "BROCKSTON_OPAQUE_SECRET is required — refusing to start with insecure default. "
+        "Cardinal Rule 12: Security is mandatory, not decorative."
+    )
 SAGEMAKER_CONF_THRESHOLD = float(os.getenv("SAGEMAKER_CONF_THRESHOLD", 0.5))
 REDIS_URL = os.getenv("REDIS_URL")
 if not REDIS_URL:

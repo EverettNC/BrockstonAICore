@@ -58,8 +58,8 @@ try:
             ANTHROPIC_CLIENT = anthropic.Anthropic(
                 api_key=os.environ.get("ANTHROPIC_API_KEY")
             )
-        except Exception:
-            safe_warn("operation_failed")
+        except Exception as e:
+            logger.warning(f"Anthropic client initialization failed: {e}")
             raise
     HAS_ANTHROPIC = True
     logger.info("Anthropic API available for advanced conversational capabilities")
