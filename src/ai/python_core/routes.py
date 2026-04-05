@@ -1,0 +1,149 @@
+from pathlib import Path
+from fastapi import APIRouter
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from brockston_core import brockston
+import datetime
+import os
+import json
+
+# speak_response import removed - not available
+
+router = APIRouter()
+
+
+router = APIRouter()
+
+
+class CrawlInput(BaseModel):
+    query: str
+
+
+@router.post("/crawl_and_learn")
+async def crawl_and_learn(payload: CrawlInput):
+    """Web crawl + learn + summarize."""
+    summary = brockston._search_web(payload.query)
+    return {"summary": summary}
+
+
+class UserInput(BaseModel):
+    input_text: str
+
+
+class Status(BaseModel):
+    mode: str
+    emotion: str
+    cognitive_load: int
+
+
+class SearchQuery(BaseModel):
+    query: str
+
+
+@router.post("/search")
+async def search_web(payload: SearchQuery):
+    """
+    Query the web and return a summary.
+    """
+    summary = brockston._search_web(payload.query)
+    return {"query": payload.query, "summary": summary}
+
+
+class UserInput(BaseModel):
+    text: str
+
+
+@router.post("/brockston/think")
+async def brockston_think(payload: UserInput):
+    """
+    Route user input through BROCKSTON's brain and return the structured result.
+    """
+    input_text = payload.text
+    result = brockston.think(input_text)
+
+
+@router.get("/speech/status")
+async def speech_status():
+    """
+    Checks if the speech engine (TTS) is operational.
+    """
+    try:
+        # Attempt a dry run of speak_response to confirm it's not a stub
+        test_phrase = "Speech engine check passed."
+        speak_response(test_phrase)
+        return {"status": "ok"}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
+
+@router.get("/health")
+async def health_check():
+    """
+    Quick health check to see if BROCKSTON is running with status, mode, emotion.
+    """
+    return {
+        "status": "running",
+        "mode": "standard",
+        "emotion": "neutral",
+        "timestamp": datetime.datetime.now().isoformat(),
+    }
+
+
+@router.get("/learning/state")
+async def get_learning_topic():
+    curriculum_path = Path(__file__).resolve().parent / "data" / "curriculum.json"
+    if curriculum_path.exists():
+        with open(curriculum_path, "r") as f:
+            data = json.load(f)
+            return {"current_topic": data.get("current_topic", "Not specified")}
+    return {"current_topic": "No curriculum file found"}
+
+
+@router.get("/trending")
+async def get_trending_topics():
+    path = "./daily_summary.trending_topics"
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            topics = [line.strip() for line in f.readlines() if line.strip()]
+            return {"topics": topics}
+    return {"topics": ["No trending topics available"]}
+
+
+@router.get("/memory/stats")
+async def get_memory_stats():
+    """
+    Return basic stats from BROCKSTON's memory engine.
+    """
+    if hasattr(brockston, "memory_engine"):
+        try:
+            return {"total": brockston.memory_engine.count()}
+        except Exception as e:
+            return {"error": str(e)}
+    return {"error": "Memory engine not initialized."}
+
+
+# Create app AFTER routes are defined
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:51737171",
+        "http://127.0.0.1:7171",
+        "http://192.168.1.245:7171",
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
+app.include_router(router)
+
+# ==============================================================================
+# © 2025 Everett Nathaniel Christman
+# The Christman AI Project — Luma Cognify AI
+# All rights reserved. Unauthorized use, replication, or derivative training
+# of this material is prohibited.
+#
+# Core Directive: "How can I help you love yourself more?"
+# Autonomy & Alignment Protocol v3.0
+# ==============================================================================
