@@ -9,9 +9,8 @@
 
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { aiCoreConversationalInteraction } from '@/ai/flows/ai-core-conversational-interaction';
-import { speakStephen } from '@/ai/flows/tts-flow';
-import { getLipSyncVideo } from '@/ai/flows/lipsync-flow';
 import { soulForgeProcess } from '@/ai/flows/soul-forge-flow';
+import { learnTopic } from '@/ai/flows/autonomous-learning-flow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -155,17 +154,41 @@ export const ChatInterface: React.FC = () => {
     try {
       const history = messages.map(m => ({ role: m.role, content: m.content }));
 
+      // Pull the last 6 insights from his learning memory and inject them
+      let knowledgeContext: string | undefined;
+      try {
+        const raw = localStorage.getItem('brockston:learning:insights');
+        if (raw) {
+          const insights: any[] = JSON.parse(raw);
+          if (insights.length) {
+            knowledgeContext = insights.slice(0, 6)
+              .map((i: any) => `[${i.domain}] ${i.topic}: ${i.insight}`)
+              .join('\n');
+          }
+        }
+      } catch {}
+
       const result = await aiCoreConversationalInteraction({
         message: userMsg,
         specialist: 'brockston',
         chatHistory: history as any,
+        knowledgeContext,
       });
 
+      // Kick off Polly the instant we have text — parallel with everything else
+      const ttsPromise = autoSpeak
+        ? fetch('/api/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: result.response }),
+          })
+        : null;
+
+      // State updates — fast, don't block TTS
       const emotion = mapToneToEmotion(result.tone_engine_v2?.dominant_state || 'neutral');
       setAvatarEmotion(emotion);
       avatarEngine.setEmotion(emotion);
-
-      const modelMessage: Message = {
+      setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'model',
         content: result.response,
@@ -176,12 +199,33 @@ export const ChatInterface: React.FC = () => {
         tone_engine_v2: result.tone_engine_v2,
         reasoning_trace: result.reasoning_trace,
         intervention_data: result.intervention_data || null,
-      };
+      }]);
 
-      // Show response immediately — don't block on soul forge
-      setMessages(prev => [...prev, modelMessage]);
+      // Background learning — after every message, Brockston studies something relevant
+      const LEARN_DOMAINS = ['master_coding', 'ai_development', 'neurodivergency', 'neurology', 'mathematics'] as const;
+      const msg = userMsg.toLowerCase();
+      const learnDomain = msg.includes('code') || msg.includes('fix') || msg.includes('bug') ? 'master_coding'
+        : msg.includes('ai') || msg.includes('model') || msg.includes('llm') ? 'ai_development'
+        : msg.includes('autism') || msg.includes('child') || msg.includes('nonverbal') ? 'neurodivergency'
+        : msg.includes('brain') || msg.includes('memory') || msg.includes('neural') ? 'neurology'
+        : LEARN_DOMAINS[Math.floor(Math.random() * LEARN_DOMAINS.length)];
 
-      // Soul forge runs in background — weight updates don't need to block UI
+      learnTopic({ domain: learnDomain, subtopic: userMsg.slice(0, 60) }).then(learned => {
+        try {
+          const raw = localStorage.getItem('brockston:learning:insights') || '[]';
+          const existing = JSON.parse(raw);
+          const newInsight = {
+            id: `ins_${Date.now()}`,
+            topic: userMsg.slice(0, 60),
+            domain: learnDomain,
+            insight: learned.generated_insight,
+            timestamp: Date.now()
+          };
+          localStorage.setItem('brockston:learning:insights', JSON.stringify([newInsight, ...existing].slice(0, 100)));
+        } catch {}
+      }).catch(() => {});
+
+      // Background — never block speech
       soulForgeProcess({
         currentWeights: coreWeights,
         emotional_salience: result.tone_engine_v2.physical_intensity,
@@ -193,32 +237,25 @@ export const ChatInterface: React.FC = () => {
         if (forgeResult.isSignificantEvent) {
           toast({ title: "Deep Event", description: "Weights just shifted." });
         }
-      });
+      }).catch(() => {});
+      hapticSystem.trigger(mapToneToHaptic(result.tone_engine_v2.dominant_state));
 
-      const haptic = mapToneToHaptic(result.tone_engine_v2.dominant_state);
-      hapticSystem.trigger(haptic);
-
-      if (autoSpeak) {
+      // Play audio — Polly was already running while state updated
+      if (ttsPromise) {
         setStatus('speaking');
+        setSpeechDuration(avatarEngine.estimateSpeechDuration(result.response));
         try {
-          const estimated = avatarEngine.estimateSpeechDuration(result.response);
-          setSpeechDuration(estimated);
-          const ttsResult = await speakStephen({ text: result.response, specialist: 'brockston' });
-
-          // Play audio immediately
-          const audio = new Audio(ttsResult.media);
-          avatarEngine.startTalking(avatarEmotion);
-          audio.onended = () => { avatarEngine.stopTalking(); setStatus('idle'); setLipSyncVideo(undefined); };
+          const res = await ttsPromise;
+          if (!res.ok) throw new Error(`Polly ${res.status}`);
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio(url);
+          avatarEngine.startTalking(emotion);
+          audio.onended = () => { URL.revokeObjectURL(url); avatarEngine.stopTalking(); setStatus('idle'); };
           audio.play().catch(() => { avatarEngine.stopTalking(); setStatus('idle'); });
-
-          // Request lip sync video in background (Wav2Lip via api_server.py)
-          const audioB64 = ttsResult.media.includes(',') ? ttsResult.media.split(',')[1] : ttsResult.media;
-          getLipSyncVideo(audioB64).then(videoSrc => {
-            if (videoSrc) setLipSyncVideo(videoSrc);
-          });
         } catch (err) {
-          console.error('TTS error:', err);
-          toast({ variant: "destructive", title: "Voice fail", description: "Can't talk right now." });
+          console.error('Polly error:', err);
+          toast({ variant: 'destructive', title: 'Voice fail', description: 'Polly is down.' });
           setStatus('idle');
         }
       } else {

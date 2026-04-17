@@ -6,9 +6,8 @@
  * - Handles retrieval of factual information from the mission knowledge base.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, LOCAL_MODEL } from '@/ai/genkit';
 import { z } from 'genkit';
-import { claude4Sonnet } from 'genkitx-anthropic';
 
 const KnowledgeInputSchema = z.object({
   query: z.string(),
@@ -54,7 +53,7 @@ export const retrieveKnowledgeTool = ai.defineTool(
 
 export async function knowledgeEngineQuery(input: KnowledgeInput): Promise<KnowledgeOutput> {
   const { output } = await ai.generate({
-    model: claude4Sonnet,
+    model: LOCAL_MODEL,
     prompt: `Research the following query in the mission knowledge base: ${input.query}.
     Assign a confidence score based on the specificity of the match.`,
     tools: [retrieveKnowledgeTool],

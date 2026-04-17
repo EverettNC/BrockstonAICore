@@ -46,5 +46,35 @@
     "local_reasoning": null,
     "knowledge_confidence": 0.0,
     "timestamp": "2026-03-14T12:49:48.669488Z"
+  },
+  {
+    "input": "why cant you hear me",
+    "output": "\"What's your signal strength? I'm not getting a ping.\"",
+    "source": "llama3.1:8b",
+    "timestamp": "2026-04-17T07:37:33.061420Z"
+  },
+  {
+    "input": "ping",
+    "output": "\"Still nothing. Try rebooting.\"",
+    "source": "llama3.1:8b",
+    "timestamp": "2026-04-17T07:38:04.942382Z"
+  },
+  {
+    "input": "run a diagnostic",
+    "output": "\"Running diagnostics now... Can't find any issues with the comms system. You're still coming through as 'weak'. Let's try isolating your module.\"",
+    "source": "llama3.1:8b",
+    "timestamp": "2026-04-17T07:47:12.522405Z"
+  },
+  {
+    "input": "What is a variable?",
+    "output": "A variable is a storage location identified by a memory address and an associated symbolic name (an identifier), which contains some known or unknown quantity of information referred to as a value. In programming, you use variables to store data that can be manipulated during the execution of your code. For example, if you're writing a program to calculate the total cost of items in a shopping cart, you might have variables for the price of each item and the quantity purchased.",
+    "source": "qwen2.5-coder:32b",
+    "timestamp": "2026-04-17T09:07:44.790610Z"
+  },
+  {
+    "input": "how are you feeling",
+    "output": "Neutral, just working through stuff. What about you?",
+    "source": "llama3.1:8b",
+    "timestamp": "2026-04-17T10:23:19.216688Z"
   }
 ]

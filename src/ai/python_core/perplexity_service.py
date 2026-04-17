@@ -25,6 +25,8 @@ Cardinal Rule 13: Citations included. No hallucinations.
 
 import os
 import logging
+import json
+import requests
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -61,14 +63,12 @@ class PerplexityService:
 
         Raises:
             EnvironmentError: If PERPLEXITY_API_KEY is not set (Rule 6).
-            ImportError: If openai package is not installed.
         """
         self.model = model
-        self._client = None
         self._available = False
+        self.api_key = os.getenv("PERPLEXITY_API_KEY")
 
-        api_key = os.getenv("PERPLEXITY_API_KEY")
-        if not api_key:
+        if not self.api_key:
             logger.warning(
                 "[PerplexityService] PERPLEXITY_API_KEY not set — "
                 "search engine will not be available. "
@@ -76,27 +76,16 @@ class PerplexityService:
             )
             return
 
-        try:
-            from openai import OpenAI
-            self._client = OpenAI(
-                api_key=api_key,
-                base_url=PERPLEXITY_BASE_URL,
-            )
-            self._available = True
-            logger.info(
-                f"[PerplexityService] Search engine online — "
-                f"model: {self.model} — Brockston can see the world."
-            )
-        except ImportError:
-            logger.error(
-                "[PerplexityService] openai package not installed. "
-                "Run: pip install openai"
-            )
+        self._available = True
+        logger.info(
+            f"[PerplexityService] Search engine online — "
+            f"model: {self.model} — Brockston can see the world."
+        )
 
     @property
     def is_available(self) -> bool:
         """True if Perplexity is configured and ready."""
-        return self._available and self._client is not None
+        return self._available
 
     def generate_content(
         self,
@@ -147,31 +136,45 @@ class PerplexityService:
         ]
 
         # Build extra search parameters
-        extra_body: Dict[str, Any] = {
-            "search_mode": search_mode,
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": max_tokens,
             "return_related_questions": False,
+            "search_mode": search_mode,
         }
+        
         if recency_filter:
-            extra_body["search_recency_filter"] = recency_filter
+            payload["search_recency_filter"] = recency_filter
         if domain_filter:
-            extra_body["search_domain_filter"] = domain_filter
+            payload["search_domain_filter"] = domain_filter
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
 
         try:
             logger.info(
                 f"[PerplexityService] Searching: {prompt[:80]}... "
                 f"(model={self.model})"
             )
-            response = self._client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                max_tokens=max_tokens,
-                extra_body=extra_body,
+            
+            response = requests.post(
+                f"{PERPLEXITY_BASE_URL}/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=60
             )
-
-            answer = response.choices[0].message.content
+            
+            response.raise_for_status()
+            data = response.json()
+            
+            answer = data["choices"][0]["message"]["content"]
 
             # Append citations if available
-            citations = getattr(response, "citations", None)
+            citations = data.get("citations")
             if citations:
                 citation_block = "\n\nSources:\n" + "\n".join(
                     f"  [{i+1}] {url}" for i, url in enumerate(citations[:5])
@@ -180,7 +183,7 @@ class PerplexityService:
 
             logger.info(
                 f"[PerplexityService] Search complete — "
-                f"{response.usage.total_tokens} tokens used"
+                f"{data['usage']['total_tokens']} tokens used"
             )
             return answer
 

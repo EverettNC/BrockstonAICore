@@ -27,16 +27,21 @@ import { cn } from '@/lib/utils';
 
 export const CognitiveStats: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
-  
-  const coreRef = useMemo(() => db ? null : null, [db]);
-  const topologyRef = useMemo(() => db ? null : null, [db]);
-  
-
-  
+  const [forgeState, setForgeState] = useState<any>(null);
+  const [topologyState, setTopologyState] = useState<any>(null);
+  const [recentMessages, setRecentMessages] = useState<any[]>([]);
 
   useEffect(() => {
     setIsMounted(true);
-  });
+    try {
+      const weights = localStorage.getItem('brockston:cognitive:weights');
+      if (weights) setForgeState(JSON.parse(weights));
+      const topo = localStorage.getItem('brockston:topology:stats');
+      if (topo) setTopologyState(JSON.parse(topo));
+      const msgs = localStorage.getItem('brockston:chat:messages');
+      if (msgs) setRecentMessages(JSON.parse(msgs));
+    } catch {}
+  }, []);
 
   if (!isMounted) return null;
 

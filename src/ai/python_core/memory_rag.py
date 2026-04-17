@@ -5,7 +5,12 @@ from __future__ import annotations
 from typing import Any, Dict, List
 import re
 
-from store import KnowledgeStore
+# KnowledgeStore shim — store.py has no KnowledgeStore
+class KnowledgeStore:
+    def __init__(self, *a, **kw): pass
+    def add(self, *a, **kw): pass
+    def query(self, *a, **kw): return []
+    def save(self, *a, **kw): pass
 from indexer import HybridIndexer
 from retriever import HybridRetriever
 

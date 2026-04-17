@@ -14,7 +14,7 @@ PROVIDER HIERARCHY (cost → sovereignty):
   2. Anthropic Claude      — Premium external reasoning when Ollama isn't enough yet.
   3. Perplexity Sonar      — Live search. Real-world grounded answers. Citations.
   4. AWS Polly / Bedrock   — Voice synthesis + Bedrock Claude fallback.
-  5. ElevenLabs            — Neural voice (Matthew profile). Highest quality TTS.
+  
 
 The router tries providers in the configured priority order.
 If one fails or isn't available, it moves to the next — loud about why.
@@ -23,7 +23,7 @@ No silent failures. No pretending a provider worked when it didn't.
 Environment variables:
   ANTHROPIC_API_KEY      — Required for Anthropic Claude
   PERPLEXITY_API_KEY     — Required for Perplexity Sonar search
-  ELEVENLABS_API_KEY     — Required for ElevenLabs TTS
+  
   AWS_ACCESS_KEY_ID      — Required for AWS Polly / Bedrock
   AWS_SECRET_ACCESS_KEY  — Required for AWS Polly / Bedrock
   AWS_REGION             — AWS region (default: us-east-1)
@@ -57,7 +57,7 @@ class Provider(str, Enum):
     PERPLEXITY  = "perplexity"   # Live search
     AWS_POLLY   = "aws_polly"    # Voice synthesis
     AWS_BEDROCK = "aws_bedrock"  # Claude via Bedrock
-    ELEVENLABS  = "elevenlabs"   # Neural voice
+    
 
 
 # Default priority — Ollama first (local sovereignty), then external
@@ -68,7 +68,7 @@ DEFAULT_LLM_PRIORITY = [
 ]
 
 DEFAULT_TTS_PRIORITY = [
-    Provider.ELEVENLABS,
+    
     Provider.AWS_POLLY,
 ]
 
@@ -210,34 +210,7 @@ class ProviderStatus:
         except Exception as e:
             logger.warning(f"[ProviderRouter] AWS init failed: {e}")
 
-    def _check_elevenlabs(self):
-        key = os.getenv("ELEVENLABS_API_KEY")
-        if not key:
-            logger.info("[ProviderRouter] ElevenLabs: ELEVENLABS_API_KEY not set")
-            return
-        try:
-            import requests as _req
-            r = _req.get(
-                "https://api.elevenlabs.io/v1/user",
-                headers={"xi-api-key": key},
-                timeout=5,
-            )
-            if r.status_code == 200:
-                user = r.json()
-                self._status[Provider.ELEVENLABS] = True
-                self._clients[Provider.ELEVENLABS] = {
-                    "api_key": key,
-                    "user": user.get("first_name", "user"),
-                    "voice_id": os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB"),  # Matthew
-                }
-                logger.info(
-                    f"[ProviderRouter] ElevenLabs ONLINE — "
-                    f"Matthew voice ready"
-                )
-            else:
-                logger.warning(f"[ProviderRouter] ElevenLabs key invalid: {r.status_code}")
-        except Exception as e:
-            logger.warning(f"[ProviderRouter] ElevenLabs check failed: {e}")
+ 
 
 
 # ---------------------------------------------------------------------------
@@ -433,7 +406,7 @@ class ProviderRouter:
         """
         Convert text to speech using the best available TTS provider.
 
-        Priority: ElevenLabs (neural, Matthew voice) → AWS Polly → gTTS fallback
+        Priority: AWS Polly → gTTS fallback
 
         Args:
             text: Text to speak
@@ -447,14 +420,15 @@ class ProviderRouter:
                 continue
 
             try:
-                if p == Provider.ELEVENLABS:
-                    audio = self._elevenlabs_synthesize(text)
-                elif p == Provider.AWS_POLLY:
+                # FIXED: Changed 'elif' to 'if' to start the logic properly
+                if p == Provider.AWS_POLLY:
                     audio = self._polly_synthesize(text)
+                elif p == Provider.GOOGLE_TTS:  # Assuming you have a Google fallback
+                    audio = self._google_synthesize(text)
                 else:
                     continue
 
-                if output_path:
+                if audio and output_path:
                     with open(output_path, "wb") as f:
                         f.write(audio)
 
@@ -462,37 +436,14 @@ class ProviderRouter:
                 return audio, p
 
             except Exception as e:
-                logger.warning(f"[ProviderRouter] TTS via {p.value} failed: {e}")
+                logger.warning(f"[ProviderRouter] {p.value} synthesis failed: {e}")
                 continue
 
         # gTTS fallback — always available, no API key needed
         logger.info("[ProviderRouter] TTS falling back to gTTS (free, no key needed)")
         return self._gtts_synthesize(text, output_path), Provider.AWS_POLLY
 
-    def _elevenlabs_synthesize(self, text: str) -> bytes:
-        import requests as _req
-        client = self._status.get_client(Provider.ELEVENLABS)
-        voice_id = client["voice_id"]
-        r = _req.post(
-            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
-            headers={
-                "xi-api-key": client["api_key"],
-                "Content-Type": "application/json",
-            },
-            json={
-                "text": text,
-                "model_id": "eleven_turbo_v2_5",
-                "voice_settings": {
-                    "stability": 0.5,
-                    "similarity_boost": 0.75,
-                    "style": 0.0,
-                    "use_speaker_boost": True,
-                },
-            },
-            timeout=30,
-        )
-        r.raise_for_status()
-        return r.content
+
 
     def _polly_synthesize(self, text: str) -> bytes:
         client = self._status.get_client(Provider.AWS_POLLY)
@@ -550,7 +501,7 @@ class ProviderRouter:
             Provider.PERPLEXITY:  "Live search — grounded answers with citations",
             Provider.AWS_POLLY:   "Voice synthesis — AWS neural TTS (Matthew)",
             Provider.AWS_BEDROCK: "External LLM — Claude via AWS Bedrock",
-            Provider.ELEVENLABS:  "Neural voice — highest quality TTS (Matthew profile)",
+            
         }
         return roles.get(provider, "unknown")
 

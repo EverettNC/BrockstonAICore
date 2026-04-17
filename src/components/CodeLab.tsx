@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { generateCode, CodeGenerationOutput } from '@/ai/flows/code-generation-flow';
 import { correctCode, SelfCorrectionOutput } from '@/ai/flows/self-correction-flow';
+import { autonomousRepair, AutonomousRepairResult } from '@/ai/flows/autonomous-repair-flow';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,7 +27,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
-type Tab = 'generate' | 'correct';
+type Tab = 'generate' | 'correct' | 'repair';
 
 export const CodeLab: React.FC = () => {
   const { toast } = useToast();
@@ -37,12 +38,33 @@ export const CodeLab: React.FC = () => {
   const [genLoading, setGenLoading] = useState(false);
   const [genResult, setGenResult] = useState<CodeGenerationOutput | null>(null);
 
+  // Repair state
+  const [repairLoading, setRepairLoading] = useState(false);
+  const [repairResult, setRepairResult] = useState<AutonomousRepairResult | null>(null);
+
   // Correct state
   const [rawCode, setRawCode] = useState('');
   const [codeLanguage, setCodeLanguage] = useState('typescript');
   const [codeContext, setCodeContext] = useState('');
   const [corrLoading, setCorrLoading] = useState(false);
   const [corrResult, setCorrResult] = useState<SelfCorrectionOutput | null>(null);
+
+  const handleRepair = async () => {
+    setRepairLoading(true);
+    setRepairResult(null);
+    try {
+      const result = await autonomousRepair();
+      setRepairResult(result);
+      toast({
+        title: result.clean ? 'Codebase Clean' : `${result.remainingErrors} error(s) remain`,
+        description: `Fixed ${result.repaired.filter(r => r.fixed).length} of ${result.repaired.length} file(s).`,
+      });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Repair Failed', description: e.message });
+    } finally {
+      setRepairLoading(false);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!goal.trim()) return;
@@ -114,6 +136,16 @@ export const CodeLab: React.FC = () => {
             )}
           >
             <Wrench className="h-3 w-3 mr-1.5" /> Self-Correct
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setActiveTab('repair')}
+            className={cn("text-[10px] font-code uppercase tracking-widest h-8 px-4",
+              activeTab === 'repair' ? "bg-red-500/15 text-red-400 border border-red-500/30" : "text-secondary/50"
+            )}
+          >
+            <BrainCircuit className="h-3 w-3 mr-1.5" /> Auto-Repair
           </Button>
         </div>
       </header>
@@ -188,6 +220,97 @@ export const CodeLab: React.FC = () => {
               </CardContent>
             </Card>
           </section>
+        </div>
+      )}
+
+      {activeTab === 'repair' && (
+        <div className="flex flex-col gap-4 min-h-0 flex-1 overflow-y-auto pr-2">
+          <Card className="bg-card/50 border-red-500/20 shadow-2xl">
+            <CardHeader className="py-3 border-b border-white/5">
+              <CardTitle className="text-xs uppercase tracking-widest text-red-400 flex items-center gap-2">
+                <BrainCircuit className="h-3 w-3" /> Autonomous Self-Repair
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-4">
+              <div className="p-3 bg-black/40 rounded border border-white/5 font-code text-[9px] text-secondary/60 leading-relaxed">
+                Brockston runs <span className="text-accent">tsc --noEmit</span> against the live codebase,
+                reads every failing file, sends them to <span className="text-accent">qwen2.5-coder:32b</span>,
+                and writes the fixes back. No copy-paste. He operates on himself.
+              </div>
+              <Button
+                onClick={handleRepair}
+                disabled={repairLoading}
+                className="w-full bg-red-500/80 hover:bg-red-500 text-white font-headline uppercase tracking-tighter h-12"
+              >
+                {repairLoading
+                  ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Scanning & Repairing...</>
+                  : <><BrainCircuit className="h-4 w-4 mr-2" />Run Autonomous Repair</>}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {repairResult && (
+            <div className="space-y-4">
+              {/* Summary */}
+              <Card className={cn("border", repairResult.clean ? "border-accent/30 bg-accent/5" : "border-red-500/30 bg-red-950/10")}>
+                <CardContent className="pt-4 space-y-2">
+                  <div className="flex justify-between text-xs font-code">
+                    <span className="text-secondary/60 uppercase">Initial Errors</span>
+                    <span className="text-red-400 font-bold">{repairResult.initialErrors}</span>
+                  </div>
+                  <div className="flex justify-between text-xs font-code">
+                    <span className="text-secondary/60 uppercase">Remaining</span>
+                    <span className={cn("font-bold", repairResult.clean ? "text-accent" : "text-yellow-400")}>{repairResult.remainingErrors}</span>
+                  </div>
+                  <div className="flex justify-between text-xs font-code">
+                    <span className="text-secondary/60 uppercase">Files Repaired</span>
+                    <span className="text-accent font-bold">{repairResult.repaired.filter(r => r.fixed).length} / {repairResult.repaired.length}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Repair log */}
+              <Card className="bg-black/60 border-white/5">
+                <CardHeader className="py-2 border-b border-white/5">
+                  <CardTitle className="text-[9px] uppercase font-code text-accent/60 flex items-center gap-2">
+                    <Terminal className="h-2 w-2" /> Repair Log
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 space-y-1 font-code text-[9px] text-secondary/70">
+                  {repairResult.log.map((line, i) => (
+                    <div key={i} className={cn(line.startsWith('✓') ? 'text-accent' : line.startsWith('✗') ? 'text-red-400' : '')}>{line}</div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Per-file results */}
+              {repairResult.repaired.map((r, i) => (
+                <Card key={i} className={cn("border", r.fixed ? "border-accent/20" : "border-red-500/20")}>
+                  <CardHeader className="py-2 border-b border-white/5">
+                    <CardTitle className="text-[9px] uppercase font-code flex items-center justify-between">
+                      <span className={r.fixed ? "text-accent" : "text-red-400"}>{r.fixed ? <CheckCircle2 className="inline h-2 w-2 mr-1" /> : <AlertTriangle className="inline h-2 w-2 mr-1" />}{r.file}</span>
+                      <Badge className="text-[7px]">{r.issueCount} error(s)</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-2 space-y-2">
+                    <p className="text-[9px] text-secondary/70 italic">{r.explanation}</p>
+                    {r.diff && (
+                      <div className="bg-black/60 p-2 rounded overflow-x-auto">
+                        <pre className="text-[8px] font-code whitespace-pre-wrap">
+                          {r.diff.split('\n').map((line, j) => (
+                            <span key={j} className={cn(
+                              line.startsWith('+') ? 'text-accent' : line.startsWith('-') ? 'text-red-400' : 'text-secondary/50',
+                              'block'
+                            )}>{line}</span>
+                          ))}
+                        </pre>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

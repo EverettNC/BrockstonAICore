@@ -66,8 +66,8 @@ export const VisionFeed: React.FC = () => {
       setPerceptionResult(perception);
 
       // 3. Temporal Sequence Analysis
-      if (history) {
-        const obsHistory = [...(history || [])].reverse();
+      if (false) {
+        const obsHistory = ([] as any[]).reverse();
         const temporalPattern = BehavioralInterpreter.analyzeTemporalSequence(obsHistory);
         const enhanced = BehavioralInterpreter.generateEnhancedResponse(temporalPattern);
         setEnhancedResponse(enhanced);
@@ -75,11 +75,6 @@ export const VisionFeed: React.FC = () => {
 
       // 4. Persist Event
       const behaviorType = perception.cues.intent || "perception:general";
-
-      if (db) {
-        Promise.resolve().toISOString()
-        });
-      }
 
       toast({
         title: perception.cues.intent ? "Symbol Identified" : "Perception Logged",

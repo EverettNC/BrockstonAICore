@@ -30,6 +30,8 @@ import queue
 import logging
 import signal
 from queue import Empty
+import torch
+import torch.nn as nn
 
 # Neural component: For embeddings (install via pip if needed)
 embedder = None
@@ -54,6 +56,11 @@ try:
 except ImportError:
     ollama = None
     logging.warning("⚠️ ollama not installed; cloud APIs required for research")
+
+class AutonomousLearningEngine(nn.Module): # This fails if 'nn' isn't above
+    def __init__(self):
+        super().__init__()
+
 
 # Cloud AI clients (optional, via env vars)
 try:
@@ -353,7 +360,7 @@ class EnhancedAutonomousLearningEngine:
         return structured_knowledge
 
     def _check_ollama_available(self) -> bool:
-        """Check if Ollama is running and has a model (e.g., llama2)."""
+        """Check if Ollama is running and has a model (e.g., llama3.1:8b)."""
         if not ollama:
             return False
         try:
@@ -366,7 +373,8 @@ class EnhancedAutonomousLearningEngine:
         """Research using local Ollama - non-blocking, low-resource."""
         try:
             logger.info("🔍 Researching with Ollama...")
-            response = ollama.generate(model="llama2", prompt=prompt, options={"temperature": 0.3, "num_predict": 1500})
+            target_model = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+            response = ollama.generate(model=target_model, prompt=prompt, options={"temperature": 0.3, "num_predict": 1500})
             content = response['response']
             logger.info(f"✅ Ollama research completed: {len(content)} characters")
             return {"content": content, "confidence": 0.8, "source": "ollama"}
@@ -807,6 +815,9 @@ def optimized_search(data: List[int], target: int) -> int:
         for domain, mastery in status['domain_mastery'].items():
             logger.info(f"   {domain}: {mastery:.1%}")
         logger.info(f"   Generated modules: {status['generated_modules']}, Improvements: {status['improvements_made']}")
+
+# Wire the name the boot sequence expects to the real engine
+AutonomousLearningEngine = EnhancedAutonomousLearningEngine
 
 def shutdown_handler(signum, frame):
     logger.info("🛑 Graceful shutdown initiated")

@@ -77,8 +77,6 @@ export const OpenSmell: React.FC = () => {
         };
 
         setData(scanResult);
-        if (db) await Promise.resolve();
-        
         toast({ title: "Sample Processed", description: "Chemical Truth synchronized with core." });
       }
     }, 200);

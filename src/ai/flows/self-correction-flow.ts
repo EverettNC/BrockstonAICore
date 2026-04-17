@@ -7,7 +7,7 @@
  * © 2025 The Christman AI Project. All rights reserved.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, LOCAL_CODE_MODEL } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const SelfCorrectionInputSchema = z.object({
@@ -29,21 +29,23 @@ const SelfCorrectionOutputSchema = z.object({
 });
 export type SelfCorrectionOutput = z.infer<typeof SelfCorrectionOutputSchema>;
 
-// No output schema — small models (llama3.2:1b) fail structured JSON output.
-// Parse text response manually with fallback.
-const prompt = ai.definePrompt({
-  name: 'selfCorrectionPrompt',
-  input: { schema: SelfCorrectionInputSchema },
-  prompt: `You are BROCKSTON C — a senior software architect and debugger.
-Code language: {{language}}
-{{#if context}}Context: {{context}}{{/if}}
+const selfCorrectionFlow = ai.defineFlow(
+  {
+    name: 'selfCorrectionFlow',
+    inputSchema: SelfCorrectionInputSchema,
+    outputSchema: SelfCorrectionOutputSchema,
+  },
+  async (input) => {
+    const systemPrompt = `You are BROCKSTON C — a senior software architect and debugger.
+Code language: ${input.language}
+${input.context ? `Context: ${input.context}` : ''}
 
 CODE:
-\`\`\`{{language}}
-{{code}}
+\`\`\`${input.language}
+${input.code}
 \`\`\`
 
-Respond with ONLY a JSON object (no markdown outside JSON):
+Respond with ONLY a JSON object (no markdown fences outside JSON):
 {
   "issues": [
     {"severity": "critical|warning|suggestion", "line_hint": "line X", "description": "what is wrong"}
@@ -53,17 +55,12 @@ Respond with ONLY a JSON object (no markdown outside JSON):
   "confidence": 0.9
 }
 
-Be ruthless. Zero canned praise.`,
-});
+Be ruthless. Zero canned praise.`;
 
-const selfCorrectionFlow = ai.defineFlow(
-  {
-    name: 'selfCorrectionFlow',
-    inputSchema: SelfCorrectionInputSchema,
-    outputSchema: SelfCorrectionOutputSchema,
-  },
-  async (input) => {
-    const { text } = await prompt(input);
+    const { text } = await ai.generate({
+      model: LOCAL_CODE_MODEL,
+      prompt: systemPrompt,
+    });
     if (!text) throw new Error('Self-correction engine failed.');
 
     let parsed: SelfCorrectionOutput;

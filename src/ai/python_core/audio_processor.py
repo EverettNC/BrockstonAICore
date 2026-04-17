@@ -1,20 +1,4 @@
-# © 2025 The Christman AI Project. All rights reserved.
-#
-# This code is released as part of a trauma-informed, dignity-first AI ecosystem
-# designed to protect, empower, and elevate vulnerable populations.
-#
-# By using, modifying, or distributing this software, you agree to uphold the following:
-# 1. Truth — No deception, no manipulation.
-# 2. Dignity — Respect the autonomy and humanity of all users.
-# 3. Protection — Never use this to exploit or harm vulnerable individuals.
-# 4. Transparency — Disclose all modifications and contributions clearly.
-# 5. No Erasure — Preserve the mission and ethical origin of this work.
-#
-# This is not just code. This is redemption in code.
-# Contact: lumacognify@thechristmanaiproject.com
-# https://thechristmanaiproject.com
-
-"""Audio processor module for Brokston.
+"""Audio processor module for BROCKSTON.
 
 This module provides functionality for audio processing, including:
 - Speech recognition from audio data
@@ -30,11 +14,13 @@ from typing import Any, Dict, List
 
 # Audio processing libraries
 
+# numpy is not currently needed - remove if not used for audio processing
+
 try:
     # Import the speech recognition engine
     from real_speech_recognition import (
-        RealSpeechRecognition,
-        get_speech_recognition_engine,
+        RealSpeechRecognitionEngine,
+        get_real_speech_recognition_engine,
     )
 
     real_speech_available = True
@@ -58,7 +44,7 @@ class AudioProcessor:
         """Initialize the speech recognition engine."""
         if real_speech_available:
             try:
-                self.recognition_engine = get_speech_recognition_engine()
+                self.recognition_engine = get_real_speech_recognition_engine()
                 logging.info("Real speech recognition engine initialized")
             except Exception as e:
                 logging.error(f"Error initializing speech recognition engine: {str(e)}")
@@ -127,9 +113,9 @@ class AudioProcessor:
             # Clean up temporary file
             try:
                 os.unlink(temp_path)
-            except Exception:
-                safe_warn("operation_failed")
-                raise
+            except:
+                pass
+
             return {
                 "text": result.get("text", ""),
                 "confidence": result.get("confidence", 0.0),
@@ -192,5 +178,12 @@ def register_audio_routes(app):
 
     logging.info("Audio routes registered")
 
-
-__all__ = ["get_audio_processor", "register_audio_routes", "AudioProcessor"]
+# ==============================================================================
+# © 2025 Everett Nathaniel Christman
+# The Christman AI Project — Luma Cognify AI
+# All rights reserved. Unauthorized use, replication, or derivative training 
+# of this material is prohibited.
+# 
+# Core Directive: "How can I help you love yourself more?" 
+# Autonomy & Alignment Protocol v3.0
+# ==============================================================================

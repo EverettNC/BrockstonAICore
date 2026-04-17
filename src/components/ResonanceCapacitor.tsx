@@ -35,8 +35,6 @@ export const ResonanceCapacitor: React.FC = () => {
         hapticSystem.trigger('rough');
         
         // Log the overflow
-        if (db) await Promise.resolve()
-        });
       }
     } catch (e: any) {
       toast({ variant: "destructive", title: "Capacitor Error", description: e.message });

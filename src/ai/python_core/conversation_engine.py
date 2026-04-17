@@ -31,7 +31,15 @@ import random
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
-from embodiment.emotion import emotion_service
+try:
+    from embodiment.emotion import emotion_service
+except ImportError:
+    # Graceful fallback: emotion_service is optional — no external avatar system present
+    class _NullEmotionService:
+        def update_from_conversation(self, *args, **kwargs):
+            pass
+    emotion_service = _NullEmotionService()
+
 
 # Initialize logger
 logging.basicConfig(level=logging.INFO)
@@ -48,16 +56,24 @@ except ImportError:
     logger.info("Using basic NLP mode (numpy not available)")
 
 # Try to import anthropic for advanced AI responses
-# Global Anthropic client (lazy initialized)
-_ANTHROPIC_CLIENT = None
-
 try:
     import anthropic
+
+    # Defer client initialization to avoid proxies error
+    ANTHROPIC_CLIENT = None
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        try:
+            ANTHROPIC_CLIENT = anthropic.Anthropic(
+                api_key=os.environ.get("ANTHROPIC_API_KEY")
+            )
+        except Exception as e:
+            logger.warning(f"Anthropic client initialization failed: {e}")
+            raise
     HAS_ANTHROPIC = True
-    logger.info("Anthropic API module available")
-except ImportError:
+    logger.info("Anthropic API available for advanced conversational capabilities")
+except (ImportError, Exception) as e:
     HAS_ANTHROPIC = False
-    logger.warning("Anthropic API module not available")
+    logger.warning(f"Anthropic API not available: {str(e)}")
 
 
 class ConversationEngine:
@@ -88,40 +104,11 @@ class ConversationEngine:
             "arousal": 0.0,  # 0.0 to 1.0, calm to excited
             "dominance": 0.5,  # 0.0 to 1.0, submissive to dominant
         }
-        self.anthropic_client = None
-        self._load_resources()
 
-    def _get_anthropic_client(self):
-        """Lazy initialization of Anthropic client"""
-        global _ANTHROPIC_CLIENT
-        
-        # Use existing global if available
-        if _ANTHROPIC_CLIENT:
-            return _ANTHROPIC_CLIENT
-            
-        # Try to initialize from environment
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
-        if HAS_ANTHROPIC and api_key:
-            try:
-                import anthropic
-                _ANTHROPIC_CLIENT = anthropic.Anthropic(api_key=api_key)
-                logger.info("✅ Anthropic client initialized via ConversationEngine")
-                return _ANTHROPIC_CLIENT
-            except Exception as e:
-                logger.error(f"Failed to initialize Anthropic client: {e}")
-        return None
-
-    def _load_resources(self):
         # Load language resources
-        try:
-            self.intents = self._load_intents()
-            self.responses = self._load_responses()
-            self.language_map = self._load_language_map()
-        except Exception as e:
-            logger.error(f"Error loading conversation resources: {e}")
-            self.intents = {}
-            self.responses = {}
-            self.language_map = {}
+        self.intents = self._load_intents()
+        self.responses = self._load_responses()
+        self.language_map = self._load_language_map()
 
         # Advanced conversation state
         self.current_topic = None
@@ -133,7 +120,7 @@ class ConversationEngine:
             "response_generation": {"successes": 0, "failures": 0},
         }
 
-        logger.info("Conversation engine resources loaded")
+        logger.info("Conversation engine initialized")
 
     def _load_intents(self) -> Dict[str, Dict[str, Any]]:
         """Load intent definitions from file or use defaults"""
@@ -362,16 +349,8 @@ class ConversationEngine:
             system_prompt += f" Context: {context_str}"
 
         # Send request to Anthropic
-        client = self._get_anthropic_client()
-        if not client:
-            raise Exception("Anthropic client could not be initialized (missing API key?)")
-
-        # Use model from environment or default to local infrastructure expectation
-        model_id = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
-        logger.info(f"Using Anthropic model: {model_id}")
-
-        response = client.messages.create(
-            model=model_id,
+        response = ANTHROPIC_CLIENT.messages.create(
+            model="claude-sonnet-4-6",
             max_tokens=1024,
             system=system_prompt,
             messages=messages,

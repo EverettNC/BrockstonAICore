@@ -108,10 +108,7 @@ if not DB_DSN:
     DB_DSN = "sqlite:///brockston_local.db"  # Fallback to local SQLite
 
 SAGEMAKER_ENDPOINT = os.getenv("SAGEMAKER_ENDPOINT")
-HEALTHLAKE_STORE_ID = os.getenv("HEALTHLAKE_STORE_ID")
-HEALTHLAKE_FHIR_ENDPOINT = os.getenv("HEALTHLAKE_FHIR_ENDPOINT")
-HEALTHLAKE_ROLE_ARN = os.getenv("HEALTHLAKE_ROLE_ARN")
-FHIR_RESOURCE_PATH = os.getenv("HEALTHLAKE_FHIR_RESOURCE_PATH", "Observation")
+
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 S3_BUCKET = os.getenv("BROCKSTON_S3_BUCKET")
 if not S3_BUCKET:
@@ -137,7 +134,6 @@ REDIS_URL = os.getenv("REDIS_URL")
 if not REDIS_URL:
     logger.warning("REDIS_URL not set - Redis features disabled")
     REDIS_URL = None
-CM_ENABLED = os.getenv("COMPREHEND_MEDICAL_ENABLED", "false").lower() == "true"
 
 # ---- DB ----
 engine = create_engine(
@@ -160,13 +156,7 @@ _BOTO_CFG = Config(
 boto_session = boto3.Session(region_name=AWS_REGION)
 polly_client = boto_session.client("polly", config=_BOTO_CFG)
 s3_client = boto_session.client("s3", config=_BOTO_CFG)
-healthlake_client = (
-    boto_session.client("healthlake", config=_BOTO_CFG) if HEALTHLAKE_STORE_ID else None
-)
 sagemaker_runtime = boto_session.client("sagemaker-runtime", config=_BOTO_CFG)
-cm_client = (
-    boto_session.client("comprehendmedical", config=_BOTO_CFG) if CM_ENABLED else None
-)
 
 # ---- Redis (rate limits) ----
 redis_client = redis.from_url(REDIS_URL)
@@ -352,25 +342,7 @@ def _predict(payload: Dict[str, Any]) -> Dict[str, Any]:
     return {"intent": "unknown", "behavior": "stable", "confidence": 0.0}
 
 
-def _signed_fhir_post(
-    region: str, endpoint: str, resource_path: str, payload: Dict[str, Any]
-) -> None:
-    url = endpoint.rstrip("/") + "/" + resource_path.lstrip("/")
-    sess = boto3.Session(region_name=region)
-    creds = sess.get_credentials().get_frozen_credentials()
-    req = AWSRequest(
-        method="POST",
-        url=url,
-        data=json.dumps(payload),
-        headers={"Content-Type": "application/fhir+json"},
-    )
-    SigV4Auth(creds, "healthlake", region).add_auth(req)
-    prepped = requests.Request(
-        "POST", url, data=req.data, headers=dict(req.headers)
-    ).prepare()
-    resp = requests.Session().send(prepped, timeout=5)
-    if resp.status_code >= 300:
-        raise HTTPException(502, f"HealthLake POST failed {resp.status_code}")
+
 
 
 def _normalize_mp3(data: bytes) -> bytes:
@@ -449,18 +421,6 @@ async def cortex_brain_operation(
         # TTS uses canonical symbols only (never tenant strings)
         tts_text = " ".join(input.symbols)[:2000]
 
-        # Optional Comprehend Medical gated; discard outputs, never log decrypted notes
-        if CM_ENABLED and input.clinical_notes_enc and cm_client:
-            try:
-                decrypted_notes = cipher.decrypt(
-                    input.clinical_notes_enc.encode("utf-8")
-                ).decode("utf-8")
-                _ = cm_client.detect_entities(Text=decrypted_notes)
-            except InvalidToken:
-                raise HTTPException(400, "Invalid notes token")
-            except Exception:
-                # Fire-and-forget; do not log PHI
-                pass
 
         # Polly
         tts = await to_thread.run_sync(
@@ -484,45 +444,6 @@ async def cortex_brain_operation(
             ContentType="audio/mpeg",
         )
 
-        # HealthLake (fire-and-forget policy)
-        if HEALTHLAKE_FHIR_ENDPOINT or (
-            healthlake_client and HEALTHLAKE_STORE_ID and HEALTHLAKE_ROLE_ARN
-        ):
-            resource = {
-                "resourceType": "Observation",
-                "subject": {"reference": f"Patient/{decrypted_user_id}"},
-                "code": {"text": "Session Insight"},
-                "valueString": behavior,
-            }
-            try:
-                if HEALTHLAKE_FHIR_ENDPOINT:
-                    await to_thread.run_sync(
-                        _signed_fhir_post,
-                        AWS_REGION,
-                        HEALTHLAKE_FHIR_ENDPOINT,
-                        FHIR_RESOURCE_PATH,
-                        resource,
-                    )
-                else:
-                    fhir_key = f"fhir/{uuid.uuid4()}.json"
-                    s3_client.put_object(
-                        Body=json.dumps(resource),
-                        Bucket=S3_BUCKET,
-                        Key=fhir_key,
-                        ServerSideEncryption="aws:kms",
-                        SSEKMSKeyId=KMS_KEY_ID,
-                        ContentType="application/fhir+json",
-                    )
-                    if healthlake_client:  # Type guard
-                        healthlake_client.start_fhir_import_job(
-                            DatastoreId=HEALTHLAKE_STORE_ID,
-                            InputDataConfig={"S3Uri": f"s3://{S3_BUCKET}/{fhir_key}"},
-                            JobName=f"Brokston-session-{uuid.uuid4()}",
-                            DataAccessRoleArn=HEALTHLAKE_ROLE_ARN,
-                        )
-            except Exception:
-                # Fire-and-forget: never block session on HL issues
-                pass
 
         return BrainOutput(
             predicted_intent=intent,
@@ -575,7 +496,7 @@ if __name__ == "__main__":
 
 __all__ = [
     "_predict",
-    "_signed_fhir_post",
+
     "_normalize_mp3",
     "_opaque_key",
     "health",

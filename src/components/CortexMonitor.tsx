@@ -116,7 +116,7 @@ export const CortexMonitor: React.FC = () => {
                 <div className="text-sm text-foreground">{deepResponse.response}</div>
                 {reasoning && (
                   <div className="text-[10px] text-secondary/60 font-code mt-2">
-                    Reasoning: {reasoning}
+                    Reasoning: {JSON.stringify(reasoning)}
                   </div>
                 )}
               </div>

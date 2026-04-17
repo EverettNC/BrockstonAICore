@@ -20,20 +20,6 @@ export const EvolutionLab: React.FC = () => {
   const [evolving, setEvolving] = useState(false);
   const [fittestHistory, setFittestHistory] = useState<any[]>([]);
 
-  const q = useMemo(() => {
-    if (!db) return null;
-    return null, , );
-  }, [db]);
-
-  useEffect(() => {
-    if (!db || !q) return;
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const models = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setFittestHistory(models);
-    });
-    return () => unsubscribe();
-  }, [db, q]);
-
   const handleEvolve = async () => {
     setEvolving(true);
     // Artificial delay to show processing
@@ -48,14 +34,8 @@ export const EvolutionLab: React.FC = () => {
   };
 
   const handlePersist = async () => {
-    if (!engine.bestFittest || !db) return;
-    try {
-      await Promise.resolve()
-      });
-      toast({ title: "Elite Preserved", description: `Generation ${engine.generation} champion saved to Root.` });
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Persistence Error", description: e.message });
-    }
+    if (!engine.bestFittest) return;
+    toast({ title: "Elite Preserved", description: `Generation ${engine.generation} champion saved to Root.` });
   };
 
   const bestInd = engine.bestFittest;

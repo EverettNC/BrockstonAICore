@@ -3,14 +3,24 @@ BROCKSTON Initialization Sequence Manager
 Ensures all subsystems boot in the correct order with proper dependency chains
 """
 
+import sys
+import os
+import time
 import logging
+import json
+from datetime import datetime
 from typing import Dict, List, Any, Tuple
 from pathlib import Path
+
+# Hard-wire Christman SDK path
+_SDK_PATH = "/Users/EverettN/ICanHearYou/"
+if _SDK_PATH not in sys.path:
+    sys.path.insert(0, _SDK_PATH)
 
 logger = logging.getLogger(__name__)
 
 
-class InitializationSequence:
+class BrockstonBoot:
     """Manages BROCKSTON's boot sequence with dependency resolution"""
 
     def __init__(self):
@@ -115,7 +125,7 @@ class InitializationSequence:
         try:
             from validator import CodeValidator
 
-            quality_config = config["ideal"].get("quality", {})
+            quality_config = config.get("ideal", {}).get("quality", {})
             validator = CodeValidator(
                 minimum_success_rate=quality_config.get("minimum_success_rate", 96.0),
                 quality_threshold=quality_config.get("quality_threshold", 80),
@@ -153,13 +163,11 @@ class InitializationSequence:
 
             if ai_orchestrator.is_available():
                 self.initialized_systems["ai_orchestrator"] = ai_orchestrator
-                self.log_step("✅ AI Orchestrator validated and ready")
+                self.log_step("✅ AI Orchestrator validated (Ollama Brain + Anthropic Secondary)")
             else:
                 self.log_step(
-                    "⚠️  AI Orchestrator NOT configured - check API keys", "warning"
+                    "⚠️  AI Orchestrator NOT configured - check local Ollama or Anthropic key", "warning"
                 )
-                self.log_step("   - Need: AI_INTEGRATIONS_OPENAI_BASE_URL", "warning")
-                self.log_step("   - Need: AI_INTEGRATIONS_OPENAI_API_KEY", "warning")
                 self.initialized_systems["ai_orchestrator"] = None
         except Exception as e:
             self.log_step(f"❌ AI Orchestrator failed: {e}", "error")
@@ -228,21 +236,22 @@ class InitializationSequence:
         self.log_step("=" * 80)
         self.log_step("👁️  PHASE 4: Sensory Systems")
         self.log_step("=" * 80)
-
-        # 4.1: Speech Service (ElevenLabs)
+        # 4.1: Speech Service (Ultimate Voice Stack)
         try:
-            from speech import SpeechService
-
-            speech_service = SpeechService(config)
-
-            if speech_service.is_available():
-                self.initialized_systems["speech_service"] = speech_service
-                self.log_step("✅ ElevenLabs Speech Service validated and ready")
-            else:
-                self.log_step(
-                    "⚠️  ElevenLabs NOT configured - set ELEVENLABS_API_KEY", "warning"
-                )
-                self.initialized_systems["speech_service"] = None
+            from brockston_ultimate_voice import BrockstonUltimateVoice
+            
+            # Using the Ultimate Voice stack (Sovereign Synthesis & ToneScore)
+            voice_engine = BrockstonUltimateVoice()
+            
+            # Check for proprietary SDK integration
+            try:
+                from christman_voice_sdk.synthesis_api import VoiceSDK
+                self.log_step("🌟 CHRISTMAN VOICE SDK: INTEGRATED (ToneScore™ Active)")
+            except ImportError:
+                self.log_step("⚠️  Proprietary voice SDK not found - using basic synthesis", "warning")
+                
+            self.initialized_systems["speech_service"] = voice_engine
+            self.log_step("✅ Sovereign Voice Architecture validated and ready")
         except Exception as e:
             self.log_step(f"❌ Speech Service failed: {e}", "error")
             self.failed_systems.append("speech_service")
@@ -682,7 +691,7 @@ class InitializationSequence:
 
         return "\n".join(report)
 
-    def run_full_sequence(self, config: Dict = None) -> Dict[str, Any]:
+    def run_full_initialization(self, config: Dict = None) -> Dict[str, Any]:
         """Execute complete initialization sequence"""
         # Phase 1: Environment
         phase1_ok = self.initialize_phase_1_environment()
@@ -718,8 +727,8 @@ class InitializationSequence:
 
 def initialize_brockston() -> Dict[str, Any]:
     """Main entry point for BROCKSTON initialization"""
-    sequence = InitializationSequence()
-    return sequence.run_full_sequence()
+    sequence = BrockstonBoot()
+    return sequence.run_full_initialization()
 
 
 if __name__ == "__main__":

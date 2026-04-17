@@ -3,8 +3,12 @@ import os
 import pickle
 
 import numpy as np
-from shim_numpy_tf import shim_setup
-shim_setup()
+try:
+    from shim_numpy_tf import shim_setup
+    shim_setup()
+except ImportError:
+    pass  # shim not required with current TensorFlow stack
+
 import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import LSTM, Dense, Dropout

@@ -3,7 +3,13 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-from embodiment.emotion import emotion_service
+try:
+    from embodiment.emotion import emotion_service
+except ImportError:
+    class _NullEmotionService:
+        def update_from_voice(self, *args, **kwargs): pass
+        def update_from_conversation(self, *args, **kwargs): pass
+    emotion_service = _NullEmotionService()
 
 logger = logging.getLogger(__name__)
 
@@ -77,136 +83,57 @@ class VoiceAnalysisService:
     def analyze_tone(
         self, audio_data: bytes
     ) -> Tuple[Dict[str, float], Dict[str, float], float]:
-        """Enhanced analyzer for both verbal and non-verbal communication
-        patterns.
-
-        Specifically tuned for neurodivergent communication patterns including:
-        - Emotional states
-        - Sound patterns
-        - Rhythm variations
-        - Communication styles
-
+        """Proprietary ToneScore™ analysis via Christman Voice SDK.
+        
         Returns: (emotions dict, communication_patterns dict, confidence score)
         """
+        import tempfile
+        import os
+        import uuid
+        
         try:
-            if not audio_data:
-                logger.error("Empty audio data received")
-                return self._get_default_response()
-
-            # Convert audio data to numpy array with error handling
+            from christman_voice_sdk.tonescore_api import compute_tonescore
+            
+            # Save audio_data to temporary wav for SDK analysis
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+                tmp.write(audio_data)
+                temp_path = tmp.name
+            
             try:
-                audio_array = np.frombuffer(audio_data, dtype=np.float32)
-                audio_array = np.clip(audio_array, -1.0, 1.0)
-
-                if len(audio_array) == 0:
-                    logger.error("Invalid audio data format")
-                    return self._get_default_response()
-            except ValueError as e:
-                logger.error(f"Error converting audio data: {str(e)}")
-                return self._get_default_response()
-
-            # Extract enhanced audio features
-            amplitude = np.abs(audio_array)
-            mean_amplitude = float(np.mean(amplitude)) if len(amplitude) > 0 else 0.0
-            variance = float(np.nanvar(amplitude)) if len(amplitude) > 0 else 0.0
-
-            # Advanced pattern analysis
-            frame_size = min(1024, len(audio_array))
-            hop_length = min(512, frame_size // 2)
-
-            if frame_size <= 0 or hop_length <= 0:
-                logger.error("Invalid frame parameters")
-                return self._get_default_response()
-
-            frames = [
-                audio_array[i : i + frame_size]
-                for i in range(0, len(audio_array) - frame_size, hop_length)
-            ]
-
-            if not frames:
-                logger.warning("Audio data too short for analysis")
-                return self._get_default_response()
-
-            # Analyze rhythmic patterns
-            frame_energies = []
-            for frame in frames:
-                energy = float(np.sum(np.abs(frame)))
-                if not np.isnan(energy) and not np.isinf(energy):
-                    frame_energies.append(energy)
-
-            if not frame_energies:
-                logger.error("No valid frame energies computed")
-                return self._get_default_response()
-
-            # Enhanced pattern detection
-            rhythm_regularity = float(np.std(frame_energies)) if frame_energies else 0.0
-            pattern_strength = self._detect_repetitive_patterns(frame_energies)
-
-            # Analyze sound variations
-            max_frame_values = [float(np.max(np.abs(frame))) for frame in frames]
-            intensity_variations = (
-                float(np.std(max_frame_values)) if max_frame_values else 0.0
-            )
-
-            # Enhanced emotional state analysis
-            emotions = {
-                "calm": max(
-                    min(
-                        (1 - min(variance, 1.0)) * 0.6
-                        + (1 - min(intensity_variations, 1.0)) * 0.4,
-                        1.0,
-                    ),
-                    0.0,
-                ),
-                "engaged": max(
-                    min(mean_amplitude * 0.4 + pattern_strength * 0.6, 1.0), 0.0
-                ),
-                "uncertain": max(
-                    min(intensity_variations * 0.5 + rhythm_regularity * 0.5, 1.0), 0.0
-                ),
-                "focused": max(
-                    min((1 - rhythm_regularity) * 0.7 + pattern_strength * 0.3, 1.0),
-                    0.0,
-                ),
-                "overwhelmed": max(
-                    min(variance * 0.6 + intensity_variations * 0.4, 1.0), 0.0
-                ),
-            }
-
-            # Enhanced communication pattern analysis
-            communication_patterns = {
-                "rhythm_consistency": max(min(1 - rhythm_regularity, 1.0), 0.0),
-                "sound_complexity": max(min(variance * 1.5, 1.0), 0.0),
-                "pattern_repetition": max(min(pattern_strength, 1.0), 0.0),
-                "intensity_control": max(min(1 - intensity_variations, 1.0), 0.0),
-                "engagement_level": max(
-                    min(mean_amplitude + pattern_strength * 0.5, 1.0), 0.0
-                ),
-            }
-
-            # Normalize emotions
-            total = sum(emotions.values())
-            if total > 0:
-                emotions = {k: float(v / total) for k, v in emotions.items()}
-
-            # Calculate enhanced confidence score
-            confidence = max(
-                min(
-                    mean_amplitude * 0.3
-                    + pattern_strength * 0.3
-                    + (1 - min(rhythm_regularity, 1.0)) * 0.4,
-                    1.0,
-                ),
-                0.0,
-            )
-
-            logger.debug(
-                f"Enhanced analysis complete: emotions={emotions}, "
-                f"patterns={communication_patterns}, confidence={confidence}"
-            )
-            emotion_service.update_from_voice(emotions)
-
-            return emotions, communication_patterns, confidence
+                # Run proprietary analysis
+                result = compute_tonescore(temp_path)
+                
+                # Map ToneScore results to the legacy interface
+                emotions = {
+                    "calm": 1.0 - result.arousal,
+                    "engaged": result.valence,
+                    "uncertain": 1.0 - result.intensity,
+                    "focused": result.arousal * result.intensity,
+                    "overwhelmed": result.intensity if result.valence < 0.5 else 0.0
+                }
+                
+                communication_patterns = {
+                    "rhythm_consistency": result.response_mode.get("rhythm", 0.5),
+                    "sound_complexity": result.response_mode.get("complexity", 0.5),
+                    "pattern_repetition": 0.5, # Placeholder from SDK
+                    "intensity_control": result.intensity,
+                    "engagement_level": result.valence
+                }
+                
+                confidence = result.score
+                
+                return emotions, communication_patterns, confidence
+                
+            finally:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                    
+        except ImportError:
+            logger.warning("Christman Voice SDK not found, falling back to basic analysis")
+            return self._get_default_response()
+        except Exception as e:
+            logger.error(f"Error during ToneScore analysis: {e}")
+            return self._get_default_response()
 
         except Exception as e:
             logger.error(f"Error analyzing audio patterns: {str(e)}", exc_info=True)

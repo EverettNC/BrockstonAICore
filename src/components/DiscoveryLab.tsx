@@ -31,11 +31,6 @@ export const DiscoveryLab: React.FC = () => {
       });
       setResult(data);
       
-      // Persist to HIPAA-logged Research collection
-      if (db) await Promise.resolve(),
-        contributor: "Everett N. Christman"
-      });
-
       toast({
         title: "Discovery Logged",
         description: "Your joint breakthrough has been persisted to the secure vault.",

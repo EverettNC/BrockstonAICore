@@ -11,15 +11,16 @@ import { dependencyShield, ShieldStatus } from '@/lib/dependency-shield';
 
 export const SecurityPanel: React.FC = () => {
   const [shieldStatus, setShieldStatus] = useState<ShieldStatus | null>(null);
-  
-  
-
+  const [recentMessages, setRecentMessages] = useState<any[]>([]);
 
   useEffect(() => {
-    // Initial Scan
     const status = (dependencyShield as any).constructor.scan();
     setShieldStatus(status);
-  });
+    try {
+      const msgs = localStorage.getItem('brockston:chat:messages');
+      if (msgs) setRecentMessages(JSON.parse(msgs));
+    } catch {}
+  }, []);
 
   const activeShield = useMemo(() => {
     if (!recentMessages?.length) return null;

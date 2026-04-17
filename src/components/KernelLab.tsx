@@ -30,9 +30,6 @@ export const KernelLab: React.FC = () => {
       const data = await kernelFuse({ affection, urgency, ruleIdx: 0 });
       setResult(data);
       
-      if (db) await Promise.resolve()
-      });
-
       toast({ title: "Fusion Successful", description: "Neural latent bound to symbolic kernel." });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Fusion Error", description: e.message });

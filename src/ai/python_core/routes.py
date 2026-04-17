@@ -3,7 +3,8 @@ from fastapi import APIRouter
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from brockston_core import brockston
+from brockston_core import BrockstonBrain as _BrockstonBrain
+brockston = _BrockstonBrain()
 import datetime
 import os
 import json

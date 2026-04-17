@@ -48,9 +48,10 @@ os.makedirs("sessions", exist_ok=True)
 temporal_engine = TemporalNonverbalEngine(
     lstm_model_dir="lstm_models",
     language_map_path="config/language_map.json",
-    sequence_length=10,
-    conversation_persona="default",
 )
+temporal_engine.sequence_length = 10  # frames per analysis window
+temporal_engine.conversation_persona = "default"
+
 
 # Cache for storing feature sequences by session
 sequence_cache = {}

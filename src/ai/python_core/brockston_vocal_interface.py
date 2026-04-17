@@ -308,9 +308,7 @@ class BrockstonUltimateVoice:
         print("⚙️  Initializing external interfaces (optional)...")
         self.ai_clients = {}
         try:
-            from api_clients import openai_client, anthropic_client
-
-            self.ai_clients["openai"] = openai_client
+            from api_clients import anthropic_client
             self.ai_clients["anthropic"] = anthropic_client
             print("📡 External AI client modules imported successfully")
         except ImportError:

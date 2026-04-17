@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 export const AlphaVoxMoments: React.FC = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [moments, setMoments] = useState<any[]>([]);
   const { toast } = useToast();
 
   
@@ -26,10 +27,6 @@ export const AlphaVoxMoments: React.FC = () => {
     
     try {
       const result = await captureMoment({ rawInput: input });
-      if (db) {
-        await Promise.resolve()
-        });
-      }
       setInput('');
       toast({ 
         title: "CONFIRMED: Moment preserved", 

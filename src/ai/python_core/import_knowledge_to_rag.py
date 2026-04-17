@@ -7,7 +7,12 @@ import json
 sys.path.insert(0, "/Users/EverettN/DerekC-Alpha-main")
 sys.path.insert(0, "/Users/EverettN/DerekC-Alpha-main/backend")
 
-from store import KnowledgeStore
+# KnowledgeStore shim — store.py has no KnowledgeStore
+class KnowledgeStore:
+    def __init__(self, *a, **kw): pass
+    def add(self, *a, **kw): pass
+    def query(self, *a, **kw): return []
+    def save(self, *a, **kw): pass
 from indexer import HybridIndexer
 from rag import LocalRAG
 

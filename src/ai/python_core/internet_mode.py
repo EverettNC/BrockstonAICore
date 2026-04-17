@@ -68,9 +68,7 @@ class KnowledgeGateway:
             try:
                 response = self.perplexity.generate_content(question)
                 if isinstance(response, dict):
-                    return response.get(
-                        "content", response.get("answer", str(response))
-                    )
+                    return response.get("content", response.get("answer", str(response)))
                 return str(response)
             except Exception as e:
                 logger.error(f"Perplexity query failed: {e}")
@@ -93,7 +91,7 @@ def query_internet(query: str) -> Dict[str, Any]:
     try:
         logger.info(f"🌐 Querying Perplexity for: {query}")
         result = perplexity.generate_content(query)
-        summary = result.get("content", "")
+        summary = result if isinstance(result, str) else result.get("content", "")
         _log_search(query, summary)
         memory_engine.save(
             {

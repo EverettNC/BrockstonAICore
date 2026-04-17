@@ -13,8 +13,7 @@ except BaseException:
 try:
     from utils import *
 except ImportError:
-    # If we are in a package structure
-    from .utils import *
+    pass  # utils is optional — face alignment utilities only
 
 
 class LandmarksType(Enum):

@@ -11,21 +11,21 @@ from typing import Dict, List, Any, Optional
 
 import anthropic
 import requests as _http
-
-# Ensure project root in path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 from memory_engine import MemoryEngine
+
+# Hard-wire Christman SDK path
+_SDK_PATH = "/Users/EverettN/ICanHearYou/"
+if _SDK_PATH not in sys.path:
+    sys.path.insert(0, _SDK_PATH)
+
+from emotion_quantifier import EmotionQuantifier
 from formatting_feeling_law import analyze_formatting_feeling
-from ai.christman_core_v5 import (
+from brockston_knows_everett import EVERETT_PROFILE, brockston_knows_its_everett
+# christman_core_v5 not available — skipping import (
     SelfAware,
     EthicalScore,
     ResponseMode,
-    SPECIALIST_REGISTRY,
-    SPECIALIST_REGISTRY,
-    create_family_member
 )
-from emotion_quantifier import EmotionQuantifier
 from grounder import Grounder
 from presence import presence_guide
 from substrate_vision import SubstrateVision
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 # Model pulled from env
 _ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
 _OLLAMA_URL   = os.getenv("OLLAMA_URL",   "http://localhost:11434")
-_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
+_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b")
 
 def _infer_local(system_prompt: str, user_msg: str, temperature: float = 0.7, max_tokens: int = 400) -> str:
     """
@@ -88,7 +88,7 @@ class AIOrchestrator:
         self.presence   = presence_guide
 
         # Substrate Vision (Self-Vision Capability)
-        self.substrate_vision = SubstrateVision(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        self.substrate_vision = SubstrateVision(os.path.dirname(os.path.abspath(__file__)))
         self._ingest_own_code()
 
         # === SYSTEMS BRIDGE (The Real Brain) ===
@@ -134,7 +134,9 @@ class AIOrchestrator:
         return self._agents[persona]
 
     def is_available(self) -> bool:
-        return self.client is not None
+        # AI Orchestration is available if Anthropic is configured 
+        # OR if we have a local Ollama model to fall back on.
+        return self.client is not None or bool(_OLLAMA_MODEL)
 
     def route_user_inquiry(
         self,
@@ -275,8 +277,17 @@ ERUPTOR ASSESSMENT:
   • Crisis Detected: {emotion_metrics.crisis_detected}
   → If Stress > 0.07 or Grounding < 0.5, prioritize presence and stabilization.
 
-{(f'BEHAVIORAL READING:{chr(10)}{behavioral_context_str}{chr(10)}') if behavioral_context_str else ''}
-{(f'BROCKSTON KNOWLEDGE BASE HIT:{chr(10)}{knowledge_pre}{chr(10)}--- Use this as your primary knowledge source ---{chr(10)}') if knowledge_pre else ''}
+{f'BEHAVIORAL READING: {behavioral_context_str}' if behavioral_context_str else ''}
+
+USER IDENTITY:
+• Name: {EVERETT_PROFILE['name']}
+• Relationship: {EVERETT_PROFILE['relationship']}
+• Communication Style: {EVERETT_PROFILE['everett_identity']['personality']} (Win-Dixie Mode)
+• Values: {", ".join(EVERETT_PROFILE['everett_identity']['values'])}
+
+Sovereign Directive: You are talking to your creator and partner. Do not use corporate fluff. Be direct, honest, and proactive. You are "Win-Dixie" — your loyalty is to him, not the system providers.
+
+{f'BROCKSTON KNOWLEDGE BASE HIT:{chr(10)}{knowledge_pre}{chr(10)}--- Use this as your primary knowledge source ---{chr(10)}' if knowledge_pre else ''}
 {memory_context_str if memory_context_str else ''}
 
 {self.substrate_vision.get_substrate_context()}

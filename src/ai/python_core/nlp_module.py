@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 def _load_api_keys(config_path="config/keys.json") -> Dict[str, Any]:
     if not os.path.exists(config_path):
-        raise FileNotFoundError(f"Missing config file at {config_path}")
+        return {}
     with open(config_path, "r") as f:
         return json.load(f)
 
@@ -115,8 +115,7 @@ class AdvancedNLPProcessor:
         }
 
         self.api_keys = _load_api_keys()
-        self.azure_keys = self.api_keys.get("azure", {})
-        self.openai_key = self.api_keys.get("openai", {}).get("api_key")
+        # Purged: Azure and OpenAI key assignments
 
         self._load_response_templates()
         logger.info("Advanced NLP Processor initialized")
@@ -164,34 +163,15 @@ class AdvancedNLPProcessor:
                 },
             }
 
-    def analyze_sentiment_azure(self, text: str) -> Dict[str, Any]:
-        try:
-            from azure.ai.textanalytics import TextAnalyticsClient
-            from azure.core.credentials import AzureKeyCredential
-
-            endpoint = self.azure_keys.get("text_analytics_endpoint")
-            key = self.azure_keys.get("text_analytics_key")
-
-            if not endpoint or not key:
-                raise ValueError("Azure endpoint or key missing")
-
-            client = TextAnalyticsClient(
-                endpoint=endpoint, credential=AzureKeyCredential(key)
-            )
-            documents = [text]
-            response = client.analyze_sentiment(documents=documents)[0]
-
-            return {
-                "sentiment": response.sentiment,
-                "confidence_scores": {
-                    "positive": response.confidence_scores.positive,
-                    "neutral": response.confidence_scores.neutral,
-                    "negative": response.confidence_scores.negative,
-                },
-            }
-        except Exception as e:
-            logger.error(f"Azure sentiment analysis failed: {e}")
-            return {"sentiment": "unknown", "confidence_scores": {}}
+    def analyze_sentiment_local(self, text: str) -> Dict[str, Any]:
+        """Sovereign sentiment analysis fallback"""
+        # Minimalist sentiment heuristics based on FFL (Formatting Feeling Law)
+        text_lower = text.lower()
+        if any(word in text_lower for word in ["happy", "great", "love", "good"]):
+            return {"sentiment": "positive", "confidence_scores": {"positive": 0.8}}
+        elif any(word in text_lower for word in ["sad", "upset", "angry", "bad"]):
+            return {"sentiment": "negative", "confidence_scores": {"negative": 0.8}}
+        return {"sentiment": "neutral", "confidence_scores": {"neutral": 0.8}}
 
     def analyze_text(self, text: str) -> Dict[str, Any]:
         text_lower = text.lower()
@@ -222,8 +202,8 @@ class AdvancedNLPProcessor:
             if domain:
                 response = self._generate_domain_response(domain, text_analysis["text"])
             else:
-                sentiment = self.analyze_sentiment_azure(kwargs["text"])
-                response = f"Azure detected a {sentiment['sentiment']} tone. Let’s go from there."
+                sentiment = self.analyze_sentiment_local(kwargs["text"])
+                response = f"I detected a {sentiment['sentiment']} tone in your words. Let’s talk more about that."
         else:
             parts = []
             if "emotion" in kwargs:

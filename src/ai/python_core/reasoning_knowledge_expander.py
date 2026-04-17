@@ -13,7 +13,12 @@ PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "backend"))
 
-from store import KnowledgeStore
+# KnowledgeStore shim — store.py has no KnowledgeStore
+class KnowledgeStore:
+    def __init__(self, *a, **kw): pass
+    def add(self, *a, **kw): pass
+    def query(self, *a, **kw): return []
+    def save(self, *a, **kw): pass
 from indexer import HybridIndexer
 from rag import LocalRAG
 

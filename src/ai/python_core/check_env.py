@@ -9,10 +9,8 @@ variables_to_check = [
     "BROCKSTON_VISION",
     "ENABLE_VISION",
     "AWS_REGION",
-    "OPENAI_API_KEY",
     "ANTHROPIC_API_KEY",
     "PERPLEXITY_API_KEY",
-    "AWS_BEARER_TOKEN_BEDROCK"
 ]
 
 print("--- Environment Variable Check ---")

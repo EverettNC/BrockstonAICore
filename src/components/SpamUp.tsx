@@ -68,8 +68,7 @@ export const SpamUp: React.FC = () => {
         
         try {
           // 1. Record Intention (Vortex Start)
-          if (!db) return;
-          const intentId = await vortexEngine.recordIntention(db, `AUTHENTIC_PACE: ${label}`, 0.99);
+          const intentId = await vortexEngine.recordIntention(null, `AUTHENTIC_PACE: ${label}`, 0.99);
           
           setResults(prev => [{ id: intentId, start: startTime }, ...prev].slice(0, 50));
           setTotalSent(t => t + 1);
@@ -78,7 +77,7 @@ export const SpamUp: React.FC = () => {
           await new Promise(r => setTimeout(r, 100));
 
           // 3. Manifestation (Vortex Close)
-          await vortexEngine.markManifested(db, intentId, "RESONANCE_VERIFIED");
+          await vortexEngine.markManifested(null, intentId, "RESONANCE_VERIFIED");
           
           const endTime = Date.now();
           setResults(prev => prev.map(r => r.id === intentId ? { ...r, end: endTime, latency: endTime - startTime } : r));
@@ -92,7 +91,7 @@ export const SpamUp: React.FC = () => {
       if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isRunning, intensity, db]);
+  }, [isRunning, intensity]);
 
   useEffect(() => {
     const latencies = results.filter(r => r.latency).map(r => r.latency!);

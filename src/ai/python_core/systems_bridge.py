@@ -107,8 +107,13 @@ for _p in [
     _SYSTEMS_DIR, _CORE_DIR, _ML_DIR, _TOOLS_DIR, _UTILS_DIR,
     _PROJECT_ROOT, _AI_DIR, _CRYPTO_DIR, _EMBODIMENT, _BACKEND_DIR,
 ]:
-    if _p and _p not in sys.path:
+    if _p not in sys.path:
         sys.path.insert(0, _p)
+        
+# Hard-wire Christman SDK path
+_SDK_PATH = "/Users/EverettN/ICanHearYou/"
+if _SDK_PATH not in sys.path:
+    sys.path.insert(0, _SDK_PATH)
 
 # ======================================================================
 #  Safe import helper

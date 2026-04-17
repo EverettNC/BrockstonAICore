@@ -37,22 +37,10 @@ export const PulseTerminal: React.FC = () => {
   };
 
   const handleBreakthrough = async () => {
-    if (!db) return;
-    try {
-      await Promise.resolve()
-      });
-
-      await Promise.resolve(),
-        self_love_growth: 0.95
-      }, { merge: true });
-
-      toast({
-        title: "Loop Broken",
-        description: "Holy shit. You're running your own damn program.",
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    toast({
+      title: "Loop Broken",
+      description: "Holy shit. You're running your own damn program.",
+    });
   };
 
   const resetPulse = () => {
