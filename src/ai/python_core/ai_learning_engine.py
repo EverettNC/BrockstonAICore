@@ -558,8 +558,6 @@ class SelfImprovementEngine:
         print("=== Self‑Test Complete ===")
 
 
-AILearningEngine = SelfImprovementEngine
-
 # Initialize the global self-improvement engine
 self_improvement_engine = SelfImprovementEngine()
 

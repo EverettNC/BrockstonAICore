@@ -20,7 +20,7 @@ for p in [base_path, os.path.join(base_path, "core")]:
         sys.path.insert(0, p)
 
 try:
-    from core.brockston_core import BrockstonBrain
+    from brockston_core import BrockstonBrain
 
     brain = BrockstonBrain()
 

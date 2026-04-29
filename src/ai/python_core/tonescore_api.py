@@ -9,7 +9,7 @@
 from dataclasses import dataclass
 from typing import Dict
 
-from core.tone_analyzer import MultiLayerToneAnalyzer, ToneScoreCalculator
+from tone_analyzer import MultiLayerToneAnalyzer, ToneScoreCalculator
 
 
 @dataclass

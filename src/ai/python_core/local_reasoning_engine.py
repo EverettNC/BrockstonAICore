@@ -38,9 +38,7 @@ class LocalReasoningEngine:
         self.brockston = brockston_instance
 
         # Ollama API endpoint (local)
-        import os
-        self.ollama_url = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-        self.default_model = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+        self.ollama_url = "http://localhost:11434"
 
         # ========================================
         # LOCAL MODEL CONFIGURATION
@@ -79,7 +77,7 @@ class LocalReasoningEngine:
         }
 
         # Current active model
-        self.current_model = self.default_model
+        self.current_model = "llama3.1"
         self.ollama_available = False
         self.installed_models = []
 

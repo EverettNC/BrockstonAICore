@@ -12,8 +12,9 @@ class MemoryEngine:
     """Handles memory persistence, retrieval, and contextual queries."""
 
     def __init__(self, file_path: str = "./brockston_memory/semantic_memory.json"):
-        # Resolve absolute path relative to project root
-        self.project_root = os.path.dirname(os.path.abspath(__file__))
+        # Resolve absolute path relative to project root (e.g., /Users/.../BROCKSTON)
+        self.backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.project_root = os.path.dirname(self.backend_dir)
         
         if file_path.startswith("./"):
             # If it starts with ./, resolve relative to project root

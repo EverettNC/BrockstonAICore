@@ -1,14 +1,16 @@
-"""Tone and empathy management helpers for BROCKSTON."""
+"""Tone and empathy management helpers for Derek."""
 
 from __future__ import annotations
 
 import re
 from typing import Dict, List, Tuple, Any
 
+from embodiment.emotion import emotion_service
+
 
 class ToneManager:
     """
-    Manages BROCKSTON's tone, empathy, and communication style
+    Manages Derek's tone, empathy, and communication style
     Adapts to user's emotional state and communication needs
     """
 
@@ -26,7 +28,7 @@ class ToneManager:
 
     def analyze_user_input(self, text: str) -> str:
         """
-        Analyze user input for emotional tone and adjust BROCKSTON's response style
+        Analyze user input for emotional tone and adjust Derek's response style
 
         Args:
             text: User's input text
@@ -56,7 +58,7 @@ class ToneManager:
             )
             self.profile["structure"] = "guided"
             self.profile["warmth"] = "reassuring"
-            return "supportive"
+            label = "supportive"
 
         # Detect positive affect
         elif any(
@@ -65,7 +67,7 @@ class ToneManager:
         ):
             self.emotion_state = "positive"
             self.profile["warmth"] = "uplifting"
-            return "positive"
+            label = "positive"
 
         # Detect sadness or distress
         elif any(
@@ -74,12 +76,15 @@ class ToneManager:
         ):
             self.emotion_state = "compassionate"
             self.profile["warmth"] = "gentle"
-            return "compassionate"
+            label = "compassionate"
 
         # Neutral
         else:
             self.emotion_state = "neutral"
-            return "neutral"
+            label = "neutral"
+
+        emotion_service.update_from_gesture(label)
+        return label
 
     def get_emotional_context(self) -> str:
         """Get current emotional context for AI response"""
@@ -141,7 +146,7 @@ def analyse_user_text(
 
 
 def format_response(base_text: str, cues: List[str], profile: Dict[str, Any]) -> str:
-    """Apply empathy wrappers and structure adjustments to BROCKSTON's reply."""
+    """Apply empathy wrappers and structure adjustments to Derek's reply."""
 
     profile = _ensure_profile_defaults(profile)
     intro_parts: List[str] = []

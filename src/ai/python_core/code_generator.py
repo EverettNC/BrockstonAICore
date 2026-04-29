@@ -410,25 +410,24 @@ print(df['Department'].value_counts())
         """Generate complete image generator application"""
         return '''"""
 AI Image Generator Application
-Note: This is a placeholder for a local-first generation stack.
-OpenAI/DALL-E has been purged from the sovereign architecture.
+Generates images using OpenAI DALL-E or Stable Diffusion
 """
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-
-app = FastAPI(title="Sovereign Image Generator")
-
-class ImageRequest(BaseModel):
-    prompt: str
-
 @app.post("/generate")
 async def generate_image(request: ImageRequest):
     """Generate image from text prompt"""
-    return {
-        "success": False,
-        "error": "Cloud-based Image generation removed. System is evolving toward a local-first vision engine.",
-        "prompt": request.prompt
-    }
+    try:
+        # NOTE: Anthropic does not support image generation (dall-e). 
+        # This is left as an example of what an external API call looks like, 
+        # but openai is removed from requirements.
+        return {
+            "success": False,
+            "error": "OpenAI image generation removed. Image generation not available via Anthropic.",
+            "prompt": request.prompt
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health")
 async def health():
@@ -437,13 +436,18 @@ async def health():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# Usage:
+# 1. Set OPENAI_API_KEY environment variable
+# 2. Run: python <filename>.py
+# 3. POST to http://localhost:8000/generate with {"prompt": "a cat"}
 '''
 
     def _generate_chatbot(self, goal: str) -> str:
         """Generate AI chatbot application"""
         return '''"""
-AI Chatbot with Memory (Sovereign Stack)
-Uses Anthropic Claude for intelligent conversations
+AI Chatbot with Memory
+Uses OpenAI GPT for intelligent conversations
 """
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -1848,8 +1852,14 @@ class AIVideoGenerator:
         return output
     
     def text_to_video_simple(self, text, output_path='media/video/generated_video.mp4'):
-        """Deactivated: Legacy cloud-based video generation stub (Purged for Sovereignty)"""
-        return "Video generation is currently offline while we actualize the local vision engine."
+        """Simple text-to-video using image generation + animation"""
+        from moviepy.editor import ImageClip, concatenate_videoclips
+        import openai
+        
+        # Generate images from text
+        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        
+        scenes = text.split('.')[:5]  # First 5 sentences as scenes
         image_clips = []
         
         for i, scene in enumerate(scenes):

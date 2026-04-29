@@ -8,7 +8,7 @@
 
 from typing import Dict
 
-from core.tone_analyzer import ToneScoreCalculator
+from tone_analyzer import ToneScoreCalculator
 from engines.emotion_embedder import EmotionEmbedder
 from utils.config import Tier
 

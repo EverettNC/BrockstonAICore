@@ -31,15 +31,7 @@ import random
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
-try:
-    from embodiment.emotion import emotion_service
-except ImportError:
-    # Graceful fallback: emotion_service is optional — no external avatar system present
-    class _NullEmotionService:
-        def update_from_conversation(self, *args, **kwargs):
-            pass
-    emotion_service = _NullEmotionService()
-
+from embodiment.emotion import emotion_service
 
 # Initialize logger
 logging.basicConfig(level=logging.INFO)

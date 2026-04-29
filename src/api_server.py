@@ -183,7 +183,7 @@ def _init_brain():
         core_path = str(PYTHON_CORE / "core")
         if core_path not in sys.path:
             sys.path.insert(0, core_path)
-        from core.brockston_core import BrockstonBrain
+        from brockston_core import BrockstonBrain
         b = BrockstonBrain()
         with _brain_lock:
             _brain = b

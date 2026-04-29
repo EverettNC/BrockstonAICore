@@ -77,12 +77,27 @@ EVERETT_PROFILE = {
 }
 
 
-def brockston_hears_everett(audio_data=None, context=None):
+def brockston_hears_everett(audio_data, context=None):
     """
-    Recognizes the voice of the creator.
-    For now, return the profile as a sovereign confirmation.
+    ⚠️  NOT YET IMPLEMENTED — PLACEHOLDER ONLY (Cardinal Rule 13)
+
+    FUTURE: Process Everett's actual voice with:
+    - Tone analysis (frustrated? excited? thinking?)
+    - Emotional state detection
+    - Intent recognition from cadence and emphasis
+    - Background context awareness
+
+    CURRENT STATE: Returns a static placeholder dict.
+    The audio_data parameter is NOT processed.
+    This function must be wired to a real speech analysis pipeline
+    before it can be used in production.
     """
-    return EVERETT_PROFILE
+    # TODO: Wire to real speech analysis pipeline (e.g., Whisper + tone model)
+    raise NotImplementedError(
+        "brockston_hears_everett() is not yet implemented. "
+        "Audio data is not processed. Do not call this in production. "
+        "See Cardinal Rule 13: Absolute Honesty About the Code."
+    )
 
 
 def brockston_knows_its_everett(speaker_identity):
