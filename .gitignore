@@ -56,4 +56,5 @@ src/ai/brockston_memory/semantic_memory.json
 # HIPAA secure data
 hipaa_secure/
 *.log
+secret.key
 
