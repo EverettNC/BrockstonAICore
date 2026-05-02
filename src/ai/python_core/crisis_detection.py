@@ -19,7 +19,7 @@ False positives are acceptable. False negatives are not.
 
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -251,7 +251,7 @@ class CrisisDetector:
 
         # Log the alert
         alert = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "severity": severity.name,
             "matched_patterns": matched,
             "input_snippet": cleaned[:100],  # Don't log full text for privacy
@@ -335,7 +335,7 @@ class CrisisDetector:
         )
 
         alert = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "severity": max_severity.name,
             "behavioral_indicators": triggered_indicators,
             "type": "behavioral",

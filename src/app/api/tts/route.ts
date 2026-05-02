@@ -10,9 +10,16 @@ const polly = new PollyClient({
 });
 
 export async function POST(req: NextRequest) {
-  const { text } = await req.json();
+  let text: string;
+  try {
+    const body = await req.json();
+    text = body?.text;
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
   if (!text?.trim()) {
-    return NextResponse.json({ error: 'No text' }, { status: 400 });
+    return NextResponse.json({ error: 'No text provided' }, { status: 400 });
   }
 
   const command = new SynthesizeSpeechCommand({
@@ -23,23 +30,26 @@ export async function POST(req: NextRequest) {
     TextType: TextType.TEXT,
   });
 
-  const response = await polly.send(command);
-  if (!response.AudioStream) {
-    return NextResponse.json({ error: 'No audio from Polly' }, { status: 502 });
+  try {
+    const response = await polly.send(command);
+    if (!response.AudioStream) {
+      console.error('[Polly] No AudioStream in response');
+      return NextResponse.json({ error: 'No audio from Polly' }, { status: 502 });
+    }
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of response.AudioStream as AsyncIterable<Uint8Array>) {
+      chunks.push(chunk);
+    }
+    const buffer = Buffer.concat(chunks);
+    return new NextResponse(buffer, {
+      headers: {
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': String(buffer.length),
+        'Cache-Control': 'no-store',
+      },
+    });
+  } catch (err) {
+    console.error('[Polly] TTS synthesis failed:', err);
+    return NextResponse.json({ error: 'Voice synthesis unavailable' }, { status: 503 });
   }
-
-  // AudioStream is a Node.js Readable — collect it into a buffer
-  const chunks: Uint8Array[] = [];
-  for await (const chunk of response.AudioStream as AsyncIterable<Uint8Array>) {
-    chunks.push(chunk);
-  }
-  const buffer = Buffer.concat(chunks);
-
-  return new NextResponse(buffer, {
-    headers: {
-      'Content-Type': 'audio/mpeg',
-      'Content-Length': String(buffer.length),
-      'Cache-Control': 'no-store',
-    },
-  });
 }

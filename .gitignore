@@ -59,3 +59,25 @@ hipaa_secure/
 secret.key
 *.key
 
+# ── SECURITY — Cardinal Rule 12 ──────────────────────────────────
+secret.key
+*.key
+*.fernet
+*_secret*
+*_private*
+*.p12
+*.pfx
+
+# ── Python runtime artifacts ──────────────────────────────────────
+*.pyo
+.pytest_cache/
+.mypy_cache/
+dist/
+*.egg-info/
+.venv/
+
+# ── BROCKSTON runtime data ────────────────────────────────────────
+src/ai/memory/
+src/ai/brockston_memory/
+src/ai/python_core/brockston_knowledge/
+learning_engine.log

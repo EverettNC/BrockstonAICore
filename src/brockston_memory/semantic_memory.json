@@ -1,0 +1,102 @@
+[
+  {
+    "type": "web_ingest",
+    "text": "User: hello there\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:03.298814Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: hello\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:03.300079Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: first call\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:03.301561Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: second call\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:03.301814Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: test input for memory\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:03.303530Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: hello there\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:10.662233Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: hello\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:10.663551Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: first call\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:10.665413Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: second call\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:10.665813Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: test input for memory\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:10.667408Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: hello there\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:44.758436Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: hello\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:44.759799Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: first call\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:44.761376Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: second call\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:44.761651Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: test input for memory\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:22:44.763114Z"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: hello there\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:23:15.280959+00:00"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: hello\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:23:15.282607+00:00"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: first call\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:23:15.284457+00:00"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: second call\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:23:15.284958+00:00"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: test input for memory\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-02T23:23:15.287651+00:00"
+  }
+]

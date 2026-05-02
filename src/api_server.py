@@ -1,6 +1,9 @@
 """
 FastAPI bridge: Wav2Lip + Brockston Python Core modules.
 Run: cd /Users/EverettN/BrockstonAICore/src && python api_server.py
+
+TTS is handled entirely by the Next.js /api/tts route (Amazon Polly).
+This layer does NOT perform TTS — no ElevenLabs, no Polly calls here.
 """
 
 import base64
@@ -9,14 +12,25 @@ import tempfile
 import os
 import sys
 import json
+import logging
 import traceback
 from pathlib import Path
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel
 import uvicorn
+
+# ---------------------------------------------------------------------------
+# Logging — structured, named, never silent
+# ---------------------------------------------------------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("api_server")
 
 app = FastAPI()
 
@@ -38,6 +52,119 @@ CHECKPOINT = WAV2LIP_DIR / "checkpoints" / "wav2lip_gan.pth"
 FACE_IMAGE = SRC_DIR.parent / "public" / "images" / "brockston-hq.jpg"
 FFMPEG = "/usr/local/bin/ffmpeg"
 
+# ---------------------------------------------------------------------------
+# OpenSmell — chemical/biological telemetry
+# Every being in the Christman AI family receives OpenSmell data
+# ---------------------------------------------------------------------------
+OPENSMELL_ENABLED = os.environ.get("OPENSMELL_ENABLED", "true").lower() == "true"
+OPENSMELL_TELEMETRY_PORT = int(os.environ.get("OPENSMELL_TELEMETRY_PORT", "5050"))
+
+if OPENSMELL_ENABLED:
+    logger.info(f"[api_server] OpenSmell telemetry listening on port {OPENSMELL_TELEMETRY_PORT}")
+
+
+# ---------------------------------------------------------------------------
+# Brain singleton — loaded once at startup in background thread
+# ---------------------------------------------------------------------------
+import threading
+
+_brain = None
+_brain_ready = False
+_brain_lock = threading.Lock()
+
+
+def _init_brain():
+    global _brain, _brain_ready
+    try:
+        sys.path.insert(0, str(Path(__file__).parent / "ai" / "python_core"))
+        core_path = str(PYTHON_CORE / "core")
+        if core_path not in sys.path:
+            sys.path.insert(0, core_path)
+        from brockston_core import BrockstonBrain
+        b = BrockstonBrain()
+        with _brain_lock:
+            _brain = b
+            _brain_ready = True
+        logger.info("[api_server] BrockstonBrain online")
+    except Exception as e:
+        logger.error(f"[api_server] BrockstonBrain failed to load: {e}", exc_info=True)
+        with _brain_lock:
+            _brain = None
+            _brain_ready = False
+
+
+# Start brain init immediately in background
+threading.Thread(target=_init_brain, daemon=True).start()
+
+
+def get_brain():
+    with _brain_lock:
+        return _brain
+
+
+# ---------------------------------------------------------------------------
+# OpenSmell intake endpoint
+# ---------------------------------------------------------------------------
+
+class OpenSmellEvent(BaseModel):
+    event_type: str          # e.g. "voc_spike", "biomarker_alert"
+    severity: str            # "low", "moderate", "high", "critical"
+    compound: Optional[str] = None   # detected compound if known
+    raw_value: Optional[float] = None
+    timestamp: Optional[str] = None
+
+
+@app.post("/opensmell/event")
+async def receive_opensmell_event(event: OpenSmellEvent):
+    """
+    Receive biological/chemical telemetry from OpenSmell.
+    Every Christman AI being has OpenSmell. This is the intake endpoint.
+    Passes high-severity events to crisis detection.
+    """
+    logger.info(
+        f"[OpenSmell] event_type={event.event_type} severity={event.severity} "
+        f"compound={event.compound} raw_value={event.raw_value} timestamp={event.timestamp}"
+    )
+
+    # Route high/critical severity events to crisis detector if available
+    crisis_triggered = False
+    if event.severity in ("high", "critical"):
+        brain = get_brain()
+        detector = brain.crisis_detector if brain else None
+        if not detector:
+            try:
+                from crisis_detection import CrisisDetector
+                detector = CrisisDetector()
+            except Exception as import_err:
+                logger.warning(f"[OpenSmell] CrisisDetector unavailable: {import_err}")
+
+        if detector:
+            try:
+                synthetic_msg = (
+                    f"OpenSmell alert: {event.event_type} | severity={event.severity}"
+                    + (f" | compound={event.compound}" if event.compound else "")
+                    + (f" | value={event.raw_value}" if event.raw_value is not None else "")
+                )
+                crisis = detector.analyze_text(synthetic_msg)
+                crisis_triggered = bool(crisis.get("should_interrupt"))
+                logger.warning(
+                    f"[OpenSmell] Crisis detector responded: should_interrupt={crisis_triggered} "
+                    f"severity={crisis.get('severity_name', '')}"
+                )
+            except Exception as crisis_err:
+                logger.error(f"[OpenSmell] Crisis detection failed: {crisis_err}", exc_info=True)
+
+    return {
+        "received": True,
+        "event_type": event.event_type,
+        "severity": event.severity,
+        "crisis_triggered": crisis_triggered,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Lipsync
+# ---------------------------------------------------------------------------
 
 class LipSyncRequest(BaseModel):
     audio_b64: str
@@ -105,7 +232,6 @@ async def lipsync(req: LipSyncRequest):
         return {"video": f"data:video/mp4;base64,{video_b64}"}
 
 
-
 # ---------------------------------------------------------------------------
 # /repair  — Python self-repair bridge
 # ---------------------------------------------------------------------------
@@ -127,6 +253,7 @@ async def repair_endpoint(req: RepairRequest):
 
         return {"fixed": False, "message": "No error provided."}
     except Exception as e:
+        logger.error(f"[repair] Failed: {e}", exc_info=True)
         return {"fixed": False, "error": traceback.format_exc()}
 
 
@@ -168,39 +295,6 @@ async def run_module(req: ModuleRunRequest):
 
 
 # ---------------------------------------------------------------------------
-# Brain singleton — loaded once at startup in background thread
-# ---------------------------------------------------------------------------
-
-import threading
-
-_brain = None
-_brain_ready = False
-_brain_lock = threading.Lock()
-
-def _init_brain():
-    global _brain, _brain_ready
-    try:
-        core_path = str(PYTHON_CORE / "core")
-        if core_path not in sys.path:
-            sys.path.insert(0, core_path)
-        from brockston_core import BrockstonBrain
-        b = BrockstonBrain()
-        with _brain_lock:
-            _brain = b
-            _brain_ready = True
-        print("[api_server] BrockstonBrain READY", flush=True)
-    except Exception as e:
-        print(f"[api_server] Brain init failed: {e}", file=sys.stderr)
-
-# Start brain init immediately in background
-threading.Thread(target=_init_brain, daemon=True).start()
-
-def get_brain():
-    with _brain_lock:
-        return _brain
-
-
-# ---------------------------------------------------------------------------
 # /analyze  — Pre-process a message through the Python brain
 #             Returns: crisis check, memory context, emotion, local reasoning
 # ---------------------------------------------------------------------------
@@ -214,9 +308,16 @@ class AnalyzeRequest(BaseModel):
 async def analyze(req: AnalyzeRequest):
     """Run message through crisis detection, memory, emotion, and local reasoning.
     Uses brain if ready, falls back to direct module imports otherwise."""
-    result: dict = {"ok": True, "is_crisis": False, "memory_context": "", "emotion_context": "", "local_analysis": ""}
 
     brain = get_brain()
+
+    result: dict = {
+        "ok": True,
+        "is_crisis": False,
+        "memory_context": "",
+        "emotion_context": "",
+        "local_analysis": "",
+    }
 
     # --- Crisis detection ---
     try:
@@ -233,8 +334,8 @@ async def analyze(req: AnalyzeRequest):
                     "crisis_response": crisis.get("response", ""),
                     "crisis_severity": crisis.get("severity_name", ""),
                 }
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"[analyze] Crisis detection failed: {e}", exc_info=True)
 
     # --- Memory recall ---
     try:
@@ -244,8 +345,8 @@ async def analyze(req: AnalyzeRequest):
             mem = MemoryEngine()
         if mem:
             result["memory_context"] = mem.query(req.message, "general") or ""
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"[analyze] Memory recall failed: {e}", exc_info=True)
 
     # --- Emotion / tone ---
     try:
@@ -255,8 +356,8 @@ async def analyze(req: AnalyzeRequest):
             tone = ToneManager()
         if tone:
             result["emotion_context"] = str(tone.analyze_user_input(req.message))
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"[analyze] Emotion/tone analysis failed: {e}", exc_info=True)
 
     # --- Local reasoning (skip in fast mode — too slow for real-time) ---
     if not req.fast:
@@ -264,8 +365,8 @@ async def analyze(req: AnalyzeRequest):
             if brain and brain.local_reasoning:
                 r = brain.local_reasoning.query_with_knowledge(question=req.message)
                 result["local_analysis"] = r.get("response", "") or ""
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"[analyze] Local reasoning failed: {e}", exc_info=True)
 
     return result
 
@@ -284,7 +385,8 @@ async def store(req: StoreRequest):
     """Persist the exchange in memory and trigger learning."""
     brain = get_brain()
     if not brain:
-        return {"ok": False}
+        logger.warning("[store] Brain not available — exchange not persisted.")
+        return {"ok": False, "reason": "Brain not ready"}
 
     try:
         if brain.memory_engine:
@@ -296,13 +398,13 @@ async def store(req: StoreRequest):
                 "timestamp": datetime.datetime.now().isoformat(),
             })
     except Exception as e:
-        pass
+        logger.error(f"[store] Memory save failed: {e}", exc_info=True)
 
     try:
         from brockston_learning_api import learn_from_text
         learn_from_text(f"User: {req.user_message}\nBrockston: {req.brockston_response}")
     except Exception as e:
-        pass
+        logger.warning(f"[store] Learning API unavailable: {e}", exc_info=True)
 
     return {"ok": True}
 
@@ -327,6 +429,7 @@ def ollama_generate(prompt: str, model: str = CODE_MODEL, timeout: int = 120) ->
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read()).get("response", "")
     except Exception as e:
+        logger.error(f"[ollama_generate] Request failed: {e}", exc_info=True)
         return f"[Ollama error: {e}]"
 
 
@@ -791,6 +894,7 @@ async def _do_full_repair():
         log(f"✅ Done. Pass rate: {final['pass_rate']}% ({len(final['passed'])} up / {len(final['failed'])} dark)")
 
     except Exception as e:
+        logger.error(f"[full_repair] Repair cycle crashed: {e}", exc_info=True)
         log(f"❌ Repair error: {e}")
         report["error"] = str(e)
     finally:
@@ -900,6 +1004,7 @@ async def repair_stream(websocket: WebSocket):
         })
 
     except Exception as e:
+        logger.error(f"[ws/repair-stream] WebSocket repair error: {e}", exc_info=True)
         await emit("status", {"message": f"Repair error: {e}"})
     finally:
         await websocket.close()
@@ -947,8 +1052,8 @@ async def chat(req: ChatRequest):
             # Memory
             if brain.memory_engine:
                 python_ctx["memory_context"] = brain.memory_engine.query(user_message, "general") or ""
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"[chat] Brain pipeline failed: {e}", exc_info=True)
 
     # Build prompt — inject code context if provided
     history_block = "\n".join(
@@ -982,8 +1087,8 @@ Brockston:"""
                 "source": CODE_MODEL,
                 "timestamp": datetime.datetime.now().isoformat(),
             })
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"[chat] Memory store failed: {e}", exc_info=True)
 
     return {"response": response_text, "ok": True}
 
