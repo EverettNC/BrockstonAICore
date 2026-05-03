@@ -98,5 +98,30 @@
     "type": "web_ingest",
     "text": "User: test input for memory\nBrockston: I'm here, but my response systems are offline. Check the logs.",
     "timestamp": "2026-05-02T23:23:15.287651+00:00"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: hello there\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-03T00:40:57.316518+00:00"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: hello\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-03T00:40:57.318257+00:00"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: first call\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-03T00:40:57.319846+00:00"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: second call\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-03T00:40:57.320446+00:00"
+  },
+  {
+    "type": "web_ingest",
+    "text": "User: test input for memory\nBrockston: I'm here, but my response systems are offline. Check the logs.",
+    "timestamp": "2026-05-03T00:40:57.322420+00:00"
   }
 ]

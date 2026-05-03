@@ -98,6 +98,18 @@ except ImportError:
     logger.warning("[BrockstonCore] ProviderRouter not available")
 
 try:
+    from reasoning_reflective_planner import ReflectivePlanner
+except ImportError:
+    ReflectivePlanner = None
+    logger.warning("[BrockstonCore] ReflectivePlanner not available")
+
+try:
+    from reasoning_intent import IntentEngine
+except ImportError:
+    IntentEngine = None
+    logger.warning("[BrockstonCore] IntentEngine not available")
+
+try:
     from perplexity_service import get_perplexity_service
 except ImportError:
     get_perplexity_service = None
@@ -185,6 +197,24 @@ class BrockstonBrain:
             except Exception as e:
                 logger.error(f"[BrockstonCore] ToneManager init failed: {e}")
 
+        # Reflective planner — autonomous reflection loop
+        self.reflective_planner = None
+        if ReflectivePlanner and self.memory_engine:
+            try:
+                self.reflective_planner = ReflectivePlanner(memory_engine=self.memory_engine)
+                logger.info("[BrockstonCore] ReflectivePlanner online")
+            except Exception as e:
+                logger.error(f"[BrockstonCore] ReflectivePlanner init failed: {e}")
+
+        # Elite intent engine — language detection, emotion, urgency, slot filling
+        self.intent_engine = None
+        if IntentEngine:
+            try:
+                self.intent_engine = IntentEngine()
+                logger.info("[BrockstonCore] IntentEngine online")
+            except Exception as e:
+                logger.error(f"[BrockstonCore] IntentEngine init failed: {e}")
+
         # Speech to speech
         self.speech_to_speech = None
         if BrockstonSpeechToSpeech:
@@ -221,6 +251,8 @@ class BrockstonBrain:
         logger.info(f"  Tone manager    : {'online' if self.tone_manager else 'offline'}")
         logger.info(f"  Perplexity      : {'online' if self.perplexity else 'offline'}")
         logger.info(f"  Provider router : {'online' if self.provider_router else 'offline'}")
+        logger.info(f"  Intent engine   : {'online' if self.intent_engine else 'offline'}")
+        logger.info(f"  Reflective plan : {'online' if self.reflective_planner else 'offline'}")
 
     def _build_system_prompt(self) -> str:
         if EVERETT_PROFILE:
@@ -259,13 +291,23 @@ class BrockstonBrain:
             except Exception as e:
                 logger.error(f"[BrockstonCore] Crisis detector failed: {e}", exc_info=True)
 
+        # Step 0.5: Intent analysis — language, emotion, urgency, slot filling
+        intent_output = None
+        if self.intent_engine:
+            try:
+                intent_output = self.intent_engine.analyze(input_text)
+                logger.info(f"[BrockstonCore] Intent: {intent_output.intent} | urgency={intent_output.urgency:.2f}")
+            except Exception as e:
+                logger.warning(f"[BrockstonCore] IntentEngine failed: {e}")
+
         # Step 1: Context
         memory_context = ""
         emotion_context = ""
+        intent_query = intent_output.intent if intent_output else "general"
 
         if self.memory_engine:
             try:
-                memory_context = self.memory_engine.query(input_text, "general")
+                memory_context = self.memory_engine.query(input_text, intent_query)
             except Exception as e:
                 logger.warning(f"[BrockstonCore] Memory query failed: {e}")
 
@@ -346,6 +388,19 @@ class BrockstonBrain:
             self.stats["learning_sessions"] += 1
         except Exception as e:
             logger.warning(f"[BrockstonCore] Learning failed: {e}")
+
+        # Step 5b: Reflective planner — record interaction, surface follow-ups
+        if self.reflective_planner:
+            try:
+                empathy_cues = [intent_output.emotion] if (intent_output and intent_output.emotion) else []
+                self.reflective_planner.record_interaction(
+                    user_input=input_text,
+                    response=response,
+                    intent=intent_output.intent if intent_output else "unknown",
+                    cues=empathy_cues,
+                )
+            except Exception as e:
+                logger.warning(f"[BrockstonCore] ReflectivePlanner record failed: {e}")
 
         return {
             "response": response,

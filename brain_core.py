@@ -78,6 +78,22 @@ except ImportError:
     logger.warning("KnowledgeEngine not available")
     knowledge_engine_available = False
 
+
+# Cortex Integration - BROCKSTON's Higher Reasoning
+try:
+    from local_reasoning_engine import LocalReasoningEngine
+    local_reasoning_available = True
+except ImportError:
+    logger.warning("LocalReasoningEngine not available")
+    local_reasoning_available = False
+
+try:
+    from knowledge_engine import KnowledgeEngine
+    knowledge_engine_available = True
+except ImportError:
+    logger.warning("KnowledgeEngine not available")
+    knowledge_engine_available = False
+
 import sys
 from conversation_engine import ConversationEngine
 from memory_engine import MemoryEngine  # Updated
@@ -260,6 +276,26 @@ class BROCKSTON:
         self.avatar_engine: AvatarEngine = NullAvatarEngine()
         self.vision_engine = None
         self.learning_coordinator = brockston_coordinator
+
+        # 🧠 CORTEX INTEGRATION - Brockston's Higher Reasoning Systems
+        self.local_reasoning = None
+        self.knowledge_engine = None
+        
+        # Initialize Local Reasoning Engine (Ollama-based)
+        if local_reasoning_available:
+            try:
+                self.local_reasoning = LocalReasoningEngine(brockston_instance=self)
+                logger.info("🧠 Brockston Local Reasoning Engine initialized")
+            except Exception as e:
+                logger.warning(f"Local Reasoning Engine failed to initialize: {e}")
+        
+        # Initialize Knowledge Engine
+        if knowledge_engine_available:
+            try:
+                self.knowledge_engine = KnowledgeEngine(brockston_instance=self)
+                logger.info("📚 Brockston Knowledge Engine initialized")
+            except Exception as e:
+                logger.warning(f"Knowledge Engine failed to initialize: {e}")
 
         # 🧠 CORTEX INTEGRATION - Brockston's Higher Reasoning Systems
         self.local_reasoning = None
