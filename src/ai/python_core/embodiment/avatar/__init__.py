@@ -1,36 +1,23 @@
 """
-embodiment.avatar package — BROCKSTON's visual avatar subsystem.
+embodiment.avatar namespace package.
 
-Provides the AvatarEngine interface and NullAvatarEngine fallback
-used by brain_core.py when full avatar rendering is unavailable.
+Provides AvatarEngine interface and NullAvatarEngine fallback
+used by brain_core.py. These are lightweight interface contracts only —
+the actual rendering implementation attaches at runtime.
 """
 
 
 class AvatarEngine:
-    """Base avatar engine interface"""
+    """Base interface for BROCKSTON's avatar rendering layer."""
 
-    def start(self):
-        pass
-
-    def speak(self, text: str):
-        pass
-
-    def stop(self):
-        pass
+    def start(self): ...
+    def speak(self, text: str): ...
+    def stop(self): ...
 
 
 class NullAvatarEngine(AvatarEngine):
-    """No-op avatar engine — used when avatar is disabled or unavailable"""
+    """No-op engine used when avatar is disabled or unavailable."""
 
-    def start(self):
-        pass
-
-    def speak(self, text: str):
-        pass
-
-    def stop(self):
-        pass
-
-
-# Expose interface at package level so brain_core.py import works:
-# from embodiment.avatar.interface import AvatarEngine, NullAvatarEngine
+    def start(self): pass
+    def speak(self, text: str): pass
+    def stop(self): pass

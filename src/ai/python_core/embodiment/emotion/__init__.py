@@ -1,59 +1,66 @@
 """
-embodiment.emotion package — BROCKSTON's emotion state service.
+embodiment.emotion — delegates entirely to christman_voice_sdk.
 
-Imported by brain_core.py as:
+Brain_core.py imports:
     from embodiment.emotion import emotion_service
+
+That service is backed by the real ToneScore + EmotionEmbedder pipeline
+from christman_voice_sdk, not a stub.
 """
 import logging
+import sys
+import os
 
 logger = logging.getLogger(__name__)
 
+# Ensure repo root is on path so christman_voice_sdk is importable
+_repo_root = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")
+)
+if _repo_root not in sys.path:
+    sys.path.insert(0, _repo_root)
 
-class EmotionState:
-    """Represents BROCKSTON's current emotional state"""
-
-    def __init__(self):
-        self.mood = "neutral"
-        self.valence = 0.0      # -1.0 (negative) to 1.0 (positive)
-        self.arousal = 0.0      # 0.0 (calm) to 1.0 (excited)
-        self.empathy_level = 0.5
-
-    def __dict__(self):
-        return {
-            "mood": self.mood,
-            "valence": self.valence,
-            "arousal": self.arousal,
-            "empathy_level": self.empathy_level,
-        }
+try:
+    from christman_voice_sdk import get_response_mode, get_response_emotion, ToneScoreResult
+    from christman_voice_sdk.tonescore_api import analyze_tone, compute_tonescore
+    _sdk_available = True
+    logger.info("🎭 embodiment.emotion wired to christman_voice_sdk")
+except ImportError as e:
+    _sdk_available = False
+    logger.warning(f"christman_voice_sdk not available for emotion service: {e}")
 
 
-class EmotionService:
-    """Service for managing and querying BROCKSTON's emotional state"""
+class _EmotionService:
+    """
+    Thin facade over christman_voice_sdk.
+    Provides the `emotion_service` singleton brain_core.py expects.
+    All tone/emotion intelligence routes through the real SDK.
+    """
 
-    def __init__(self):
-        self._state = EmotionState()
+    @property
+    def sdk_available(self) -> bool:
+        return _sdk_available
 
-    def get_state(self) -> EmotionState:
-        return self._state
+    def score_from_audio(self, audio_path: str):
+        """Run full 5-layer ToneScore analysis on an audio file."""
+        if not _sdk_available:
+            logger.warning("ToneScore unavailable — christman_voice_sdk not loaded")
+            return None
+        return compute_tonescore(audio_path)
 
-    def set_mood(self, mood: str, valence: float = 0.0, arousal: float = 0.0):
-        self._state.mood = mood
-        self._state.valence = max(-1.0, min(1.0, valence))
-        self._state.arousal = max(0.0, min(1.0, arousal))
-        logger.info(f"🎭 Emotion updated: {mood} (v={valence:.2f}, a={arousal:.2f})")
+    def get_response_mode(self, tone_score: float):
+        """Return recommended response mode for a given ToneScore."""
+        if not _sdk_available:
+            return {"mode": "standard"}
+        return get_response_mode(tone_score)
 
-    def update_from_text(self, text: str):
-        """Basic heuristic emotion detection from text — extend with christman_emotion"""
-        text_lower = text.lower()
-        if any(w in text_lower for w in ["happy", "great", "love", "wonderful"]):
-            self.set_mood("positive", valence=0.7, arousal=0.5)
-        elif any(w in text_lower for w in ["sad", "hurt", "pain", "cry"]):
-            self.set_mood("empathetic", valence=-0.3, arousal=0.2)
-        elif any(w in text_lower for w in ["angry", "frustrated", "hate"]):
-            self.set_mood("concerned", valence=-0.5, arousal=0.7)
-        else:
-            self.set_mood("neutral", valence=0.0, arousal=0.2)
+    def get_response_emotion(self, tone_score: float):
+        """Return emotion params for voice synthesis at a given ToneScore."""
+        if not _sdk_available:
+            return {}
+        return get_response_emotion(tone_score)
 
 
-# Singleton — imported as `from embodiment.emotion import emotion_service`
-emotion_service = EmotionService()
+# Singleton — imported by brain_core.py as:
+#   from embodiment.emotion import emotion_service
+emotion_service = _EmotionService()

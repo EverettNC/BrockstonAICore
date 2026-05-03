@@ -1,11 +1,11 @@
 """
 embodiment package — BROCKSTON's physical expression layer.
 
-This package provides the namespace for all embodiment sub-packages:
-  embodiment.voice.*   — TTS, STT, audio processing, tone engines
-  embodiment.avatar.*  — Avatar rendering and lipsync
-  embodiment.emotion   — Emotion state service
+This package exists solely to give Python a resolvable namespace for:
+  embodiment.voice.*
+  embodiment.avatar.*
+  embodiment.emotion
 
-This __init__.py must exist for Python to resolve `embodiment.voice.*`
-import paths registered in brockston_module_loader.py.
+All real implementations live in christman_voice_sdk at the repo root.
+Nothing is stubbed or duplicated here.
 """

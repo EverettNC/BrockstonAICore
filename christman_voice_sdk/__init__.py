@@ -13,10 +13,10 @@ High-level API for:
 - Emotion-aware voice synthesis
 """
 
-#from .tonescore_api import analyze_tone, compute_tonescore, ToneScoreResult
-#from .response_api import get_response_mode, get_response_emotion
-#from .synthesis_api import VoiceSDK
-#from utils.config import Tier
+from .tonescore_api import analyze_tone, compute_tonescore, ToneScoreResult
+from .response_api import get_response_mode, get_response_emotion
+from .synthesis_api import VoiceSDK
+from utils.config import Tier
 
 __all__ = [
     "analyze_tone",

@@ -1,22 +1,10 @@
 """
-embodiment.voice package — BROCKSTON's voice and audio subsystems.
+embodiment.voice namespace package.
 
-Modules in this package:
-  tts_service                 — Primary text-to-speech service
-  tts_bridge                  — TTS bridge layer
-  tts_bridget                 — TTS bridge variant
-  tts_advanced                — Advanced TTS features
-  speech_recognition_engine   — Main speech recognition engine
-  real_speech_recognition     — Hardware speech recognition
-  audio_processor             — Raw audio processing
-  audio_pattern               — Audio pattern analysis
-  tone_manager                — Tone management
-  tone_score_engine           — Tone scoring
-  sound_recognition           — Environmental sound recognition
-  sound_recognition_service   — Sound recognition service layer
-  derek_interface             — Derek voice interface
+Real voice engines (TTS, STT, ToneScore, synthesis) are implemented
+in christman_voice_sdk. This __init__.py exists only so Python can
+resolve `embodiment.voice.*` import paths in brockston_module_loader.py.
 
-All modules in this package are loaded dynamically by
-brockston_module_loader.py. Individual .py files for each module
-must be placed in this directory to be importable.
+Individual .py files (tts_service.py, tts_bridge.py, etc.) that live
+in this directory are the actual module implementations.
 """
