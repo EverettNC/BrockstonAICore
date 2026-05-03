@@ -34,16 +34,21 @@ AVATAR_ENABLED = _bool_env(os.getenv("BROCKSTON_ENABLE_AVATAR"), default=True)
 # ---------------------------------------------------------------------------
 from conversation_engine import ConversationEngine
 from memory_engine import MemoryEngine
-from web_crawler import extract_from_urls
 from embodiment.avatar.interface import AvatarEngine, NullAvatarEngine
 from embodiment.emotion import emotion_service
+
+# FIX 4: web_crawler wrapped so missing module doesn't crash boot
+try:
+    from web_crawler import extract_from_urls
+except ImportError:
+    logger.warning("web_crawler not found, URL extraction disabled")
+    def extract_from_urls(urls):
+        return []
 
 # ---------------------------------------------------------------------------
 # Optional imports with clean fallbacks
 # ---------------------------------------------------------------------------
 
-# FIX 1: CrisisDetector — single try/except, broad Exception so any failure
-# (ImportError, instantiation error) is caught and logged.
 try:
     from crisis_detection import CrisisDetector
     _crisis_detector = CrisisDetector()
@@ -52,8 +57,6 @@ except Exception as e:
     _crisis_detector = None
     logger.warning(f"[BrockstonCore] CrisisDetector OFFLINE: {e}")
 
-# FIX 2: ToneManager — import from canonical subpackage path first,
-# fall back to flat name if a top-level shim exists.
 try:
     from embodiment.voice.tone_manager import ToneManager
     _tone_manager = ToneManager()
@@ -111,7 +114,6 @@ def start_brockston_learning():
     """Delegate to actual coordinator if available."""
     _start_learning_impl()
 
-# FIX 3: ProviderRouter — imported so think() can use Ollama directly
 try:
     from provider_router import ProviderRouter
     _provider_router = ProviderRouter()
@@ -136,16 +138,20 @@ except ImportError:
     knowledge_engine_available = False
     KnowledgeEngine = None
 
+# FIX 4: store and indexer wrapped with fallbacks
 try:
     from memory_rag import LocalRAG
     from store import KnowledgeStore
     from indexer import HybridIndexer
     knowledge_trussle_available = True
-except ImportError:
-    logger.warning("Knowledge Trussle RAG not available")
+except ImportError as e:
+    logger.warning(f"Knowledge Trussle RAG not available: {e}")
     knowledge_trussle_available = False
     LocalRAG = KnowledgeStore = HybridIndexer = None
 
+# NOTE: reasoning_reasoner and reasoning_cortex_types are Derek's files
+# (see DEAD_FILES_TO_DELETE.md). Wrapped in try/except so deletion won't
+# crash boot. Remove this entire block after the git rm is complete.
 try:
     from reasoning_reasoner import BROCKSTONCortex, ReasonerConfig
     from reasoning_cortex_types import Step, NLU, Outcome
@@ -193,10 +199,7 @@ class BROCKSTON:
         self.vision_engine = None
         self.learning_coordinator = brockston_coordinator
 
-        # Emotion / Tone
         self.tone_manager = _tone_manager
-
-        # FIX 3: keep provider_router reference for use in think()
         self.provider_router = _provider_router
 
         # ── Local Reasoning Engine (Ollama-based) ──
@@ -492,7 +495,6 @@ class BROCKSTON:
                 except Exception as e:
                     logger.warning(f"ProviderRouter failed: {e}")
 
-        # FIX 3: Ollama direct call as second-to-last resort before hardcoded string
         if repaired_result is None:
             try:
                 import requests as _req
@@ -548,22 +550,48 @@ class BROCKSTON:
 
     # -----------------------------------------------------------------------
     # Self-repair
+    # FIX: removed literal placeholder string — now retries via Ollama or
+    # returns a honest fallback. Rule 13: no fake responses.
     # -----------------------------------------------------------------------
-    def run_self_repair(self, user_input, brockston_output):
+    def run_self_repair(self, user_input: str, brockston_output: str) -> str:
         canned_indicators = [
             "you got it", "happy to help", "sounds good", "let me know",
             "here's how", "you're doing great", "as an ai language model",
             "i'm here to assist",
         ]
-        if any(phrase in brockston_output.lower() for phrase in canned_indicators):
-            return (
-                f"⚠️ [Self-Repair Triggered]\n"
-                f"Your last response lacked depth and originality.\n\n"
-                f"🧠 USER INPUT:\n{user_input.strip()}\n\n"
-                f"🛠️ BROCKSTON'S IMPROVED RESPONSE:\n"
-                f"[Insert real, contextual, emotionally intelligent response here]"
+        if not any(phrase in brockston_output.lower() for phrase in canned_indicators):
+            return brockston_output
+
+        logger.warning("[Self-Repair] Canned response detected — attempting retry via Ollama")
+        try:
+            import requests as _req
+            retry_prompt = (
+                f"A child or neurodivergent user said: {user_input.strip()}\n"
+                f"Respond with genuine warmth and specificity. "
+                f"Do not use filler phrases. Be direct, honest, and present."
             )
-        return brockston_output
+            resp = _req.post(
+                os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate"),
+                json={
+                    "model": os.getenv("OLLAMA_MODEL", "llama3"),
+                    "prompt": retry_prompt,
+                    "stream": False,
+                },
+                timeout=30,
+            )
+            resp.raise_for_status()
+            retry_result = resp.json().get("response", "").strip()
+            if retry_result:
+                logger.info("[Self-Repair] Ollama retry succeeded")
+                return retry_result
+        except Exception as e:
+            logger.warning(f"[Self-Repair] Ollama retry failed: {e}")
+
+        # Honest fallback — Rule 13: never fake it
+        return (
+            "I want to give you a real answer, but I'm running into a problem right now. "
+            "Can you tell me a little more? I'm listening."
+        )
 
     # -----------------------------------------------------------------------
     # Logging
@@ -581,6 +609,14 @@ class BROCKSTON:
 
 
 # ---------------------------------------------------------------------------
-# Global BROCKSTON instance
+# FIX 5: Guard global instantiation — only create when run directly or
+# explicitly requested, not on every import.
 # ---------------------------------------------------------------------------
-brockston = BROCKSTON(file_path="./memory/memory_store.json")
+def get_brockston(file_path: str = "./memory/memory_store.json") -> "BROCKSTON":
+    """Factory function — call this instead of importing 'brockston' directly."""
+    return BROCKSTON(file_path=file_path)
+
+
+if __name__ == "__main__":
+    brockston = get_brockston()
+    boot()
